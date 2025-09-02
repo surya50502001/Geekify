@@ -60,7 +60,7 @@ function App() {
       formData.append('song', file);
       
       try {
-        const response = await fetch('https://YOUR_NGROK_URL.ngrok.io/upload', {
+        const response = await fetch('http://localhost:3001/upload', {
           method: 'POST',
           body: formData
         });
@@ -565,11 +565,11 @@ function App() {
             boxShadow: `0 20px 40px ${getCurrentColor()}40`
           }}>
             <div style={{marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '15px'}}>
-              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0s'}}>🎵</div>
-              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.2s'}}>🎶</div>
-              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.4s'}}>🎤</div>
-              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.6s'}}>🎧</div>
-              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.8s'}}>🎸</div>
+              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0s'}}>🎉</div>
+              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.2s'}}>🎊</div>
+              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.4s'}}>✨</div>
+              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.6s'}}>🎈</div>
+              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.8s'}}>🎁</div>
             </div>
             <h2 style={{fontSize: '28px', fontWeight: 'bold', color: getCurrentColor(), marginBottom: '16px'}}>Welcome Bhuvi!</h2>
             <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '24px', lineHeight: '1.5'}}>Your ultimate music streaming experience awaits. Discover, upload, and enjoy music like never before.</p>

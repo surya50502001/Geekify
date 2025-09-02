@@ -16,7 +16,18 @@ function App() {
   const [isUploading, setIsUploading] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
   const audioRef = useRef(null);
+  
+  useEffect(() => {
+    // Simulate loading time
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      setShowWelcome(true);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
   
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -187,8 +198,30 @@ function App() {
     setDuration(0);
   };
 
+  if (isLoading) {
+    return (
+      <div style={{background: '#000', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial'}}>
+        <div style={{textAlign: 'center'}}>
+          <div style={{width: '80px', height: '80px', margin: '0 auto 20px', position: 'relative'}}>
+            <svg width="80" height="80" viewBox="0 0 24 24" fill={getCurrentColor()} style={{animation: 'spin 2s linear infinite'}}>
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+            </svg>
+          </div>
+          <h2 style={{fontSize: '24px', fontWeight: 'bold', color: getCurrentColor(), margin: 0}}>Geekify</h2>
+          <p style={{color: '#b3b3b3', fontSize: '14px', marginTop: '8px'}}>Loading your music experience...</p>
+        </div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
   return (
-    <div style={{background: '#000', color: 'white', minHeight: '100vh', fontFamily: 'Arial', display: 'flex', flexDirection: 'column'}}>
+    <div style={{background: '#000', color: 'white', minHeight: '100vh', fontFamily: 'Arial', display: 'flex', flexDirection: 'column', position: 'relative'}}>
       <style>{`
         @media (max-width: 768px) {
           .sidebar { width: ${sidebarOpen ? '100vw' : '0'} !important; position: fixed !important; z-index: 999 !important; height: 100vh !important; }
@@ -211,6 +244,11 @@ function App() {
           .song-card-image { height: 120px !important; }
           .song-title { font-size: 13px !important; }
           .song-artist { font-size: 11px !important; }
+        }
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-10px); }
+          60% { transform: translateY(-5px); }
         }
       `}</style>
       <div style={{display: 'flex', flex: 1}}>
@@ -257,10 +295,16 @@ function App() {
         {/* Sidebar */}
         <div className="sidebar" style={{width: sidebarOpen ? '240px' : '0', background: '#000', padding: sidebarOpen ? '24px 12px' : '0', borderRight: '1px solid #282828', overflow: 'hidden', transition: 'width 0.3s ease, padding 0.3s ease'}}>
           <div style={{marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px'}}>
-            <svg width="40" height="28" viewBox="0 0 24 17" fill={getCurrentColor()}>
-              <path d="M22.54 6.42c.25-1.64-.02-2.85-.84-3.67-.82-.82-2.03-1.09-3.67-.84C16.45 2.2 14.98 2.86 12 2.86S7.55 2.2 6.97 1.91c-1.64-.25-2.85.02-3.67.84-.82.82-1.09 2.03-.84 3.67.29.58.95 2.05.95 5.05s-.66 4.47-.95 5.05c-.25 1.64.02 2.85.84 3.67.82.82 2.03 1.09 3.67.84.58-.29 2.05-.95 5.05-.95s4.47.66 5.05.95c1.64.25 2.85-.02 3.67-.84.82-.82 1.09-2.03.84-3.67-.29-.58-.95-2.05-.95-5.05s.66-4.47.95-5.05zM9.75 12.5v-8l6.5 4-6.5 4z"/>
-            </svg>
-            <h1 style={{fontSize: '24px', margin: 0, fontWeight: 'bold', color: getCurrentColor()}}>Geekify</h1>
+            <div onClick={() => {setActiveMenu('Home'); setSidebarOpen(false);}} style={{cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px'}}>
+              <svg width="40" height="28" viewBox="0 0 100 100" fill={getCurrentColor()}>
+                <circle cx="50" cy="50" r="45" fill="none" stroke={getCurrentColor()} strokeWidth="3"/>
+                <circle cx="50" cy="50" r="35" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
+                <circle cx="50" cy="50" r="25" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
+                <circle cx="50" cy="50" r="8" fill={getCurrentColor()}/>
+                <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
+              </svg>
+              <h1 style={{fontSize: '24px', margin: 0, fontWeight: 'bold', color: getCurrentColor()}}>Geekify</h1>
+            </div>
           </div>
           <nav>
             <div onClick={() => {setActiveMenu('Home'); setSidebarOpen(false);}} style={{marginBottom: '8px', padding: '12px 16px', cursor: 'pointer', borderRadius: '4px', background: activeMenu === 'Home' ? `${getCurrentColor()}20` : 'transparent', display: 'flex', alignItems: 'center', gap: '16px', color: activeMenu === 'Home' ? getCurrentColor() : '#b3b3b3'}}>
@@ -496,8 +540,60 @@ function App() {
         </div>
       </div>
       
-
-      
+      {/* Welcome Popup */}
+      {showWelcome && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          backdropFilter: 'blur(10px)'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #1e1e1e, #2a2a2a)',
+            padding: '40px',
+            borderRadius: '20px',
+            textAlign: 'center',
+            maxWidth: '400px',
+            border: `2px solid ${getCurrentColor()}`,
+            boxShadow: `0 20px 40px ${getCurrentColor()}40`
+          }}>
+            <div style={{marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '15px'}}>
+              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0s'}}>🎵</div>
+              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.2s'}}>🎶</div>
+              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.4s'}}>🎤</div>
+              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.6s'}}>🎧</div>
+              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.8s'}}>🎸</div>
+            </div>
+            <h2 style={{fontSize: '28px', fontWeight: 'bold', color: getCurrentColor(), marginBottom: '16px'}}>Welcome to Geekify!</h2>
+            <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '24px', lineHeight: '1.5'}}>Your ultimate music streaming experience awaits. Discover, upload, and enjoy music like never before.</p>
+            <button 
+              onClick={() => setShowWelcome(false)}
+              style={{
+                background: getCurrentColor(),
+                border: 'none',
+                borderRadius: '25px',
+                padding: '12px 24px',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+            >
+              Let's Get Started! 🚀
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Bottom Player */}
       <div className="bottom-player" style={{position: 'fixed', bottom: 0, left: 0, right: 0, height: '90px', background: `linear-gradient(90deg, #181818, ${getCurrentColor()}15)`, borderTop: `1px solid ${getCurrentColor()}40`, display: 'flex', alignItems: 'center', padding: '0 16px'}}>

@@ -14,17 +14,35 @@ function App() {
   const [uploadedSongs, setUploadedSongs] = useState([]);
   const audioRef = useRef(null);
   
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('audio/')) {
+      // Create local preview
       const url = URL.createObjectURL(file);
       const newSong = {
         title: file.name.replace(/\.[^/.]+$/, ''),
         artist: 'Uploaded by User',
         url: url,
-        file: file // Store original file for download
+        file: file
       };
       setUploadedSongs(prev => [...prev, newSong]);
+      
+      // Send to your local server
+      const formData = new FormData();
+      formData.append('song', file);
+      
+      try {
+        const response = await fetch('http://localhost:3001/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const result = await response.json();
+        if (result.success) {
+          console.log('Song saved to your computer:', result.originalName);
+        }
+      } catch (error) {
+        console.log('Server not running - song only available locally');
+      }
     }
   };
   

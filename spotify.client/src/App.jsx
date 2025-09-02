@@ -144,6 +144,7 @@ function App() {
           .search-input { width: calc(100% - 24px) !important; max-width: none !important; }
           .player-controls { width: 50% !important; }
           .song-info { width: 35% !important; font-size: 12px !important; }
+          .song-info div { max-width: 100px !important; }
           .volume-section { display: none !important; }
           .home-card-content { flex-direction: column !important; text-align: center !important; }
           .home-card-image { width: 120px !important; height: 120px !important; margin: 0 auto 16px !important; }
@@ -398,8 +399,8 @@ function App() {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
           </div>
           <div>
-            <div style={{fontSize: '14px', fontWeight: '400'}}>{allSongs[currentSong]?.title || 'Loading...'}</div>
-            <div style={{fontSize: '11px', color: '#b3b3b3'}}>{allSongs[currentSong]?.artist || ''}</div>
+            <div style={{fontSize: '14px', fontWeight: '400', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px'}}>{allSongs[currentSong]?.title || 'Loading...'}</div>
+            <div style={{fontSize: '11px', color: '#b3b3b3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px'}}>{allSongs[currentSong]?.artist || ''}</div>
           </div>
         </div>
         

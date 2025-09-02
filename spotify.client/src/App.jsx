@@ -109,20 +109,31 @@ function App() {
     <div style={{background: '#000', color: 'white', minHeight: '100vh', fontFamily: 'Arial', display: 'flex', flexDirection: 'column'}}>
       <style>{`
         @media (max-width: 768px) {
-          .sidebar { width: ${sidebarOpen ? '100vw' : '0'} !important; position: fixed !important; z-index: 999 !important; }
-          .main-content { padding: 12px !important; }
-          .home-card { max-width: 100% !important; padding: 20px !important; }
-          .song-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; gap: 16px !important; }
-          .search-input { width: 100% !important; max-width: 100% !important; }
-          .player-controls { width: 100% !important; }
-          .song-info { width: 25% !important; }
+          .sidebar { width: ${sidebarOpen ? '100vw' : '0'} !important; position: fixed !important; z-index: 999 !important; height: 100vh !important; }
+          .main-content { padding: 16px 12px !important; }
+          .home-card { max-width: 100% !important; padding: 24px 16px !important; margin: 0 8px !important; }
+          .song-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+          .search-input { width: calc(100% - 24px) !important; max-width: none !important; }
+          .player-controls { width: 50% !important; }
+          .song-info { width: 35% !important; font-size: 12px !important; }
           .volume-section { display: none !important; }
+          .home-card-content { flex-direction: column !important; text-align: center !important; }
+          .home-card-image { width: 120px !important; height: 120px !important; margin: 0 auto 16px !important; }
+          .home-card-details { width: 100% !important; }
+          .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; padding: 16px !important; }
+          .hamburger-btn { top: 16px !important; right: 16px !important; width: 48px !important; height: 36px !important; }
+          .bottom-player { padding: 0 12px !important; height: 80px !important; }
+          .song-card { padding: 12px !important; }
+          .song-card-image { height: 120px !important; }
+          .song-title { font-size: 13px !important; }
+          .song-artist { font-size: 11px !important; }
         }
       `}</style>
       <div style={{display: 'flex', flex: 1}}>
         {/* Hamburger Button */}
         <button 
           onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="hamburger-btn"
           style={{
             position: 'fixed',
             top: '20px',
@@ -198,11 +209,11 @@ function App() {
               
               {songs.length > 0 && (
                 <div className="home-card" style={{background: 'linear-gradient(145deg, #1e1e1e, #2a2a2a)', padding: '40px', borderRadius: '20px', maxWidth: '480px', margin: '0 auto', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', border: '1px solid #333'}}>
-                  <div style={{display: 'flex', gap: '24px', marginBottom: '32px'}}>
-                    <div style={{width: '140px', height: '140px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 8px 24px ${getCurrentColor()}40`}}>
+                  <div className="home-card-content" style={{display: 'flex', gap: '24px', marginBottom: '32px'}}>
+                    <div className="home-card-image" style={{width: '140px', height: '140px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 8px 24px ${getCurrentColor()}40`}}>
                       <svg width="56" height="56" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
                     </div>
-                    <div style={{flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                    <div className="home-card-details" style={{flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
                       <h3 style={{fontSize: '24px', fontWeight: '700', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#fff', maxWidth: '280px'}}>{songs[currentSong]?.title || 'No Song Selected'}</h3>
                       <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px'}}>
                         <img 
@@ -215,7 +226,7 @@ function App() {
                     </div>
                   </div>
                   
-                  <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', padding: '24px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', border: '1px solid #444'}}>
+                  <div className="stats-grid" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', padding: '24px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', border: '1px solid #444'}}>
                     <div style={{textAlign: 'center'}}>
                       <div style={{color: getCurrentColor(), fontSize: '18px', fontWeight: '600'}}>{formatTime(duration) || '--:--'}</div>
                       <div style={{color: '#888', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px'}}>Duration</div>
@@ -265,17 +276,17 @@ function App() {
                     song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     song.artist.toLowerCase().includes(searchTerm.toLowerCase())
                   ).map((song, index) => (
-                    <div key={index} onClick={() => {setCurrentSong(songs.indexOf(song)); setIsPlaying(false);}} style={{
+                    <div key={index} onClick={() => {setCurrentSong(songs.indexOf(song)); setIsPlaying(false);}} className="song-card" style={{
                       background: '#181818',
                       padding: '16px',
                       borderRadius: '8px',
                       cursor: 'pointer'
                     }}>
-                      <div style={{width: '100%', height: '148px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '4px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                      <div className="song-card-image" style={{width: '100%', height: '148px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '4px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
                       </div>
-                      <div style={{fontWeight: 'bold', marginBottom: '4px', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.title}</div>
-                      <div style={{color: '#b3b3b3', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.artist}</div>
+                      <div className="song-title" style={{fontWeight: 'bold', marginBottom: '4px', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.title}</div>
+                      <div className="song-artist" style={{color: '#b3b3b3', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.artist}</div>
                     </div>
                   ))}
                 </div>
@@ -318,7 +329,7 @@ function App() {
       
       
       {/* Bottom Player */}
-      <div style={{position: 'fixed', bottom: 0, left: 0, right: 0, height: '90px', background: `linear-gradient(90deg, #181818, ${getCurrentColor()}15)`, borderTop: `1px solid ${getCurrentColor()}40`, display: 'flex', alignItems: 'center', padding: '0 16px'}}>
+      <div className="bottom-player" style={{position: 'fixed', bottom: 0, left: 0, right: 0, height: '90px', background: `linear-gradient(90deg, #181818, ${getCurrentColor()}15)`, borderTop: `1px solid ${getCurrentColor()}40`, display: 'flex', alignItems: 'center', padding: '0 16px'}}>
         <audio ref={audioRef} src={songs[currentSong]?.url} />
         
         {/* Song Info */}

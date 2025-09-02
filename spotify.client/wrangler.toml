@@ -1,0 +1,10 @@
+name = "spotify-clone"
+compatibility_date = "2024-01-01"
+
+[env.production.build]
+command = "npm run build"
+cwd = "."
+
+[env.production.build.upload]
+format = "directory"
+dir = "dist"

@@ -200,7 +200,7 @@ function App() {
         
         {/* Main Content */}
         <div className="main-content" style={{flex: 1, background: `linear-gradient(180deg, ${getCurrentColor()}40 0%, #121212 100%)`, padding: '24px', paddingBottom: '100px'}}>
-          <h2 style={{fontSize: '32px', fontWeight: 'bold', marginBottom: '24px'}}>Good evening</h2>
+          <h2 style={{fontSize: '32px', fontWeight: 'bold', marginBottom: '24px'}}>Hello Melophile</h2>
           
           {activeMenu === 'Home' && (
             <div style={{textAlign: 'center', padding: '60px 20px'}}>

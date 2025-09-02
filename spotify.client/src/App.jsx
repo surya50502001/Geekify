@@ -12,11 +12,29 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [likedSongs, setLikedSongs] = useState(new Set());
   const [uploadedSongs, setUploadedSongs] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
   const audioRef = useRef(null);
   
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('audio/')) {
+      setIsUploading(true);
+      setUploadProgress(0);
+      
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 200);
+      
       // Create local preview
       const url = URL.createObjectURL(file);
       const newSong = {
@@ -25,7 +43,6 @@ function App() {
         url: url,
         file: file
       };
-      setUploadedSongs(prev => [...prev, newSong]);
       
       // Send to your local server
       const formData = new FormData();
@@ -43,6 +60,25 @@ function App() {
       } catch (error) {
         console.log('Server not running - song only available locally');
       }
+      
+      setUploadProgress(100);
+      setTimeout(() => {
+        setUploadedSongs(prev => [...prev, newSong]);
+        setIsUploading(false);
+        setUploadProgress(0);
+      }, 500);
+    }
+  };
+  
+  const addComment = () => {
+    if (newComment.trim()) {
+      const comment = {
+        id: Date.now(),
+        text: newComment,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      setComments(prev => [...prev, comment]);
+      setNewComment('');
     }
   };
   
@@ -158,7 +194,8 @@ function App() {
           .sidebar { width: ${sidebarOpen ? '100vw' : '0'} !important; position: fixed !important; z-index: 999 !important; height: 100vh !important; }
           .main-content { padding: 16px 12px !important; }
           .home-card { max-width: 100% !important; padding: 24px 16px !important; margin: 0 8px !important; }
-          .song-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+          .library-list { padding: 8px !important; }
+          .library-item { flex-direction: column !important; text-align: center !important; }
           .search-input { width: calc(100% - 24px) !important; max-width: none !important; }
           .player-controls { width: 50% !important; }
           .song-info { width: 35% !important; font-size: 12px !important; }
@@ -350,40 +387,46 @@ function App() {
                   <input type="file" accept="audio/*" onChange={handleFileUpload} style={{display: 'none'}} />
                 </label>
               </div>
-              <div className="song-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '24px'}}>
+              {isUploading && (
+                <div style={{background: '#181818', padding: '16px', borderRadius: '8px', marginBottom: '16px'}}>
+                  <div style={{marginBottom: '8px'}}>Uploading... {uploadProgress}%</div>
+                  <div style={{width: '100%', height: '4px', background: '#333', borderRadius: '2px'}}>
+                    <div style={{width: `${uploadProgress}%`, height: '100%', background: getCurrentColor(), borderRadius: '2px', transition: 'width 0.3s ease'}}></div>
+                  </div>
+                </div>
+              )}
+              
+              <div style={{marginBottom: '32px'}}>
                 {allSongs.length > 0 ? allSongs.map((song, index) => (
-                  <div key={index} style={{
+                  <div key={index} onClick={() => {setCurrentSong(index); setIsPlaying(false);}} style={{
                     background: '#181818',
-                    padding: '16px',
+                    padding: '12px 16px',
                     borderRadius: '8px',
                     cursor: 'pointer',
-                    position: 'relative'
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    ':hover': {background: '#282828'}
                   }}>
-                    <div onClick={() => {setCurrentSong(index); setIsPlaying(false);}} style={{width: '100%'}}>
-                      <div style={{width: '100%', height: '148px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '4px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '16px', flex: 1}}>
+                      <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
                       </div>
-                      <div style={{fontWeight: 'bold', marginBottom: '4px', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.title}</div>
-                      <div style={{color: '#b3b3b3', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.artist}</div>
+                      <div style={{flex: 1}}>
+                        <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
+                        <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
+                      </div>
                     </div>
                     {song.file && (
                       <button 
                         onClick={(e) => {e.stopPropagation(); downloadSong(song);}} 
                         style={{
-                          position: 'absolute',
-                          top: '8px',
-                          right: '8px',
-                          background: getCurrentColor(),
+                          background: 'transparent',
                           border: 'none',
-                          borderRadius: '50%',
-                          width: '32px',
-                          height: '32px',
-                          color: 'white',
+                          color: getCurrentColor(),
                           cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          opacity: 0.9
+                          padding: '8px'
                         }}
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
@@ -391,6 +434,55 @@ function App() {
                     )}
                   </div>
                 )) : <div>Loading songs...</div>}
+              </div>
+              
+              <div style={{background: '#181818', padding: '20px', borderRadius: '12px'}}>
+                <h4 style={{fontSize: '18px', marginBottom: '16px', color: getCurrentColor()}}>Comments</h4>
+                <div style={{marginBottom: '16px'}}>
+                  <div style={{display: 'flex', gap: '8px'}}>
+                    <input 
+                      type="text" 
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Add a comment..."
+                      style={{
+                        flex: 1,
+                        padding: '8px 12px',
+                        borderRadius: '20px',
+                        border: 'none',
+                        background: '#242424',
+                        color: 'white',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                      onKeyPress={(e) => e.key === 'Enter' && addComment()}
+                    />
+                    <button 
+                      onClick={addComment}
+                      style={{
+                        background: getCurrentColor(),
+                        border: 'none',
+                        borderRadius: '20px',
+                        padding: '8px 16px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                    >
+                      Post
+                    </button>
+                  </div>
+                </div>
+                <div style={{maxHeight: '200px', overflowY: 'auto'}}>
+                  {comments.length > 0 ? comments.map(comment => (
+                    <div key={comment.id} style={{padding: '8px 0', borderBottom: '1px solid #333'}}>
+                      <div style={{fontSize: '14px', marginBottom: '4px'}}>{comment.text}</div>
+                      <div style={{fontSize: '11px', color: '#666'}}>{comment.timestamp}</div>
+                    </div>
+                  )) : (
+                    <div style={{color: '#666', fontSize: '14px'}}>No comments yet. Be the first to comment!</div>
+                  )}
+                </div>
               </div>
             </div>
           )}

@@ -21,9 +21,21 @@ function App() {
       const newSong = {
         title: file.name.replace(/\.[^/.]+$/, ''),
         artist: 'Uploaded by User',
-        url: url
+        url: url,
+        file: file // Store original file for download
       };
       setUploadedSongs(prev => [...prev, newSong]);
+    }
+  };
+  
+  const downloadSong = (song) => {
+    if (song.file) {
+      const a = document.createElement('a');
+      a.href = song.url;
+      a.download = `${song.title}.${song.file.name.split('.').pop()}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
   };
   
@@ -288,11 +300,11 @@ function App() {
               </div>
               {searchTerm && (
                 <div className="song-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '24px'}}>
-                  {songs.filter(song => 
+                  {allSongs.filter(song => 
                     song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     song.artist.toLowerCase().includes(searchTerm.toLowerCase())
                   ).map((song, index) => (
-                    <div key={index} onClick={() => {setCurrentSong(songs.indexOf(song)); setIsPlaying(false);}} className="song-card" style={{
+                    <div key={index} onClick={() => {setCurrentSong(allSongs.indexOf(song)); setIsPlaying(false);}} className="song-card" style={{
                       background: '#181818',
                       padding: '16px',
                       borderRadius: '8px',
@@ -321,17 +333,43 @@ function App() {
               </div>
               <div className="song-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '24px'}}>
                 {allSongs.length > 0 ? allSongs.map((song, index) => (
-                  <div key={index} onClick={() => {setCurrentSong(index); setIsPlaying(false);}} style={{
+                  <div key={index} style={{
                     background: '#181818',
                     padding: '16px',
                     borderRadius: '8px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    position: 'relative'
                   }}>
-                    <div style={{width: '100%', height: '148px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '4px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                    <div onClick={() => {setCurrentSong(index); setIsPlaying(false);}} style={{width: '100%'}}>
+                      <div style={{width: '100%', height: '148px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '4px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                      </div>
+                      <div style={{fontWeight: 'bold', marginBottom: '4px', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.title}</div>
+                      <div style={{color: '#b3b3b3', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.artist}</div>
                     </div>
-                    <div style={{fontWeight: 'bold', marginBottom: '4px', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.title}</div>
-                    <div style={{color: '#b3b3b3', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.artist}</div>
+                    {song.file && (
+                      <button 
+                        onClick={(e) => {e.stopPropagation(); downloadSong(song);}} 
+                        style={{
+                          position: 'absolute',
+                          top: '8px',
+                          right: '8px',
+                          background: getCurrentColor(),
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '32px',
+                          height: '32px',
+                          color: 'white',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          opacity: 0.9
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                      </button>
+                    )}
                   </div>
                 )) : <div>Loading songs...</div>}
               </div>

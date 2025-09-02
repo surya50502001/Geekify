@@ -11,7 +11,23 @@ function App() {
   const [activeMenu, setActiveMenu] = useState('Home');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [likedSongs, setLikedSongs] = useState(new Set());
+  const [uploadedSongs, setUploadedSongs] = useState([]);
   const audioRef = useRef(null);
+  
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('audio/')) {
+      const url = URL.createObjectURL(file);
+      const newSong = {
+        title: file.name.replace(/\.[^/.]+$/, ''),
+        artist: 'Uploaded by User',
+        url: url
+      };
+      setUploadedSongs(prev => [...prev, newSong]);
+    }
+  };
+  
+  const allSongs = [...songs, ...uploadedSongs];
   
   const songColors = ['#1db954', '#e22856', '#ff6600', '#8e44ad', '#3498db', '#f39c12', '#e74c3c', '#9b59b6'];
   
@@ -90,7 +106,7 @@ function App() {
   };
 
   const playNext = () => {
-    const nextSong = (currentSong + 1) % songs.length;
+    const nextSong = (currentSong + 1) % allSongs.length;
     setCurrentSong(nextSong);
     setIsPlaying(false);
     setCurrentTime(0);
@@ -98,7 +114,7 @@ function App() {
   };
 
   const playPrev = () => {
-    const prevSong = currentSong === 0 ? songs.length - 1 : currentSong - 1;
+    const prevSong = currentSong === 0 ? allSongs.length - 1 : currentSong - 1;
     setCurrentSong(prevSong);
     setIsPlaying(false);
     setCurrentTime(0);
@@ -296,9 +312,15 @@ function App() {
           
           {activeMenu === 'Library' && (
             <div>
-              <h3 style={{fontSize: '20px', marginBottom: '24px'}}>Your Library</h3>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+                <h3 style={{fontSize: '20px', margin: 0}}>Your Library</h3>
+                <label style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}>
+                  + Upload Song
+                  <input type="file" accept="audio/*" onChange={handleFileUpload} style={{display: 'none'}} />
+                </label>
+              </div>
               <div className="song-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '24px'}}>
-                {songs.length > 0 ? songs.map((song, index) => (
+                {allSongs.length > 0 ? allSongs.map((song, index) => (
                   <div key={index} onClick={() => {setCurrentSong(index); setIsPlaying(false);}} style={{
                     background: '#181818',
                     padding: '16px',
@@ -330,7 +352,7 @@ function App() {
       
       {/* Bottom Player */}
       <div className="bottom-player" style={{position: 'fixed', bottom: 0, left: 0, right: 0, height: '90px', background: `linear-gradient(90deg, #181818, ${getCurrentColor()}15)`, borderTop: `1px solid ${getCurrentColor()}40`, display: 'flex', alignItems: 'center', padding: '0 16px'}}>
-        <audio ref={audioRef} src={songs[currentSong]?.url} />
+        <audio ref={audioRef} src={allSongs[currentSong]?.url} />
         
         {/* Song Info */}
         <div className="song-info" style={{display: 'flex', alignItems: 'center', width: '30%'}}>
@@ -338,8 +360,8 @@ function App() {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
           </div>
           <div>
-            <div style={{fontSize: '14px', fontWeight: '400'}}>{songs[currentSong]?.title || 'Loading...'}</div>
-            <div style={{fontSize: '11px', color: '#b3b3b3'}}>{songs[currentSong]?.artist || ''}</div>
+            <div style={{fontSize: '14px', fontWeight: '400'}}>{allSongs[currentSong]?.title || 'Loading...'}</div>
+            <div style={{fontSize: '11px', color: '#b3b3b3'}}>{allSongs[currentSong]?.artist || ''}</div>
           </div>
         </div>
         

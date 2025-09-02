@@ -60,7 +60,7 @@ function App() {
       formData.append('song', file);
       
       try {
-        const response = await fetch('https://dozens-oil-xhtml-polish.trycloudflare.com/upload', {
+        const response = await fetch('https://YOUR_NGROK_URL.ngrok.io/upload', {
           method: 'POST',
           body: formData
         });
@@ -207,7 +207,7 @@ function App() {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
             </svg>
           </div>
-          <h2 style={{fontSize: '24px', fontWeight: 'bold', color: getCurrentColor(), margin: 0}}>Geekify</h2>
+          <h2 style={{fontSize: '24px', fontWeight: 'bold', color: getCurrentColor(), margin: 0}}>Welcome Bhuvi</h2>
           <p style={{color: '#b3b3b3', fontSize: '14px', marginTop: '8px'}}>Loading your music experience...</p>
         </div>
         <style>{`
@@ -303,7 +303,7 @@ function App() {
                 <circle cx="50" cy="50" r="8" fill={getCurrentColor()}/>
                 <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
               </svg>
-              <h1 style={{fontSize: '24px', margin: 0, fontWeight: 'bold', color: getCurrentColor()}}>Geekify</h1>
+              <h1 style={{fontSize: '24px', margin: 0, fontWeight: 'bold', color: getCurrentColor()}}>Welcome Bhuvi</h1>
             </div>
           </div>
           <nav>
@@ -332,7 +332,7 @@ function App() {
           
           {activeMenu === 'Home' && (
             <div style={{textAlign: 'center', padding: '60px 20px'}}>
-              <h3 style={{fontSize: '24px', marginBottom: '16px'}}>Welcome to Geekify</h3>
+              <h3 style={{fontSize: '24px', marginBottom: '16px'}}>Welcome Bhuvi</h3>
               <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '40px'}}>Your music streaming experience starts here</p>
               
               {songs.length > 0 && (
@@ -571,7 +571,7 @@ function App() {
               <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.6s'}}>🎧</div>
               <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.8s'}}>🎸</div>
             </div>
-            <h2 style={{fontSize: '28px', fontWeight: 'bold', color: getCurrentColor(), marginBottom: '16px'}}>Welcome to Geekify!</h2>
+            <h2 style={{fontSize: '28px', fontWeight: 'bold', color: getCurrentColor(), marginBottom: '16px'}}>Welcome Bhuvi!</h2>
             <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '24px', lineHeight: '1.5'}}>Your ultimate music streaming experience awaits. Discover, upload, and enjoy music like never before.</p>
             <button 
               onClick={() => setShowWelcome(false)}

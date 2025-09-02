@@ -1,10 +1,9 @@
-name = "spotify-clone"
-compatibility_date = "2024-01-01"
+name = "welcome-bhuvi-music"
+compatibility_date = "2023-12-01"
 
-[env.production.build]
-command = "npm run build"
-cwd = "."
+[env.production]
+name = "welcome-bhuvi-music"
 
-[env.production.build.upload]
-format = "directory"
-dir = "dist"
+[[env.production.routes]]
+pattern = "*"
+zone_name = "your-domain.com"

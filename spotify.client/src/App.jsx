@@ -48,17 +48,25 @@ function App() {
     const audio = audioRef.current;
     if (audio) {
       const updateTime = () => setCurrentTime(audio.currentTime);
-      const updateDuration = () => setDuration(audio.duration);
+      const updateDuration = () => {
+        if (audio.duration && !isNaN(audio.duration)) {
+          setDuration(audio.duration);
+        }
+      };
       
       audio.addEventListener('timeupdate', updateTime);
       audio.addEventListener('loadedmetadata', updateDuration);
+      audio.addEventListener('durationchange', updateDuration);
+      audio.addEventListener('canplaythrough', updateDuration);
       
       return () => {
         audio.removeEventListener('timeupdate', updateTime);
         audio.removeEventListener('loadedmetadata', updateDuration);
+        audio.removeEventListener('durationchange', updateDuration);
+        audio.removeEventListener('canplaythrough', updateDuration);
       };
     }
-  }, [songs]);
+  }, [songs, currentSong]);
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -85,12 +93,16 @@ function App() {
     const nextSong = (currentSong + 1) % songs.length;
     setCurrentSong(nextSong);
     setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
   };
 
   const playPrev = () => {
     const prevSong = currentSong === 0 ? songs.length - 1 : currentSong - 1;
     setCurrentSong(prevSong);
     setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
   };
 
   return (

@@ -49,7 +49,7 @@ function App() {
       formData.append('song', file);
       
       try {
-        const response = await fetch('http://localhost:3001/upload', {
+        const response = await fetch('https://dozens-oil-xhtml-polish.trycloudflare.com/upload', {
           method: 'POST',
           body: formData
         });

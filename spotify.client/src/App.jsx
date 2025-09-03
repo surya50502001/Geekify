@@ -237,7 +237,7 @@ function App() {
   }
 
   return (
-    <div style={{background: isDarkTheme ? '#000' : '#fff', color: isDarkTheme ? 'white' : '#000', minHeight: '100vh', fontFamily: 'Arial', display: 'flex', flexDirection: 'column', position: 'relative', transition: 'background-color 0.3s ease, color 0.3s ease'}}>
+    <div style={{background: isDarkTheme ? '#000000' : '#ffffff', color: isDarkTheme ? '#ffffff' : '#000000', minHeight: '100vh', fontFamily: 'Arial', display: 'flex', flexDirection: 'column', position: 'relative', transition: 'background-color 0.3s ease, color 0.3s ease'}}>
       <style>{`
         @media (max-width: 768px) {
           .sidebar { width: ${sidebarOpen ? '100vw' : '0'} !important; position: fixed !important; z-index: 999 !important; height: 100vh !important; }
@@ -332,7 +332,7 @@ function App() {
         </div>
         
         {/* Sidebar */}
-        <div className="sidebar" style={{width: sidebarOpen ? '240px' : '0', background: isDarkTheme ? '#000' : '#f8f9fa', padding: sidebarOpen ? '24px 12px' : '0', borderRight: isDarkTheme ? '1px solid #282828' : '1px solid #e0e0e0', overflow: 'hidden', transition: 'width 0.3s ease, padding 0.3s ease, background-color 0.3s ease'}}>
+        <div className="sidebar" style={{width: sidebarOpen ? '240px' : '0', background: isDarkTheme ? '#000000' : '#f8f9fa', padding: sidebarOpen ? '24px 12px' : '0', borderRight: isDarkTheme ? '1px solid #282828' : '1px solid #e0e0e0', overflow: 'hidden', transition: 'width 0.3s ease, padding 0.3s ease, background-color 0.3s ease'}}>
           <div style={{marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px'}}>
             <div onClick={() => {setActiveMenu('Home'); setSidebarOpen(false);}} style={{cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px'}}>
               <svg width="40" height="28" viewBox="0 0 100 100" fill={getCurrentColor()}>
@@ -370,7 +370,7 @@ function App() {
         </div>
         
         {/* Main Content */}
-        <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #121212 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '100px', transition: 'background 0.3s ease'}}>
+        <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #000000 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '100px', transition: 'background 0.3s ease'}}>
           <h2 style={{fontSize: '32px', fontWeight: 'bold', marginBottom: '24px'}}>Hello Melophile</h2>
           
           {activeMenu === 'Home' && (

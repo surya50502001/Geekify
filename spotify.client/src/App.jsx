@@ -30,25 +30,44 @@ function App() {
     }
     
     // Check for updates
-    const lastVersion = localStorage.getItem('appVersion');
     const currentVersion = '1.3.0'; // Update this when you make changes
-    
-    // For testing: simulate having an older version
-    if (!lastVersion) {
-      localStorage.setItem('appVersion', '1.2.0'); // Set old version first
-    }
+    const lastVersion = localStorage.getItem('appVersion');
     
     if (lastVersion && lastVersion !== currentVersion) {
       setShowUpdateNotification(true);
     }
     localStorage.setItem('appVersion', currentVersion);
     
+    // Real-time update checker
+    const checkForUpdates = async () => {
+      try {
+        const response = await fetch('/version.json?' + Date.now());
+        const data = await response.json();
+        if (data.version !== currentVersion) {
+          setShowUpdateNotification(true);
+        }
+      } catch (error) {
+        // Fallback: check every 30 seconds for changes
+        const stored = localStorage.getItem('appVersion');
+        if (stored !== currentVersion) {
+          setShowUpdateNotification(true);
+        }
+      }
+    };
+    
+    // Check for updates every 30 seconds
+    const updateInterval = setInterval(checkForUpdates, 30000);
+    
     // Simulate loading time
     const timer = setTimeout(() => {
       setIsLoading(false);
       setShowWelcome(true);
     }, 2000);
-    return () => clearTimeout(timer);
+    
+    return () => {
+      clearTimeout(timer);
+      clearInterval(updateInterval);
+    };
   }, []);
   
   const toggleTheme = () => {

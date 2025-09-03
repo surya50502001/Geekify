@@ -547,10 +547,6 @@ function App() {
   <div style={{ textAlign: 'center', padding: '60px 20px' }}>
     <h3 style={{ fontSize: '20px', marginBottom: '16px' }}>Theme</h3>
     
-   {activeMenu === 'Theme' && (
-  <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-    <h3 style={{ fontSize: '20px', marginBottom: '16px' }}>Theme</h3>
-    
     <button
       onClick={() => document.body.classList.toggle('dark-theme')}
       style={{
@@ -571,12 +567,8 @@ function App() {
     </p>
   </div>
 )}
-
-  </div>
-)}
-
-        </div>
-      </div>
+</div>
+</div>
       
       {/* Welcome Popup */}
       {showWelcome && (

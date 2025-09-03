@@ -305,7 +305,7 @@ function App() {
                 <circle cx="50" cy="50" r="8" fill={getCurrentColor()}/>
                 <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
               </svg>
-              <h1 style={{fontSize: '24px', margin: 0, fontWeight: 'bold', color: getCurrentColor()}}>Welcome Bui</h1>
+              <h1 style={{fontSize: '24px', margin: 0, fontWeight: 'bold', color: getCurrentColor()}}>Welcome!</h1>
             </div>
           </div>
           <nav>

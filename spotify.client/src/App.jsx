@@ -22,6 +22,8 @@ function App() {
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const [spinnerColor, setSpinnerColor] = useState('#1db954');
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const audioRef = useRef(null);
   
   useEffect(() => {
@@ -65,10 +67,10 @@ function App() {
     // Check for updates every 30 seconds
     const updateInterval = setInterval(checkForUpdates, 30000);
     
-    // Simulate loading time
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+    // Remove auto-loading - now requires drag to unlock
+    // const timer = setTimeout(() => {
+    //   setIsLoading(false);
+    // }, 2000);
     
     return () => {
       clearTimeout(timer);
@@ -171,6 +173,31 @@ function App() {
     setSpinnerColor(randomColor);
   };
   
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    e.preventDefault();
+  };
+  
+  const handleMouseMove = (e) => {
+    if (isDragging) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setDragPosition({
+        x: e.clientX - rect.left - rect.width / 2,
+        y: e.clientY - rect.top - rect.height / 2
+      });
+      
+      // Check if dragged to header area (top 100px)
+      if (e.clientY < 100) {
+        setIsLoading(false);
+        setIsDragging(false);
+      }
+    }
+  };
+  
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+  
   const toggleLike = () => {
     const newLiked = new Set(likedSongs);
     if (newLiked.has(currentSong)) {
@@ -261,15 +288,37 @@ function App() {
 
   if (isLoading) {
     return (
-      <div style={{background: '#000', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial'}}>
+      <div 
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        style={{background: '#000', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial', position: 'relative', overflow: 'hidden'}}
+      >
+        {/* Header unlock area */}
+        <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '100px', background: 'linear-gradient(180deg, rgba(29,185,84,0.3) 0%, transparent 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1}}>
+          <h3 style={{color: '#1db954', fontSize: '18px', margin: 0}}>🎵 Drag spinner here to unlock 🎵</h3>
+        </div>
+        
         <div style={{textAlign: 'center'}}>
-          <div onClick={changeSpinnerColor} style={{width: '80px', height: '80px', margin: '0 auto 20px', position: 'relative', cursor: 'pointer'}}>
+          <div 
+            onMouseDown={handleMouseDown}
+            onClick={changeSpinnerColor}
+            style={{
+              width: '80px', 
+              height: '80px', 
+              margin: '0 auto 20px', 
+              position: 'relative', 
+              cursor: isDragging ? 'grabbing' : 'grab',
+              transform: `translate(${dragPosition.x}px, ${dragPosition.y}px)`,
+              transition: isDragging ? 'none' : 'transform 0.3s ease',
+              zIndex: 2
+            }}
+          >
             <svg width="80" height="80" viewBox="0 0 24 24" fill={spinnerColor} style={{animation: 'spin 2s linear infinite'}}>
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
             </svg>
           </div>
           <h2 style={{fontSize: '24px', fontWeight: 'bold', color: spinnerColor, margin: 0}}>Welcome!</h2>
-          <p style={{color: '#b3b3b3', fontSize: '14px', marginTop: '8px'}}>Loading your music experience...</p>
+          <p style={{color: '#b3b3b3', fontSize: '14px', marginTop: '8px'}}>Drag the spinner to the header to continue...</p>
         </div>
         <style>{`
           @keyframes spin {

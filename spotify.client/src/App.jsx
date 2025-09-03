@@ -32,14 +32,12 @@ function App() {
     // Check for updates
     const currentVersion = '1.5.0'; // Update this when you make changes
     const lastVersion = localStorage.getItem('appVersion');
+    const notifiedVersion = localStorage.getItem('notifiedVersion');
     
-    // Force show notification for testing
-    setTimeout(() => setShowUpdateNotification(true), 3000);
-    
-    // Show notification for version changes OR first-time users after 5 seconds
-    if (lastVersion && lastVersion !== currentVersion) {
+    // Show notification only if version changed and user hasn't been notified
+    if (lastVersion && lastVersion !== currentVersion && notifiedVersion !== currentVersion) {
       setShowUpdateNotification(true);
-    } else if (!lastVersion) {
+    } else if (!lastVersion && notifiedVersion !== currentVersion) {
       setTimeout(() => setShowUpdateNotification(true), 5000);
     }
     localStorage.setItem('appVersion', currentVersion);
@@ -762,7 +760,10 @@ function App() {
           <p style={{margin: '0 0 16px 0', fontSize: '14px', color: isDarkTheme ? '#b3b3b3' : '#666', lineHeight: '1.4'}}>New features and improvements are ready. Refresh to get the latest version.</p>
           <div style={{display: 'flex', gap: '8px'}}>
             <button 
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                localStorage.setItem('notifiedVersion', '1.5.0');
+                window.location.reload();
+              }}
               style={{
                 background: getCurrentColor(),
                 border: 'none',
@@ -777,7 +778,10 @@ function App() {
               Refresh Now
             </button>
             <button 
-              onClick={() => setShowUpdateNotification(false)}
+              onClick={() => {
+                localStorage.setItem('notifiedVersion', '1.5.0');
+                setShowUpdateNotification(false);
+              }}
               style={{
                 background: 'transparent',
                 border: `1px solid ${isDarkTheme ? '#444' : '#ddd'}`,

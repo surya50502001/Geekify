@@ -327,7 +327,7 @@ function App() {
             </div>
              <div onClick={() => {setActiveMenu('Theme'); setSidebarOpen(false);}} style={{marginBottom: '8px', padding: '12px 16px', cursor: 'pointer', borderRadius: '4px', background: activeMenu === 'Theme' ? `${getCurrentColor()}20` : 'transparent', display: 'flex', alignItems: 'center', gap: '16px', color: activeMenu === 'Theme' ? getCurrentColor() : '#b3b3b3'}}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5.21 1.57a1.39 1.39 0 0 0-.84.27 1.39 1.39 0 0 0-.52.93L2.19 7.04a1.39 1.39 0 0 0 .27.84c.2.26.5.42.84.42h.14l.48-.07.07-.01h.01c.226.914.997 1.608 1.95 1.608 1.087 0 1.968-.881 1.968-1.968S7.937 5.968 6.85 5.968c-.2 0-.4.03-.58.08L7.49 2.5a1.39 1.39 0 0 0-.27-.84 1.39 1.39 0 0 0-.93-.52L5.21 1.57zm6.28 0a1.39 1.39 0 0 0-.84.27 1.39 1.39 0 0 0-.52.93L8.47 7.04a1.39 1.39 0 0 0 .27.84c.2.26.5.42.84.42h.14l.48-.07.07-.01h.01c.226.914.997 1.608 1.95 1.608 1.087 0 1.968-.881 1.968-1.968S13.217 5.968 12.13 5.968c-.2 0-.4.03-.58.08L12.77 2.5a1.39 1.39 0 0 0-.27-.84 1.39 1.39 0 0 0-.93-.52L11.49 1.57z"/></svg>
-              Liked Songs
+              Theme
             </div>
           </nav>
         </div>

@@ -21,6 +21,7 @@ function App() {
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
+  const [spinnerColor, setSpinnerColor] = useState('#1db954');
   const audioRef = useRef(null);
   
   useEffect(() => {
@@ -165,6 +166,11 @@ function App() {
     return songColors[currentSong % songColors.length] || '#1db954';
   };
   
+  const changeSpinnerColor = () => {
+    const randomColor = songColors[Math.floor(Math.random() * songColors.length)];
+    setSpinnerColor(randomColor);
+  };
+  
   const toggleLike = () => {
     const newLiked = new Set(likedSongs);
     if (newLiked.has(currentSong)) {
@@ -257,12 +263,12 @@ function App() {
     return (
       <div style={{background: '#000', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial'}}>
         <div style={{textAlign: 'center'}}>
-          <div style={{width: '80px', height: '80px', margin: '0 auto 20px', position: 'relative'}}>
-            <svg width="80" height="80" viewBox="0 0 24 24" fill={getCurrentColor()} style={{animation: 'spin 2s linear infinite'}}>
+          <div onClick={changeSpinnerColor} style={{width: '80px', height: '80px', margin: '0 auto 20px', position: 'relative', cursor: 'pointer'}}>
+            <svg width="80" height="80" viewBox="0 0 24 24" fill={spinnerColor} style={{animation: 'spin 2s linear infinite'}}>
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
             </svg>
           </div>
-          <h2 style={{fontSize: '24px', fontWeight: 'bold', color: getCurrentColor(), margin: 0}}>Welcome!</h2>
+          <h2 style={{fontSize: '24px', fontWeight: 'bold', color: spinnerColor, margin: 0}}>Welcome!</h2>
           <p style={{color: '#b3b3b3', fontSize: '14px', marginTop: '8px'}}>Loading your music experience...</p>
         </div>
         <style>{`

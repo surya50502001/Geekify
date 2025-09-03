@@ -175,55 +175,40 @@ function App() {
     setSpinnerColor(randomColor);
   };
   
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  
   const handleMouseDown = (e) => {
     setIsDragging(true);
+    setStartPos({ x: e.clientX, y: e.clientY });
     e.preventDefault();
   };
   
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (isDragging) {
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-        const newX = e.clientX - centerX;
-        const newY = e.clientY - centerY;
-        
-        setDragPosition({ x: newX, y: newY });
-        
-        // Calculate progress based on distance to target
-        const targetDistance = Math.sqrt(newX * newX + (newY + 200) * (newY + 200));
-        const progress = Math.max(0, Math.min(100, (300 - targetDistance) / 3));
-        setGameProgress(progress);
-        
-        // Check if in unlock zone (top area)
-        if (e.clientY < 150) {
-          setShowSuccess(true);
-          setTimeout(() => {
-            setIsLoading(false);
-            setIsDragging(false);
-          }, 500);
-        }
-      }
-    };
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
     
-    const handleMouseUp = () => {
-      if (!showSuccess) {
-        setDragPosition({ x: 0, y: 0 });
-        setGameProgress(0);
-      }
-      setIsDragging(false);
-    };
+    const deltaX = e.clientX - startPos.x;
+    const deltaY = e.clientY - startPos.y;
     
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+    setDragPosition({ x: deltaX, y: deltaY });
+    
+    // Simple progress calculation
+    const progress = Math.max(0, Math.min(100, (-deltaY + 100) / 2));
+    setGameProgress(progress);
+    
+    // Check unlock condition
+    if (e.clientY < 150) {
+      setShowSuccess(true);
+      setTimeout(() => setIsLoading(false), 800);
     }
-    
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, showSuccess]);
+  };
+  
+  const handleMouseUp = () => {
+    if (!showSuccess) {
+      setDragPosition({ x: 0, y: 0 });
+      setGameProgress(0);
+    }
+    setIsDragging(false);
+  };
   
   const toggleLike = () => {
     const newLiked = new Set(likedSongs);
@@ -328,7 +313,11 @@ function App() {
 
   if (isLoading) {
     return (
-      <div style={{background: 'linear-gradient(135deg, #000 0%, #1a1a2e 50%, #16213e 100%)', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial', position: 'relative', overflow: 'hidden', userSelect: 'none'}}>
+      <div 
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        style={{background: 'linear-gradient(135deg, #000 0%, #1a1a2e 50%, #16213e 100%)', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial', position: 'relative', overflow: 'hidden', userSelect: 'none'}}
+      >
         {/* Animated background particles */}
         <div style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0}}>
           {[...Array(20)].map((_, i) => (

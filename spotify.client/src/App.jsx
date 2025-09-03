@@ -18,6 +18,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(true);
+  const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const audioRef = useRef(null);
   
   useEffect(() => {
@@ -27,6 +28,14 @@ function App() {
       setIsDarkTheme(savedTheme === 'dark');
       document.body.className = savedTheme === 'dark' ? 'dark-theme' : '';
     }
+    
+    // Check for updates
+    const lastVersion = localStorage.getItem('appVersion');
+    const currentVersion = '1.2.0'; // Update this when you make changes
+    if (lastVersion && lastVersion !== currentVersion) {
+      setShowUpdateNotification(true);
+    }
+    localStorage.setItem('appVersion', currentVersion);
     
     // Simulate loading time
     const timer = setTimeout(() => {
@@ -265,6 +274,10 @@ function App() {
           0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
           40% { transform: translateY(-10px); }
           60% { transform: translateY(-5px); }
+        }
+        @keyframes slideIn {
+          0% { transform: translateX(100%); opacity: 0; }
+          100% { transform: translateX(0); opacity: 1; }
         }
       `}</style>
       <div style={{display: 'flex', flex: 1}}>
@@ -665,6 +678,62 @@ function App() {
 )}
 </div>
 </div>
+      
+      {/* Update Notification */}
+      {showUpdateNotification && (
+        <div style={{
+          position: 'fixed',
+          top: '80px',
+          right: '20px',
+          zIndex: 2001,
+          background: isDarkTheme ? '#1e1e1e' : '#ffffff',
+          border: `2px solid ${getCurrentColor()}`,
+          borderRadius: '12px',
+          padding: '16px 20px',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+          maxWidth: '300px',
+          animation: 'slideIn 0.3s ease'
+        }}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px'}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill={getCurrentColor()}>
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v-6h-2v6zm0-8h2V7h-2v2z"/>
+            </svg>
+            <h4 style={{margin: 0, fontSize: '16px', color: getCurrentColor()}}>Update Available!</h4>
+          </div>
+          <p style={{margin: '0 0 16px 0', fontSize: '14px', color: isDarkTheme ? '#b3b3b3' : '#666', lineHeight: '1.4'}}>New features and improvements are ready. Refresh to get the latest version.</p>
+          <div style={{display: 'flex', gap: '8px'}}>
+            <button 
+              onClick={() => window.location.reload()}
+              style={{
+                background: getCurrentColor(),
+                border: 'none',
+                borderRadius: '6px',
+                padding: '8px 16px',
+                color: 'white',
+                fontSize: '14px',
+                cursor: 'pointer',
+                fontWeight: '500'
+              }}
+            >
+              Refresh Now
+            </button>
+            <button 
+              onClick={() => setShowUpdateNotification(false)}
+              style={{
+                background: 'transparent',
+                border: `1px solid ${isDarkTheme ? '#444' : '#ddd'}`,
+                borderRadius: '6px',
+                padding: '8px 16px',
+                color: isDarkTheme ? '#b3b3b3' : '#666',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              Later
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Welcome Popup */}
       {showWelcome && (

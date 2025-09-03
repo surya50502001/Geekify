@@ -320,6 +320,18 @@ function App() {
           20% { transform: translate(0, 0) scale(1.2) rotate(180deg); opacity: 1; }
           100% { transform: translate(var(--random-x, 100px), var(--random-y, -100px)) scale(0.5) rotate(720deg); opacity: 0; }
         }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        @keyframes playPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+        @keyframes ripple {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(1.5); opacity: 0; }
+        }
       `}</style>
       <div style={{display: 'flex', flex: 1}}>
         {/* Top Controls */}
@@ -816,42 +828,41 @@ function App() {
             <div 
               onClick={() => setShowWelcome(false)}
               style={{
-                width: '120px',
-                height: '120px',
+                width: '140px',
+                height: '140px',
                 margin: '0 auto',
-                background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`,
-                borderRadius: '20px',
+                background: `radial-gradient(circle, ${getCurrentColor()}, ${getCurrentColor()}aa, ${getCurrentColor()}dd)`,
+                borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
                 position: 'relative',
-                animation: 'crack 2s ease-in-out infinite',
-                boxShadow: `0 8px 32px ${getCurrentColor()}60`
+                animation: 'pulse 2s ease-in-out infinite',
+                boxShadow: `0 0 40px ${getCurrentColor()}80, inset 0 0 20px rgba(255,255,255,0.1)`,
+                border: `3px solid ${getCurrentColor()}40`
               }}
             >
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+              <svg width="70" height="70" viewBox="0 0 24 24" fill="white" style={{animation: 'playPulse 2s ease-in-out infinite'}}>
+                <path d="M8 5v14l11-7z"/>
               </svg>
+              
+              {/* Ripple effects */}
               <div style={{
                 position: 'absolute',
-                top: '10px',
-                right: '10px',
-                width: '2px',
-                height: '30px',
-                background: 'rgba(255,255,255,0.3)',
-                transform: 'rotate(45deg)',
-                animation: 'crackLine 2s ease-in-out infinite'
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                border: `2px solid ${getCurrentColor()}60`,
+                animation: 'ripple 3s ease-out infinite'
               }} />
               <div style={{
                 position: 'absolute',
-                bottom: '15px',
-                left: '15px',
-                width: '25px',
-                height: '2px',
-                background: 'rgba(255,255,255,0.3)',
-                transform: 'rotate(-30deg)',
-                animation: 'crackLine 2s ease-in-out infinite 0.5s'
+                width: '120%',
+                height: '120%',
+                borderRadius: '50%',
+                border: `1px solid ${getCurrentColor()}40`,
+                animation: 'ripple 3s ease-out infinite 1s'
               }} />
             </div>
           </div>

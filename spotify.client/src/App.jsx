@@ -31,7 +31,7 @@ function App() {
     
     // Check for updates
     const lastVersion = localStorage.getItem('appVersion');
-    const currentVersion = '1.2.0'; // Update this when you make changes
+    const currentVersion = '1.3.0'; // Update this when you make changes
     if (lastVersion && lastVersion !== currentVersion) {
       setShowUpdateNotification(true);
     }
@@ -278,6 +278,17 @@ function App() {
         @keyframes slideIn {
           0% { transform: translateX(100%); opacity: 0; }
           100% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes crack {
+          0%, 100% { transform: scale(1) rotate(0deg); }
+          25% { transform: scale(1.05) rotate(2deg); }
+          50% { transform: scale(1.1) rotate(-1deg); }
+          75% { transform: scale(1.05) rotate(1deg); }
+        }
+        @keyframes crackLine {
+          0% { opacity: 0; transform: scale(0); }
+          50% { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1.2); }
         }
       `}</style>
       <div style={{display: 'flex', flex: 1}}>
@@ -768,24 +779,47 @@ function App() {
             </div>
             <h2 style={{fontSize: '28px', fontWeight: 'bold', color: getCurrentColor(), marginBottom: '16px'}}>Welcome!</h2>
             <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '24px', lineHeight: '1.5'}}>Your ultimate music streaming experience awaits. Discover, upload, and enjoy music like never before.</p>
-            <button 
+            <div 
               onClick={() => setShowWelcome(false)}
               style={{
-                background: getCurrentColor(),
-                border: 'none',
-                borderRadius: '25px',
-                padding: '12px 24px',
-                color: 'white',
-                fontSize: '16px',
-                fontWeight: 'bold',
+                width: '120px',
+                height: '120px',
+                margin: '0 auto',
+                background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`,
+                borderRadius: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 cursor: 'pointer',
-                transition: 'transform 0.2s ease'
+                position: 'relative',
+                animation: 'crack 2s ease-in-out infinite',
+                boxShadow: `0 8px 32px ${getCurrentColor()}60`
               }}
-              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
             >
-              Let's Get Started! 🚀
-            </button>
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+              </svg>
+              <div style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                width: '2px',
+                height: '30px',
+                background: 'rgba(255,255,255,0.3)',
+                transform: 'rotate(45deg)',
+                animation: 'crackLine 2s ease-in-out infinite'
+              }} />
+              <div style={{
+                position: 'absolute',
+                bottom: '15px',
+                left: '15px',
+                width: '25px',
+                height: '2px',
+                background: 'rgba(255,255,255,0.3)',
+                transform: 'rotate(-30deg)',
+                animation: 'crackLine 2s ease-in-out infinite 0.5s'
+              }} />
+            </div>
           </div>
         </div>
       )}

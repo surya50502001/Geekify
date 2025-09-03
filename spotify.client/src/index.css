@@ -1,23 +1,32 @@
+/* Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #121212;
-  color: white;
+/* Default theme variables */
+:root {
+  --bg-color: #fff;
+  --text-color: #000;
 }
 
+/* Dark theme overrides */
+body.dark-theme {
+  --bg-color: #121212;
+  --text-color: #fff;
+}
+
+/* Apply variables */
 body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
   transition: background-color 0.3s, color 0.3s;
 }
+
+/* React app container */
 #root {
   width: 100%;
   min-height: 100vh;
-  --bg-color: #fff;
-  --text-color: #000;
 }

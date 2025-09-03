@@ -315,6 +315,11 @@ function App() {
           50% { opacity: 1; transform: scale(1); }
           100% { opacity: 0; transform: scale(1.2); }
         }
+        @keyframes burstOut {
+          0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
+          20% { transform: translate(0, 0) scale(1.2) rotate(180deg); opacity: 1; }
+          100% { transform: translate(var(--random-x, 100px), var(--random-y, -100px)) scale(0.5) rotate(720deg); opacity: 0; }
+        }
       `}</style>
       <div style={{display: 'flex', flex: 1}}>
         {/* Top Controls */}
@@ -795,12 +800,16 @@ function App() {
             border: `2px solid ${getCurrentColor()}`,
             boxShadow: `0 20px 40px ${getCurrentColor()}40`
           }}>
-            <div style={{marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '15px'}}>
-              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0s'}}>🎉</div>
-              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.2s'}}>🎊</div>
-              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.4s'}}>✨</div>
-              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.6s'}}>🎈</div>
-              <div style={{fontSize: '30px', animation: 'bounce 2s infinite', animationDelay: '0.8s'}}>🎁</div>
+            <div style={{position: 'relative', marginBottom: '40px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              {/* Animated icons bursting from play button */}
+              <div style={{fontSize: '24px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '0s', top: '20px', left: '50px'}}>🎵</div>
+              <div style={{fontSize: '20px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '0.3s', top: '40px', right: '60px'}}>🎶</div>
+              <div style={{fontSize: '22px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '0.6s', bottom: '30px', left: '40px'}}>🎼</div>
+              <div style={{fontSize: '18px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '0.9s', top: '10px', right: '30px'}}>🎤</div>
+              <div style={{fontSize: '20px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '1.2s', bottom: '20px', right: '50px'}}>🎧</div>
+              <div style={{fontSize: '24px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '1.5s', top: '60px', left: '20px'}}>🎸</div>
+              <div style={{fontSize: '16px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '1.8s', bottom: '60px', right: '20px'}}>🥁</div>
+              <div style={{fontSize: '22px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '2.1s', top: '80px', right: '80px'}}>🎹</div>
             </div>
             <h2 style={{fontSize: '28px', fontWeight: 'bold', color: getCurrentColor(), marginBottom: '16px'}}>Welcome!</h2>
             <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '24px', lineHeight: '1.5'}}>Your ultimate music streaming experience awaits. Discover, upload, and enjoy music like never before.</p>

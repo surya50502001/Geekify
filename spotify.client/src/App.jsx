@@ -30,11 +30,14 @@ function App() {
     }
     
     // Check for updates
-    const currentVersion = '1.3.0'; // Update this when you make changes
+    const currentVersion = '1.4.0'; // Update this when you make changes
     const lastVersion = localStorage.getItem('appVersion');
     
+    // Show notification for version changes OR first-time users after 5 seconds
     if (lastVersion && lastVersion !== currentVersion) {
       setShowUpdateNotification(true);
+    } else if (!lastVersion) {
+      setTimeout(() => setShowUpdateNotification(true), 5000);
     }
     localStorage.setItem('appVersion', currentVersion);
     

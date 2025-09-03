@@ -24,6 +24,8 @@ function App() {
   const [spinnerColor, setSpinnerColor] = useState('#1db954');
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [gameProgress, setGameProgress] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
   const audioRef = useRef(null);
   
   useEffect(() => {
@@ -73,7 +75,7 @@ function App() {
     // }, 2000);
     
     return () => {
-      clearTimeout(timer);
+      // clearTimeout(timer);
       clearInterval(updateInterval);
     };
   }, []);
@@ -181,20 +183,35 @@ function App() {
   const handleMouseMove = (e) => {
     if (isDragging) {
       const rect = e.currentTarget.getBoundingClientRect();
-      setDragPosition({
-        x: e.clientX - rect.left - rect.width / 2,
-        y: e.clientY - rect.top - rect.height / 2
-      });
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const newX = e.clientX - rect.left - centerX;
+      const newY = e.clientY - rect.top - centerY;
       
-      // Check if dragged to header area (top 100px)
-      if (e.clientY < 100) {
-        setIsLoading(false);
-        setIsDragging(false);
+      setDragPosition({ x: newX, y: newY });
+      
+      // Calculate progress based on how close to target
+      const targetY = -centerY + 100;
+      const distance = Math.abs(newY - targetY);
+      const progress = Math.max(0, Math.min(100, (200 - distance) / 2));
+      setGameProgress(progress);
+      
+      // Check if in unlock zone
+      if (e.clientY < 150 && Math.abs(e.clientX - centerX) < 100) {
+        setShowSuccess(true);
+        setTimeout(() => {
+          setIsLoading(false);
+          setIsDragging(false);
+        }, 500);
       }
     }
   };
   
   const handleMouseUp = () => {
+    if (!showSuccess) {
+      setDragPosition({ x: 0, y: 0 });
+      setGameProgress(0);
+    }
     setIsDragging(false);
   };
   
@@ -281,6 +298,19 @@ function App() {
     setCurrentSong(prevSong);
     setIsPlaying(false);
     setCurrentTime(0);
+    setDuration(0);
+  }; % allSongs.length;
+    setCurrentSong(nextSong);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+  };
+
+  const playPrev = () => {
+    const prevSong = currentSong === 0 ? allSongs.length - 1 : currentSong - 1;
+    setCurrentSong(prevSong);
+    setIsPlaying(false);
+    setCurrentTime(0);
 
     
     setDuration(0);
@@ -291,39 +321,111 @@ function App() {
       <div 
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        style={{background: '#000', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial', position: 'relative', overflow: 'hidden'}}
+        style={{background: 'linear-gradient(135deg, #000 0%, #1a1a2e 50%, #16213e 100%)', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial', position: 'relative', overflow: 'hidden'}}
       >
-        {/* Header unlock area */}
-        <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '100px', background: 'linear-gradient(180deg, rgba(29,185,84,0.3) 0%, transparent 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1}}>
-          <h3 style={{color: '#1db954', fontSize: '18px', margin: 0}}>🎵 Drag spinner here to unlock 🎵</h3>
+        {/* Animated background particles */}
+        <div style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0}}>
+          {[...Array(20)].map((_, i) => (
+            <div key={i} style={{
+              position: 'absolute',
+              width: '4px',
+              height: '4px',
+              background: songColors[i % songColors.length],
+              borderRadius: '50%',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 2}s`
+            }} />)
+          )}
         </div>
         
-        <div style={{textAlign: 'center'}}>
+        {/* Target zone */}
+        <div style={{
+          position: 'absolute', 
+          top: '50px', 
+          left: '50%', 
+          transform: 'translateX(-50%)',
+          width: '200px', 
+          height: '100px', 
+          border: `3px dashed ${gameProgress > 50 ? '#1db954' : '#666'}`,
+          borderRadius: '20px',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          background: gameProgress > 80 ? 'rgba(29,185,84,0.2)' : 'rgba(255,255,255,0.05)',
+          transition: 'all 0.3s ease',
+          zIndex: 1,
+          boxShadow: gameProgress > 50 ? '0 0 20px rgba(29,185,84,0.5)' : 'none'
+        }}>
+          <div style={{textAlign: 'center'}}>
+            <div style={{fontSize: '24px', marginBottom: '8px'}}>{showSuccess ? '🎉' : '🎯'}</div>
+            <div style={{fontSize: '14px', color: gameProgress > 50 ? '#1db954' : '#999'}}>
+              {showSuccess ? 'UNLOCKED!' : 'DROP ZONE'}
+            </div>
+          </div>
+        </div>
+        
+        {/* Progress bar */}
+        <div style={{
+          position: 'absolute',
+          bottom: '100px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '300px',
+          height: '8px',
+          background: 'rgba(255,255,255,0.1)',
+          borderRadius: '4px',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            width: `${gameProgress}%`,
+            height: '100%',
+            background: `linear-gradient(90deg, ${spinnerColor}, #1db954)`,
+            borderRadius: '4px',
+            transition: 'width 0.2s ease'
+          }} />
+        </div>
+        
+        <div style={{textAlign: 'center', zIndex: 2}}>
           <div 
             onMouseDown={handleMouseDown}
             onClick={changeSpinnerColor}
             style={{
-              width: '80px', 
-              height: '80px', 
-              margin: '0 auto 20px', 
+              width: '100px', 
+              height: '100px', 
+              margin: '0 auto 30px', 
               position: 'relative', 
               cursor: isDragging ? 'grabbing' : 'grab',
-              transform: `translate(${dragPosition.x}px, ${dragPosition.y}px)`,
+              transform: `translate(${dragPosition.x}px, ${dragPosition.y}px) scale(${isDragging ? 1.1 : 1})`,
               transition: isDragging ? 'none' : 'transform 0.3s ease',
-              zIndex: 2
+              zIndex: 2,
+              filter: `drop-shadow(0 0 ${gameProgress / 5}px ${spinnerColor})`,
+              background: `radial-gradient(circle, ${spinnerColor}20, transparent)`,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
-            <svg width="80" height="80" viewBox="0 0 24 24" fill={spinnerColor} style={{animation: 'spin 2s linear infinite'}}>
+            <svg width="80" height="80" viewBox="0 0 24 24" fill={spinnerColor} style={{animation: `spin ${isDragging ? '0.5s' : '2s'} linear infinite`}}>
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
             </svg>
           </div>
-          <h2 style={{fontSize: '24px', fontWeight: 'bold', color: spinnerColor, margin: 0}}>Welcome!</h2>
-          <p style={{color: '#b3b3b3', fontSize: '14px', marginTop: '8px'}}>Drag the spinner to the header to continue...</p>
+          
+          <h1 style={{fontSize: '32px', fontWeight: 'bold', color: spinnerColor, margin: '0 0 16px 0', textShadow: `0 0 20px ${spinnerColor}50`}}>🎵 MUSIC QUEST 🎵</h1>
+          <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '8px'}}>Drag the spinning disc to the target zone!</p>
+          <p style={{color: '#666', fontSize: '12px'}}>Progress: {Math.round(gameProgress)}%</p>
         </div>
+        
         <style>{`
           @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+          }
+          @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
           }
         `}</style>
       </div>

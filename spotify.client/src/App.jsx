@@ -22,10 +22,6 @@ function App() {
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const [spinnerColor, setSpinnerColor] = useState('#1db954');
-  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [gameProgress, setGameProgress] = useState(0);
-  const [showSuccess, setShowSuccess] = useState(false);
   const audioRef = useRef(null);
   
   useEffect(() => {
@@ -69,13 +65,12 @@ function App() {
     // Check for updates every 30 seconds
     const updateInterval = setInterval(checkForUpdates, 30000);
     
-    // Remove this line to enable drag-to-unlock
-    // const timer = setTimeout(() => {
-    //   setIsLoading(false);
-    // }, 2000);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
     
     return () => {
-      // clearTimeout(timer);
+      clearTimeout(timer);
       clearInterval(updateInterval);
     };
   }, []);
@@ -175,41 +170,6 @@ function App() {
     setSpinnerColor(randomColor);
   };
   
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setStartPos({ x: e.clientX, y: e.clientY });
-    e.preventDefault();
-  };
-  
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    
-    const deltaX = e.clientX - startPos.x;
-    const deltaY = e.clientY - startPos.y;
-    
-    setDragPosition({ x: deltaX, y: deltaY });
-    
-    // Simple progress calculation
-    const progress = Math.max(0, Math.min(100, (-deltaY + 100) / 2));
-    setGameProgress(progress);
-    
-    // Check unlock condition
-    if (e.clientY < 150) {
-      setShowSuccess(true);
-      setTimeout(() => setIsLoading(false), 800);
-    }
-  };
-  
-  const handleMouseUp = () => {
-    if (!showSuccess) {
-      setDragPosition({ x: 0, y: 0 });
-      setGameProgress(0);
-    }
-    setIsDragging(false);
-  };
-  
   const toggleLike = () => {
     const newLiked = new Set(likedSongs);
     if (newLiked.has(currentSong)) {
@@ -298,20 +258,28 @@ function App() {
 
   if (isLoading) {
     return (
-      <div 
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        style={{background: 'linear-gradient(135deg, #000 0%, #1a1a2e 50%, #16213e 100%)', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial', position: 'relative', overflow: 'hidden', userSelect: 'none'}}
-      >
-        <div style={{
-          position: 'absolute', 
-          top: '50px', 
-          left: '50%', 
-          transform: 'translateX(-50%)',
-          width: '200px', 
-          height: '100px', 
-          border: `3px dashed ${gameProgress > 50 ? '#1db954' : '#666'}`,
-          borderRadius: '20px',
+      <div style={{background: 'linear-gradient(135deg, #000 0%, #1a1a2e 50%, #16213e 100%)', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial'}}>
+        <div style={{textAlign: 'center'}}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            border: `4px solid ${spinnerColor}`,
+            borderTop: '4px solid transparent',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 20px'
+          }}></div>
+          <h2>Loading Spotify...</h2>
+        </div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center',

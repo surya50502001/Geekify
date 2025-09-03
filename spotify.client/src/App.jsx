@@ -547,7 +547,10 @@ function App() {
   <div style={{ textAlign: 'center', padding: '60px 20px' }}>
     <h3 style={{ fontSize: '20px', marginBottom: '16px' }}>Theme</h3>
     
-    {/* Toggle Button */}
+   {activeMenu === 'Theme' && (
+  <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+    <h3 style={{ fontSize: '20px', marginBottom: '16px' }}>Theme</h3>
+    
     <button
       onClick={() => document.body.classList.toggle('dark-theme')}
       style={{
@@ -566,6 +569,9 @@ function App() {
     <p style={{ color: '#b3b3b3', marginTop: '16px' }}>
       Click the button to switch themes
     </p>
+  </div>
+)}
+
   </div>
 )}
 

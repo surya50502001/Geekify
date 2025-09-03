@@ -1,31 +1,41 @@
 /* =====================
-   Theme Variables
-===================== */
+   THEME VARIABLES
+   ===================== */
+
+/* Light Theme (default) */
 :root {
   --bg-color: #ffffff;
   --text-color: #000000;
-  --secondary-bg: #f3f3f3;
-  --sidebar-bg: #eaeaea;
-  --muted-text: #555555;
-  --card-bg: #f7f7f7;
-  --hover-bg: #ddd;
-  --accent: #1db954;
+  --header-bg: #1db954;
+  --sidebar-bg: #f5f5f5;
+  --sidebar-border: #d1d1d1;
+  --secondary-text: #333333;
+  --card-bg: #eaeaea;
+  --hover-bg: #dcdcdc;
+  --active-bg: #1db954;
+  --progress-bg: #b3b3b3;
+  --progress-thumb: #1db954;
 }
 
+/* Dark Theme */
 body.dark-theme {
   --bg-color: #121212;
   --text-color: #ffffff;
-  --secondary-bg: #1e1e1e;
+  --header-bg: #1db954;
   --sidebar-bg: #000000;
-  --muted-text: #b3b3b3;
+  --sidebar-border: #282828;
+  --secondary-text: #b3b3b3;
   --card-bg: #1e1e1e;
   --hover-bg: #2a2a2a;
-  --accent: #1db954;
+  --active-bg: #1db954;
+  --progress-bg: #404040;
+  --progress-thumb: #1db954;
 }
 
 /* =====================
-   Global
-===================== */
+   APP STYLES (unchanged but now use variables)
+   ===================== */
+
 .app {
   background: var(--bg-color);
   color: var(--text-color);
@@ -43,13 +53,10 @@ body.dark-theme {
   overflow-y: auto;
 }
 
-/* =====================
-   Header
-===================== */
 .app-header {
   padding: 20px;
   text-align: center;
-  background: var(--accent);
+  background: var(--header-bg);
   margin-bottom: 20px;
 }
 
@@ -58,14 +65,11 @@ body.dark-theme {
   font-size: 2rem;
 }
 
-/* =====================
-   Sidebar
-===================== */
 .sidebar {
   width: 250px;
   background: var(--sidebar-bg);
   padding: 20px;
-  border-right: 1px solid var(--hover-bg);
+  border-right: 1px solid var(--sidebar-border);
 }
 
 .sidebar-header h2 {
@@ -87,21 +91,20 @@ body.dark-theme {
   align-items: center;
   gap: 15px;
   font-weight: 500;
-  color: var(--muted-text);
 }
 
 .nav-item:hover {
-  color: var(--accent);
+  color: var(--active-bg);
 }
 
 .nav-item.active {
-  color: var(--accent);
+  color: var(--active-bg);
 }
 
 .playlists h3 {
   margin: 0 0 15px 0;
   font-size: 1.1rem;
-  color: var(--muted-text);
+  color: var(--secondary-text);
 }
 
 .playlists ul {
@@ -114,16 +117,13 @@ body.dark-theme {
   padding: 8px 0;
   cursor: pointer;
   transition: color 0.3s;
-  color: var(--muted-text);
+  color: var(--secondary-text);
 }
 
 .playlists li:hover {
   color: var(--text-color);
 }
 
-/* =====================
-   Music Player
-===================== */
 .music-player {
   max-width: 800px;
   margin: 0 auto;
@@ -133,7 +133,7 @@ body.dark-theme {
 .now-playing {
   display: flex;
   align-items: center;
-  background: var(--secondary-bg);
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -154,14 +154,11 @@ body.dark-theme {
 
 .song-info p {
   margin: 0;
-  color: var(--muted-text);
+  color: var(--secondary-text);
 }
 
-/* =====================
-   Player Controls
-===================== */
 .player-controls {
-  background: var(--secondary-bg);
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -175,7 +172,7 @@ body.dark-theme {
 }
 
 .control-btn, .play-btn {
-  background: var(--accent);
+  background: var(--active-bg);
   border: none;
   border-radius: 50%;
   color: white;
@@ -209,7 +206,7 @@ body.dark-theme {
 .progress-bar {
   flex: 1;
   height: 4px;
-  background: var(--hover-bg);
+  background: var(--progress-bg);
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -220,19 +217,16 @@ body.dark-theme {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--progress-thumb);
   cursor: pointer;
 }
 
 .time {
   font-size: 12px;
-  color: var(--muted-text);
+  color: var(--secondary-text);
   min-width: 35px;
 }
 
-/* =====================
-   Volume
-===================== */
 .volume-container {
   display: flex;
   align-items: center;
@@ -243,7 +237,7 @@ body.dark-theme {
 .volume-bar {
   width: 100px;
   height: 4px;
-  background: var(--hover-bg);
+  background: var(--progress-bg);
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -254,13 +248,10 @@ body.dark-theme {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--progress-thumb);
   cursor: pointer;
 }
 
-/* =====================
-   Playlist
-===================== */
 .playlist {
   background: var(--card-bg);
   border-radius: 12px;
@@ -288,8 +279,7 @@ body.dark-theme {
 }
 
 .playlist-item.active {
-  background: var(--accent);
-  color: white;
+  background: var(--active-bg);
 }
 
 .playlist-cover {
@@ -312,7 +302,7 @@ body.dark-theme {
 }
 
 .playlist-artist {
-  color: var(--muted-text);
+  color: var(--secondary-text);
   font-size: 0.9rem;
 }
 

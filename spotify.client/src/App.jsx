@@ -429,12 +429,8 @@ function App() {
               Your Library
             </div>
             <div onClick={() => {setActiveMenu('Liked'); setSidebarOpen(false);}} style={{marginBottom: '8px', padding: '12px 16px', cursor: 'pointer', borderRadius: '4px', background: activeMenu === 'Liked' ? `${getCurrentColor()}20` : 'transparent', display: 'flex', alignItems: 'center', gap: '16px', color: activeMenu === 'Liked' ? getCurrentColor() : '#b3b3b3'}}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5.21 1.57a1.39 1.39 0 0 0-.84.27 1.39 1.39 0 0 0-.52.93L2.19 7.04a1.39 1.39 0 0 0 .27.84c.2.26.5.42.84.42h.14l.48-.07.07-.01h.01c.226.914.997 1.608 1.95 1.608 1.087 0 1.968-.881 1.968-1.968S7.937 5.968 6.85 5.968c-.2 0-.4.03-.58.08L7.49 2.5a1.39 1.39 0 0 0-.27-.84 1.39 1.39 0 0 0-.93-.52L5.21 1.57zm6.28 0a1.39 1.39 0 0 0-.84.27 1.39 1.39 0 0 0-.52.93L8.47 7.04a1.39 1.39 0 0 0 .27.84c.2.26.5.42.84.42h.14l.48-.07.07-.01h.01c.226.914.997 1.608 1.95 1.608 1.087 0 1.968-.881 1.968-1.968S13.217 5.968 12.13 5.968c-.2 0-.4.03-.58.08L12.77 2.5a1.39 1.39 0 0 0-.27-.84 1.39 1.39 0 0 0-.93-.52L11.49 1.57z"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
               Liked Songs
-            </div>
-             <div onClick={() => {setActiveMenu('Theme'); setSidebarOpen(false);}} style={{marginBottom: '8px', padding: '12px 16px', cursor: 'pointer', borderRadius: '4px', background: activeMenu === 'Theme' ? `${getCurrentColor()}20` : 'transparent', display: 'flex', alignItems: 'center', gap: '16px', color: activeMenu === 'Theme' ? getCurrentColor() : '#b3b3b3'}}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5.21 1.57a1.39 1.39 0 0 0-.84.27 1.39 1.39 0 0 0-.52.93L2.19 7.04a1.39 1.39 0 0 0 .27.84c.2.26.5.42.84.42h.14l.48-.07.07-.01h.01c.226.914.997 1.608 1.95 1.608 1.087 0 1.968-.881 1.968-1.968S7.937 5.968 6.85 5.968c-.2 0-.4.03-.58.08L7.49 2.5a1.39 1.39 0 0 0-.27-.84 1.39 1.39 0 0 0-.93-.52L5.21 1.57zm6.28 0a1.39 1.39 0 0 0-.84.27 1.39 1.39 0 0 0-.52.93L8.47 7.04a1.39 1.39 0 0 0 .27.84c.2.26.5.42.84.42h.14l.48-.07.07-.01h.01c.226.914.997 1.608 1.95 1.608 1.087 0 1.968-.881 1.968-1.968S13.217 5.968 12.13 5.968c-.2 0-.4.03-.58.08L12.77 2.5a1.39 1.39 0 0 0-.27-.84 1.39 1.39 0 0 0-.93-.52L11.49 1.57z"/></svg>
-              Theme
             </div>
           </nav>
         </div>
@@ -687,52 +683,6 @@ function App() {
               )}
             </div>
           )}
-{activeMenu === 'Theme' && (
-  <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-    <h3 style={{ fontSize: '24px', marginBottom: '32px', color: getCurrentColor() }}>Theme Settings</h3>
-    
-    <div style={{ background: isDarkTheme ? '#181818' : '#ffffff', padding: '32px', borderRadius: '16px', maxWidth: '400px', margin: '0 auto', border: isDarkTheme ? 'none' : '1px solid #e0e0e0', boxShadow: isDarkTheme ? 'none' : '0 4px 12px rgba(0,0,0,0.1)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill={getCurrentColor()}>
-            <path d={isDarkTheme ? "M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z" : "M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"} />
-          </svg>
-          <span style={{ fontSize: '16px', fontWeight: '500' }}>{isDarkTheme ? 'Dark Mode' : 'Light Mode'}</span>
-        </div>
-        
-        <button
-          onClick={toggleTheme}
-          style={{
-            width: '60px',
-            height: '32px',
-            borderRadius: '16px',
-            border: 'none',
-            background: isDarkTheme ? getCurrentColor() : '#ccc',
-            cursor: 'pointer',
-            position: 'relative',
-            transition: 'background 0.3s ease'
-          }}
-        >
-          <div style={{
-            width: '24px',
-            height: '24px',
-            borderRadius: '50%',
-            background: 'white',
-            position: 'absolute',
-            top: '4px',
-            left: isDarkTheme ? '32px' : '4px',
-            transition: 'left 0.3s ease',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-          }} />
-        </button>
-      </div>
-      
-      <p style={{ color: '#b3b3b3', fontSize: '14px', lineHeight: '1.5' }}>
-        {isDarkTheme ? 'Enjoy the sleek dark interface that\'s easy on your eyes.' : 'Switch to a bright, clean interface for daytime listening.'}
-      </p>
-    </div>
-  </div>
-)}
 </div>
 </div>
       

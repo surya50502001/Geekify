@@ -32,6 +32,12 @@ function App() {
     // Check for updates
     const lastVersion = localStorage.getItem('appVersion');
     const currentVersion = '1.3.0'; // Update this when you make changes
+    
+    // For testing: simulate having an older version
+    if (!lastVersion) {
+      localStorage.setItem('appVersion', '1.2.0'); // Set old version first
+    }
+    
     if (lastVersion && lastVersion !== currentVersion) {
       setShowUpdateNotification(true);
     }

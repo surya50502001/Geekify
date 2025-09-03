@@ -320,3 +320,18 @@ body.dark-theme {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+:root {
+  --bg-color: #fff;
+  --text-color: #000;
+}
+
+body.dark-theme {
+  --bg-color: #121212;
+  --text-color: #fff;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}

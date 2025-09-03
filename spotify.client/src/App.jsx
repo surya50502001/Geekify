@@ -413,7 +413,7 @@ function App() {
         />
         
         {/* Main Content */}
-        <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #000000 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '100px', transition: 'background 0.3s ease'}}>
+        <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #000000 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '120px', transition: 'background 0.3s ease'}}>
           <h2 style={{fontSize: '32px', fontWeight: 'bold', marginBottom: '24px'}}>Hello Melophile</h2>
           
           {activeMenu === 'Home' && (

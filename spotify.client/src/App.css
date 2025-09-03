@@ -1,6 +1,34 @@
+/* =====================
+   Theme Variables
+===================== */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --secondary-bg: #f3f3f3;
+  --sidebar-bg: #eaeaea;
+  --muted-text: #555555;
+  --card-bg: #f7f7f7;
+  --hover-bg: #ddd;
+  --accent: #1db954;
+}
+
+body.dark-theme {
+  --bg-color: #121212;
+  --text-color: #ffffff;
+  --secondary-bg: #1e1e1e;
+  --sidebar-bg: #000000;
+  --muted-text: #b3b3b3;
+  --card-bg: #1e1e1e;
+  --hover-bg: #2a2a2a;
+  --accent: #1db954;
+}
+
+/* =====================
+   Global
+===================== */
 .app {
-  background: #121212;
-  color: white;
+  background: var(--bg-color);
+  color: var(--text-color);
   min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -15,10 +43,13 @@
   overflow-y: auto;
 }
 
+/* =====================
+   Header
+===================== */
 .app-header {
   padding: 20px;
   text-align: center;
-  background: #1db954;
+  background: var(--accent);
   margin-bottom: 20px;
 }
 
@@ -27,11 +58,14 @@
   font-size: 2rem;
 }
 
+/* =====================
+   Sidebar
+===================== */
 .sidebar {
   width: 250px;
-  background: #000;
+  background: var(--sidebar-bg);
   padding: 20px;
-  border-right: 1px solid #282828;
+  border-right: 1px solid var(--hover-bg);
 }
 
 .sidebar-header h2 {
@@ -53,20 +87,21 @@
   align-items: center;
   gap: 15px;
   font-weight: 500;
+  color: var(--muted-text);
 }
 
 .nav-item:hover {
-  color: #1db954;
+  color: var(--accent);
 }
 
 .nav-item.active {
-  color: #1db954;
+  color: var(--accent);
 }
 
 .playlists h3 {
   margin: 0 0 15px 0;
   font-size: 1.1rem;
-  color: #b3b3b3;
+  color: var(--muted-text);
 }
 
 .playlists ul {
@@ -79,13 +114,16 @@
   padding: 8px 0;
   cursor: pointer;
   transition: color 0.3s;
-  color: #b3b3b3;
+  color: var(--muted-text);
 }
 
 .playlists li:hover {
-  color: white;
+  color: var(--text-color);
 }
 
+/* =====================
+   Music Player
+===================== */
 .music-player {
   max-width: 800px;
   margin: 0 auto;
@@ -95,7 +133,7 @@
 .now-playing {
   display: flex;
   align-items: center;
-  background: #1e1e1e;
+  background: var(--secondary-bg);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -116,11 +154,14 @@
 
 .song-info p {
   margin: 0;
-  color: #b3b3b3;
+  color: var(--muted-text);
 }
 
+/* =====================
+   Player Controls
+===================== */
 .player-controls {
-  background: #1e1e1e;
+  background: var(--secondary-bg);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -134,7 +175,7 @@
 }
 
 .control-btn, .play-btn {
-  background: #1db954;
+  background: var(--accent);
   border: none;
   border-radius: 50%;
   color: white;
@@ -168,7 +209,7 @@
 .progress-bar {
   flex: 1;
   height: 4px;
-  background: #404040;
+  background: var(--hover-bg);
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -179,16 +220,19 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #1db954;
+  background: var(--accent);
   cursor: pointer;
 }
 
 .time {
   font-size: 12px;
-  color: #b3b3b3;
+  color: var(--muted-text);
   min-width: 35px;
 }
 
+/* =====================
+   Volume
+===================== */
 .volume-container {
   display: flex;
   align-items: center;
@@ -199,7 +243,7 @@
 .volume-bar {
   width: 100px;
   height: 4px;
-  background: #404040;
+  background: var(--hover-bg);
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -210,19 +254,22 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #1db954;
+  background: var(--accent);
   cursor: pointer;
 }
 
+/* =====================
+   Playlist
+===================== */
 .playlist {
-  background: #1e1e1e;
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 20px;
 }
 
 .playlist h3 {
   margin: 0 0 15px 0;
-  color: white;
+  color: var(--text-color);
   font-size: 1.2rem;
 }
 
@@ -237,11 +284,12 @@
 }
 
 .playlist-item:hover {
-  background: #2a2a2a;
+  background: var(--hover-bg);
 }
 
 .playlist-item.active {
-  background: #1db954;
+  background: var(--accent);
+  color: white;
 }
 
 .playlist-cover {
@@ -264,7 +312,7 @@
 }
 
 .playlist-artist {
-  color: #b3b3b3;
+  color: var(--muted-text);
   font-size: 0.9rem;
 }
 

@@ -16,7 +16,7 @@ function App() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [showWelcome, setShowWelcome] = useState(false);
+
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const audioRef = useRef(null);
@@ -65,7 +65,6 @@ function App() {
     // Simulate loading time
     const timer = setTimeout(() => {
       setIsLoading(false);
-      setShowWelcome(true);
     }, 2000);
     
     return () => {
@@ -748,86 +747,7 @@ function App() {
         </div>
       )}
       
-      {/* Welcome Popup */}
-      {showWelcome && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.9)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 2000,
-          backdropFilter: 'blur(10px)'
-        }}>
-          <div style={{
-            background: 'linear-gradient(145deg, #1e1e1e, #2a2a2a)',
-            padding: '40px',
-            borderRadius: '20px',
-            textAlign: 'center',
-            maxWidth: '400px',
-            border: `2px solid ${getCurrentColor()}`,
-            boxShadow: `0 20px 40px ${getCurrentColor()}40`
-          }}>
-            <div style={{position: 'relative', marginBottom: '40px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-              {/* Animated icons bursting from play button */}
-              <div style={{fontSize: '24px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '0s', top: '20px', left: '50px'}}>🎵</div>
-              <div style={{fontSize: '20px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '0.3s', top: '40px', right: '60px'}}>🎶</div>
-              <div style={{fontSize: '22px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '0.6s', bottom: '30px', left: '40px'}}>🎼</div>
-              <div style={{fontSize: '18px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '0.9s', top: '10px', right: '30px'}}>🎤</div>
-              <div style={{fontSize: '20px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '1.2s', bottom: '20px', right: '50px'}}>🎧</div>
-              <div style={{fontSize: '24px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '1.5s', top: '60px', left: '20px'}}>🎸</div>
-              <div style={{fontSize: '16px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '1.8s', bottom: '60px', right: '20px'}}>🥁</div>
-              <div style={{fontSize: '22px', position: 'absolute', animation: 'burstOut 3s ease-out infinite', animationDelay: '2.1s', top: '80px', right: '80px'}}>🎹</div>
-            </div>
-            <h2 style={{fontSize: '28px', fontWeight: 'bold', color: getCurrentColor(), marginBottom: '16px'}}>Welcome!</h2>
-            <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '24px', lineHeight: '1.5'}}>Your ultimate music streaming experience awaits. Discover, upload, and enjoy music like never before.</p>
-            <div 
-              onClick={() => setShowWelcome(false)}
-              style={{
-                width: '140px',
-                height: '140px',
-                margin: '0 auto',
-                background: `radial-gradient(circle, ${getCurrentColor()}, ${getCurrentColor()}aa, ${getCurrentColor()}dd)`,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                position: 'relative',
-                animation: 'pulse 2s ease-in-out infinite',
-                boxShadow: `0 0 40px ${getCurrentColor()}80, inset 0 0 20px rgba(255,255,255,0.1)`,
-                border: `3px solid ${getCurrentColor()}40`
-              }}
-            >
-              <svg width="70" height="70" viewBox="0 0 24 24" fill="white" style={{animation: 'playPulse 2s ease-in-out infinite'}}>
-                <path d="M8 5v14l11-7z"/>
-              </svg>
-              
-              {/* Ripple effects */}
-              <div style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                borderRadius: '50%',
-                border: `2px solid ${getCurrentColor()}60`,
-                animation: 'ripple 3s ease-out infinite'
-              }} />
-              <div style={{
-                position: 'absolute',
-                width: '120%',
-                height: '120%',
-                borderRadius: '50%',
-                border: `1px solid ${getCurrentColor()}40`,
-                animation: 'ripple 3s ease-out infinite 1s'
-              }} />
-            </div>
-          </div>
-        </div>
-      )}
+
       
       {/* Bottom Player */}
       <div className="bottom-player" style={{position: 'fixed', bottom: 0, left: 0, right: 0, height: '90px', background: `linear-gradient(90deg, #181818, ${getCurrentColor()}15)`, borderTop: `1px solid ${getCurrentColor()}40`, display: 'flex', alignItems: 'center', padding: '0 16px'}}>

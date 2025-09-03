@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 
 function App() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [currentSong, setCurrentSong] = useState(0);
   const [songs, setSongs] = useState([]);
   const [currentTime, setCurrentTime] = useState(0);
@@ -84,7 +83,7 @@ function App() {
           console.log('Song saved to your computer:', result.originalName);
         }
       } catch (error) {
-        console.log('Server not running - song only available locally');
+          console.log('Server not running - song only available locally', error);
       }
       
       setUploadProgress(100);
@@ -238,7 +237,7 @@ function App() {
   }
 
   return (
-    <div style={{background: '#000', color: 'white', minHeight: '100vh', fontFamily: 'Arial', display: 'flex', flexDirection: 'column', position: 'relative'}}>
+    <div style={{background: isDarkTheme ? '#000' : '#fff', color: isDarkTheme ? 'white' : '#000', minHeight: '100vh', fontFamily: 'Arial', display: 'flex', flexDirection: 'column', position: 'relative', transition: 'background-color 0.3s ease, color 0.3s ease'}}>
       <style>{`
         @media (max-width: 768px) {
           .sidebar { width: ${sidebarOpen ? '100vw' : '0'} !important; position: fixed !important; z-index: 999 !important; height: 100vh !important; }
@@ -269,48 +268,71 @@ function App() {
         }
       `}</style>
       <div style={{display: 'flex', flex: 1}}>
-        {/* Hamburger Button */}
-        <button 
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="hamburger-btn"
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            zIndex: 1001,
-            background: `rgba(${parseInt(getCurrentColor().slice(1,3), 16)}, ${parseInt(getCurrentColor().slice(3,5), 16)}, ${parseInt(getCurrentColor().slice(5,7), 16)}, 0.9)`,
-            border: 'none',
-            borderRadius: '12px',
-            width: '56px',
-            height: '40px',
-            color: 'white',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-            transition: 'all 0.2s ease',
-            backdropFilter: 'blur(10px)'
-          }}
-          onMouseEnter={(e) => {
-            const color = getCurrentColor();
-            e.target.style.background = color;
-          }}
-          onMouseLeave={(e) => {
-            const color = getCurrentColor();
-            const r = parseInt(color.slice(1,3), 16);
-            const g = parseInt(color.slice(3,5), 16);
-            const b = parseInt(color.slice(5,7), 16);
-            e.target.style.background = `rgba(${r}, ${g}, ${b}, 0.9)`;
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{transition: 'transform 0.2s ease'}}>
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-          </svg>
-        </button>
+        {/* Top Controls */}
+        <div style={{position: 'fixed', top: '20px', right: '20px', zIndex: 1001, display: 'flex', gap: '12px'}}>
+          {/* Theme Toggle Button */}
+          <button 
+            onClick={toggleTheme}
+            style={{
+              background: `rgba(${parseInt(getCurrentColor().slice(1,3), 16)}, ${parseInt(getCurrentColor().slice(3,5), 16)}, ${parseInt(getCurrentColor().slice(5,7), 16)}, 0.9)`,
+              border: 'none',
+              borderRadius: '12px',
+              width: '40px',
+              height: '40px',
+              color: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              transition: 'all 0.2s ease',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d={isDarkTheme ? "M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z" : "M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"} />
+            </svg>
+          </button>
+          
+          {/* Hamburger Button */}
+          <button 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="hamburger-btn"
+            style={{
+              background: `rgba(${parseInt(getCurrentColor().slice(1,3), 16)}, ${parseInt(getCurrentColor().slice(3,5), 16)}, ${parseInt(getCurrentColor().slice(5,7), 16)}, 0.9)`,
+              border: 'none',
+              borderRadius: '12px',
+              width: '56px',
+              height: '40px',
+              color: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              transition: 'all 0.2s ease',
+              backdropFilter: 'blur(10px)'
+            }}
+            onMouseEnter={(e) => {
+              const color = getCurrentColor();
+              e.target.style.background = color;
+            }}
+            onMouseLeave={(e) => {
+              const color = getCurrentColor();
+              const r = parseInt(color.slice(1,3), 16);
+              const g = parseInt(color.slice(3,5), 16);
+              const b = parseInt(color.slice(5,7), 16);
+              e.target.style.background = `rgba(${r}, ${g}, ${b}, 0.9)`;
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{transition: 'transform 0.2s ease'}}>
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+          </button>
+        </div>
         
         {/* Sidebar */}
-        <div className="sidebar" style={{width: sidebarOpen ? '240px' : '0', background: '#000', padding: sidebarOpen ? '24px 12px' : '0', borderRight: '1px solid #282828', overflow: 'hidden', transition: 'width 0.3s ease, padding 0.3s ease'}}>
+        <div className="sidebar" style={{width: sidebarOpen ? '240px' : '0', background: isDarkTheme ? '#000' : '#f8f9fa', padding: sidebarOpen ? '24px 12px' : '0', borderRight: isDarkTheme ? '1px solid #282828' : '1px solid #e0e0e0', overflow: 'hidden', transition: 'width 0.3s ease, padding 0.3s ease, background-color 0.3s ease'}}>
           <div style={{marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px'}}>
             <div onClick={() => {setActiveMenu('Home'); setSidebarOpen(false);}} style={{cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px'}}>
               <svg width="40" height="28" viewBox="0 0 100 100" fill={getCurrentColor()}>
@@ -348,7 +370,7 @@ function App() {
         </div>
         
         {/* Main Content */}
-        <div className="main-content" style={{flex: 1, background: `linear-gradient(180deg, ${getCurrentColor()}40 0%, #121212 100%)`, padding: '24px', paddingBottom: '100px'}}>
+        <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #121212 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '100px', transition: 'background 0.3s ease'}}>
           <h2 style={{fontSize: '32px', fontWeight: 'bold', marginBottom: '24px'}}>Hello Melophile</h2>
           
           {activeMenu === 'Home' && (
@@ -562,7 +584,7 @@ function App() {
   <div style={{ textAlign: 'center', padding: '60px 20px' }}>
     <h3 style={{ fontSize: '24px', marginBottom: '32px', color: getCurrentColor() }}>Theme Settings</h3>
     
-    <div style={{ background: '#181818', padding: '32px', borderRadius: '16px', maxWidth: '400px', margin: '0 auto' }}>
+    <div style={{ background: isDarkTheme ? '#181818' : '#ffffff', padding: '32px', borderRadius: '16px', maxWidth: '400px', margin: '0 auto', border: isDarkTheme ? 'none' : '1px solid #e0e0e0', boxShadow: isDarkTheme ? 'none' : '0 4px 12px rgba(0,0,0,0.1)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill={getCurrentColor()}>

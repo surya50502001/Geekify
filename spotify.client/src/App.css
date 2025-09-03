@@ -1,35 +1,23 @@
-/* =====================
-   THEME VARIABLES
-   ===================== */
-
-/* Light Theme (default) */
 :root {
-  --bg-color: #ffffff;
-  --text-color: #000000;
-  --header-bg: #1db954;
-  --sidebar-bg: #f5f5f5;
-  --sidebar-border: #d1d1d1;
-  --secondary-text: #333333;
-  --card-bg: #eaeaea;
-  --hover-bg: #dcdcdc;
-  --active-bg: #1db954;
-  --progress-bg: #b3b3b3;
-  --progress-thumb: #1db954;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --text-primary: #000000;
+  --text-secondary: #666666;
+  --accent-color: #1db954;
+  --border-color: #e0e0e0;
+  --card-bg: #ffffff;
+  --hover-bg: #f5f5f5;
 }
 
-/* Dark Theme */
 body.dark-theme {
-  --bg-color: #121212;
-  --text-color: #ffffff;
-  --header-bg: #1db954;
-  --sidebar-bg: #000000;
-  --sidebar-border: #282828;
-  --secondary-text: #b3b3b3;
+  --bg-primary: #121212;
+  --bg-secondary: #181818;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --accent-color: #1db954;
+  --border-color: #282828;
   --card-bg: #1e1e1e;
   --hover-bg: #2a2a2a;
-  --active-bg: #1db954;
-  --progress-bg: #404040;
-  --progress-thumb: #1db954;
 }
 
 /* =====================
@@ -320,18 +308,8 @@ body.dark-theme {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
-:root {
-  --bg-color: #fff;
-  --text-color: #000;
-}
-
-body.dark-theme {
-  --bg-color: #121212;
-  --text-color: #fff;
-}
-
 body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

@@ -4,10 +4,22 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg-primary: #ffffff;
+  --text-primary: #000000;
+  --accent-color: #1db954;
+}
+
+body.dark-theme {
+  --bg-primary: #121212;
+  --text-primary: #ffffff;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #121212;
-  color: white;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {

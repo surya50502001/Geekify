@@ -135,21 +135,11 @@ function App() {
       const url = URL.createObjectURL(file);
       
       audio.onloadedmetadata = async () => {
-        const newSong = {
-          title: file.name.replace(/\.[^/.]+$/, ''),
-          artist: `Uploaded by ${currentUser}`,
-          url: url,
-          file: file,
-          uploadedBy: currentUser,
-          duration: audio.duration
-        };
-        
-        // Try to upload to server
+        // Upload to server immediately
         const formData = new FormData();
         formData.append('song', file);
         formData.append('uploader', currentUser);
         
-        let serverUploaded = false;
         try {
           const response = await fetch('https://2d7bf6cd2efd.ngrok-free.app/upload', {
             method: 'POST',
@@ -157,25 +147,34 @@ function App() {
           });
           const result = await response.json();
           if (result.success) {
-            console.log('Song saved to local server:', result.originalName);
-            // Use server URL instead of blob URL
-            newSong.url = `https://2d7bf6cd2efd.ngrok-free.app/play/${result.filename}`;
-            newSong.isServerSong = true;
-            serverUploaded = true;
+            console.log('Song saved to your local server:', result.originalName);
+            
+            const newSong = {
+              title: file.name.replace(/\.[^/.]+$/, ''),
+              artist: `Uploaded by ${currentUser}`,
+              url: `https://2d7bf6cd2efd.ngrok-free.app/play/${result.filename}`,
+              uploadedBy: currentUser,
+              duration: audio.duration,
+              filename: result.filename,
+              isServerSong: true,
+              isPending: true
+            };
+            
+            setUploadProgress(100);
+            setTimeout(() => {
+              setAllUserUploads(prev => [...prev, newSong]);
+              console.log('Song uploaded to server and pending approval:', newSong.title);
+              setIsUploading(false);
+              setUploadProgress(0);
+              alert('Song uploaded successfully! Waiting for admin approval.');
+            }, 500);
           }
         } catch (error) {
-          console.log('Server not available - using local blob URL');
-        }
-        
-        setUploadProgress(100);
-        setTimeout(() => {
-          setUploadedSongs(prev => [...prev, newSong]);
-          setUserUploadedSongs(prev => [...prev, newSong]);
-          setAllUserUploads(prev => [...prev, newSong]);
-          console.log('Song added:', newSong.title, serverUploaded ? '(Server)' : '(Local)');
+          console.log('Server not available - upload failed');
+          alert('Upload failed - server not running');
           setIsUploading(false);
           setUploadProgress(0);
-        }, 500);
+        }
       };
       
       // Simulate progress while loading metadata
@@ -909,13 +908,15 @@ function App() {
                               artist: song.artist || `Uploaded by ${song.uploadedBy}`,
                               url: song.url,
                               duration: song.duration,
-                              file: song.file,
-                              isServerSong: song.isServerSong
+                              filename: song.filename,
+                              isServerSong: true,
+                              isPending: false
                             };
                             setSongs(prev => [...prev, approvedSong]);
                             setUploadedSongs(prev => [...prev, approvedSong]);
                             setAllUserUploads(prev => prev.filter((_, i) => i !== index));
-                            alert('Song moved to main library!');
+                            console.log('Song approved and moved to library:', approvedSong.title);
+                            alert('Song approved and moved to main library!');
                           }}
                           style={{background: getCurrentColor(), color: 'white', padding: '8px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px'}}
                         >

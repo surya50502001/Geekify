@@ -4,7 +4,7 @@ import MusicPlayer from './components/MusicPlayer';
 import { validateUser, registerUser, isAdmin } from './People';
 
 // Simple user data management
-const createUserData = (userId) => {
+const createUserData = async (userId) => {
   const userData = {
     userId,
     likedSongs: [],
@@ -61,31 +61,27 @@ const createUserData = (userId) => {
   };
   
   // Load from server first, fallback to localStorage
-  const loadUserData = async () => {
-    try {
-      const response = await fetch(`https://8af4e83e88ce.ngrok-free.app/get-user-data/${userId}`);
-      if (response.ok) {
-        const serverData = await response.json();
-        if (serverData.success) {
-          userData.likedSongs = serverData.data.likedSongs || [];
-          userData.playlists = serverData.data.playlists || [];
-          return;
-        }
+  try {
+    const response = await fetch(`https://8af4e83e88ce.ngrok-free.app/get-user-data/${userId}`);
+    if (response.ok) {
+      const serverData = await response.json();
+      if (serverData.success) {
+        userData.likedSongs = serverData.data.likedSongs || [];
+        userData.playlists = serverData.data.playlists || [];
+        return userData;
       }
-    } catch (error) {
-      console.log('Server load failed, using local storage');
     }
-    
-    // Fallback to localStorage
-    const saved = localStorage.getItem(`userData_${userId}`);
-    if (saved) {
-      const data = JSON.parse(saved);
-      userData.likedSongs = data.likedSongs || [];
-      userData.playlists = data.playlists || [];
-    }
-  };
+  } catch (error) {
+    console.log('Server load failed, using local storage');
+  }
   
-  loadUserData();
+  // Fallback to localStorage
+  const saved = localStorage.getItem(`userData_${userId}`);
+  if (saved) {
+    const data = JSON.parse(saved);
+    userData.likedSongs = data.likedSongs || [];
+    userData.playlists = data.playlists || [];
+  }
   
   return userData;
 };
@@ -162,10 +158,9 @@ function App() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       setCurrentUser(savedUser);
-      const userData = createUserData(savedUser);
-      setUserData(userData);
-      // Force refresh after server sync
-      setTimeout(() => setUserData({...userData}), 1000);
+      createUserData(savedUser).then(userData => {
+        setUserData(userData);
+      });
     }
     
     // Load theme preference (override cache if exists)
@@ -272,7 +267,9 @@ function App() {
       const user = validateUser(authId, authPassword);
       if (user) {
         setCurrentUser(user.id);
-        setUserData(createUserData(user.id));
+        createUserData(user.id).then(userData => {
+          setUserData(userData);
+        });
         setShowAuth(false);
         localStorage.setItem('currentUser', user.id);
       } else {

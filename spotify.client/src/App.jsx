@@ -3,7 +3,7 @@ import Sidebar from './components/Sidebar';
 import MusicPlayer from './components/MusicPlayer';
 import { validateUser, registerUser, isAdmin } from './People';
 
-// File-based user data management
+// C# server user data management
 const createUserData = async (userId) => {
   const userData = {
     userId,
@@ -17,14 +17,13 @@ const createUserData = async (userId) => {
       
       // Save to file system via server
       try {
-        await fetch('https://8af4e83e88ce.ngrok-free.app/save-user-data', {
+        await fetch('https://8af4e83e88ce.ngrok-free.app/api/user/save-user-data', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: this.userId, data })
         });
       } catch (error) {
-        console.log('File save failed, using localStorage');
-        localStorage.setItem(`userData_${this.userId}`, JSON.stringify(data));
+        console.log('C# server save failed');
       }
     },
     likeSong(song) {
@@ -60,9 +59,9 @@ const createUserData = async (userId) => {
     }
   };
   
-  // Load from file system first
+  // Load from C# server
   try {
-    const response = await fetch(`https://8af4e83e88ce.ngrok-free.app/load-user-data/${userId}`);
+    const response = await fetch(`https://8af4e83e88ce.ngrok-free.app/api/user/load-user-data/${userId}`);
     if (response.ok) {
       const result = await response.json();
       if (result.success && result.data) {
@@ -72,15 +71,7 @@ const createUserData = async (userId) => {
       }
     }
   } catch (error) {
-    console.log('File load failed, using localStorage');
-  }
-  
-  // Fallback to localStorage
-  const saved = localStorage.getItem(`userData_${userId}`);
-  if (saved) {
-    const data = JSON.parse(saved);
-    userData.likedSongs = data.likedSongs || [];
-    userData.playlists = data.playlists || [];
+    console.log('C# server unavailable');
   }
   
   return userData;

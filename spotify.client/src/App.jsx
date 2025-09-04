@@ -459,7 +459,7 @@ function App() {
         audio.removeEventListener('canplaythrough', updateDuration);
       };
     }
-  }, [songs, currentSong]);
+  }, [allSongs, currentSong]);
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);

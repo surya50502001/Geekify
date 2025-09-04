@@ -16,7 +16,7 @@ function MusicPlayer({
 }) {
   return (
     <div className="bottom-player" style={{position: 'fixed', bottom: 0, left: 0, right: 0, height: '90px', background: `linear-gradient(90deg, #181818, ${getCurrentColor()}15)`, borderTop: `1px solid ${getCurrentColor()}40`, display: 'flex', alignItems: 'center', padding: '0 16px'}}>
-      <audio ref={audioRef} src={allSongs[currentSong]?.url} />
+      <audio ref={audioRef} src={allSongs[currentSong]?.url} preload="metadata" />
       
       {/* Song Info */}
       <div className="song-info" style={{display: 'flex', alignItems: 'center', width: '30%'}}>

@@ -901,12 +901,7 @@ function App() {
               ) : (
                 <div style={{textAlign: 'center', padding: '60px 20px'}}>
                   <p style={{color: '#b3b3b3', fontSize: '16px'}}>Please login to view your uploaded songs</p>
-                  <button 
-                    onClick={() => setShowAuth(true)}
-                    style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '24px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: '500', marginTop: '16px'}}
-                  >
-                    Login / Register
-                  </button>
+                  <p style={{color: '#666', fontSize: '14px'}}>Use the login button in the top header</p>
                 </div>
               )}
             </div>

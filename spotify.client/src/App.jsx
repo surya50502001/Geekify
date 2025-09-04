@@ -6,7 +6,6 @@ import { validateUser, registerUser, isAdmin } from './People';
 function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSong, setCurrentSong] = useState(0);
-  const [songs, setSongs] = useState([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,11 +23,9 @@ function App() {
   const [authMode, setAuthMode] = useState('login');
   const [authId, setAuthId] = useState('');
   const [authPassword, setAuthPassword] = useState('');
-  const [userUploadedSongs, setUserUploadedSongs] = useState([]);
   const [allUserUploads, setAllUserUploads] = useState([]);
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
-  const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [spinnerColor, setSpinnerColor] = useState('#1db954');
   const [serverStatus, setServerStatus] = useState('checking');
@@ -1027,47 +1024,7 @@ function App() {
             </div>
           )}
           
-          {activeMenu === 'Your Uploaded Songs' && (
-            <div>
-              <h3 style={{fontSize: '20px', margin: '0 0 24px 0'}}>Your Uploaded Songs</h3>
-              {currentUser ? (
-                userUploadedSongs.length > 0 ? (
-                  <div>
-                    {userUploadedSongs.map((song, index) => (
-                      <div key={index} onClick={() => {setCurrentSong(allSongs.indexOf(song)); setIsPlaying(true);}} style={{
-                        background: '#181818',
-                        padding: '12px 16px',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        marginBottom: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px'
-                      }}>
-                        <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-                        </div>
-                        <div style={{flex: 1}}>
-                          <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
-                          <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{textAlign: 'center', padding: '60px 20px'}}>
-                    <p style={{color: '#b3b3b3', fontSize: '16px'}}>No songs uploaded yet</p>
-                    <p style={{color: '#666', fontSize: '14px'}}>Upload your first song in the Library section</p>
-                  </div>
-                )
-              ) : (
-                <div style={{textAlign: 'center', padding: '60px 20px'}}>
-                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>Please login to view your uploaded songs</p>
-                  <p style={{color: '#666', fontSize: '14px'}}>Use the login button in the top header</p>
-                </div>
-              )}
-            </div>
-          )}
+
           
           {activeMenu === 'Admin Panel' && isAdmin(currentUser) && (
             <div>

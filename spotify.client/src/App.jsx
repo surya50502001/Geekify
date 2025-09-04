@@ -543,27 +543,54 @@ function App() {
         
         {/* Main Content */}
         <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #000000 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '120px', transition: 'background 0.3s ease'}}>
-          <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px'}}>
-            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'}}>
-              <svg width="48" height="36" viewBox="0 0 100 100" fill={getCurrentColor()}>
-                <circle cx="50" cy="50" r="45" fill="none" stroke={getCurrentColor()} strokeWidth="3"/>
-                <circle cx="50" cy="50" r="35" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
-                <circle cx="50" cy="50" r="25" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
-                <circle cx="50" cy="50" r="8" fill={getCurrentColor()}/>
-                <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
-              </svg>
-              <div style={{
-                fontSize: '12px',
-                fontWeight: 'bold',
-                color: getCurrentColor(),
-                textShadow: `0 0 5px ${getCurrentColor()}, 0 0 10px ${getCurrentColor()}, 0 0 15px ${getCurrentColor()}`,
-                letterSpacing: '1px',
-                fontFamily: 'Arial, sans-serif',
-                width: '48px',
-                textAlign: 'center'
-              }}>GEEKIFY</div>
+          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+              <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'}}>
+                <svg width="48" height="36" viewBox="0 0 100 100" fill={getCurrentColor()}>
+                  <circle cx="50" cy="50" r="45" fill="none" stroke={getCurrentColor()} strokeWidth="3"/>
+                  <circle cx="50" cy="50" r="35" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
+                  <circle cx="50" cy="50" r="25" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
+                  <circle cx="50" cy="50" r="8" fill={getCurrentColor()}/>
+                  <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
+                </svg>
+                <div style={{
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  color: getCurrentColor(),
+                  textShadow: `0 0 5px ${getCurrentColor()}, 0 0 10px ${getCurrentColor()}, 0 0 15px ${getCurrentColor()}`,
+                  letterSpacing: '1px',
+                  fontFamily: 'Arial, sans-serif',
+                  width: '48px',
+                  textAlign: 'center'
+                }}>GEEKIFY</div>
+              </div>
+              <h2 style={{fontSize: '24px', fontWeight: '300', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic'}}>Hello Melophile</h2>
             </div>
-            <h2 style={{fontSize: '24px', fontWeight: '300', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic'}}>Hello Melophile</h2>
+            
+            {/* Login/Logout Buttons */}
+            <div style={{display: 'flex', gap: '12px', alignItems: 'center'}}>
+              {currentUser ? (
+                <>
+                  <span style={{color: getCurrentColor(), fontSize: '14px', fontWeight: '500'}}>Welcome, {currentUser}</span>
+                  <button 
+                    onClick={() => {
+                      setCurrentUser(null);
+                      localStorage.removeItem('currentUser');
+                    }}
+                    style={{background: 'transparent', border: `1px solid #ff4444`, color: '#ff4444', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => setShowAuth(true)}
+                  style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                >
+                  Login / Register
+                </button>
+              )}
+            </div>
           </div>
           
           {activeMenu === 'Home' && (
@@ -573,8 +600,25 @@ function App() {
               {songs.length > 0 && (
                 <div className="home-card" style={{background: 'linear-gradient(145deg, #1e1e1e, #2a2a2a)', padding: '40px', borderRadius: '20px', maxWidth: '480px', margin: '0 auto', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', border: '1px solid #333'}}>
                   <div className="home-card-content" style={{display: 'flex', gap: '24px', marginBottom: '32px'}}>
-                    <div className="home-card-image" style={{width: '140px', height: '140px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 8px 24px ${getCurrentColor()}40`}}>
-                      <svg width="56" height="56" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                    <div 
+                      className="home-card-image" 
+                      onClick={() => {
+                        if (allSongs[currentSong]) {
+                          setIsPlaying(!isPlaying);
+                          if (!isPlaying) {
+                            audioRef.current?.play();
+                          } else {
+                            audioRef.current?.pause();
+                          }
+                        }
+                      }}
+                      style={{width: '140px', height: '140px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 8px 24px ${getCurrentColor()}40`, cursor: 'pointer', transition: 'transform 0.2s ease'}}
+                      onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                      onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                    >
+                      <svg width="56" height="56" viewBox="0 0 24 24" fill="white">
+                        <path d={isPlaying ? "M6 19h4V5H6v14zm8-14v14h4V5h-4z" : "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"}/>
+                      </svg>
                     </div>
                     <div className="home-card-details" style={{flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
                       <h3 style={{fontSize: '24px', fontWeight: '700', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#fff', maxWidth: '280px'}}>{songs[currentSong]?.title || 'No Song Selected'}</h3>
@@ -671,14 +715,6 @@ function App() {
                   >
                     📤 Share Upload Link
                   </button>
-                  {currentUser && (
-                    <button 
-                      onClick={() => setCurrentUser(null)}
-                      style={{background: 'transparent', border: `1px solid #ff4444`, color: '#ff4444', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
-                    >
-                      Logout ({currentUser})
-                    </button>
-                  )}
                   <label style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}>
                     + Upload Song
                     <input type="file" accept="audio/*" onChange={handleFileUpload} style={{display: 'none'}} />
@@ -1070,42 +1106,7 @@ function App() {
         toggleLike={toggleLike}
       />
       
-      {/* Login Button - Bottom Right */}
-      {!currentUser && (
-        <button 
-          onClick={() => setShowAuth(true)}
-          style={{
-            position: 'fixed',
-            bottom: '100px',
-            right: '20px',
-            background: getCurrentColor(),
-            border: 'none',
-            borderRadius: '50px',
-            padding: '12px 20px',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '500',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = 'scale(1)';
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M12 13C10.89 13 10 13.89 10 15V19H14V15C14 13.89 13.11 13 12 13Z"/>
-          </svg>
-          Login
-        </button>
-      )}
+
     </div>
   );
 }

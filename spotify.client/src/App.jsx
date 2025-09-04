@@ -451,12 +451,11 @@ function App() {
                 textAlign: 'center'
               }}>GEEKIFY</div>
             </div>
-            <h2 style={{fontSize: '24px', fontWeight: '600', margin: 0, fontFamily: 'Arial, sans-serif'}}>Hello Melophile</h2>
+            <h2 style={{fontSize: '24px', fontWeight: '300', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic'}}>Hello Melophile</h2>
           </div>
           
           {activeMenu === 'Home' && (
             <div style={{textAlign: 'center', padding: '60px 20px'}}>
-              <h3 style={{fontSize: '24px', marginBottom: '16px'}}>Welcome!</h3>
               <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '40px'}}>Your music streaming experience starts here</p>
               
               {songs.length > 0 && (

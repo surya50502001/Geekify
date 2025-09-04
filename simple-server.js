@@ -4,7 +4,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
-const { saveUserData, loadUserData } = require('./database');
+const userDataFile = path.join(__dirname, 'user-data.json');
 
 const app = express();
 const PORT = 3001;
@@ -224,20 +224,33 @@ app.post('/push-to-github', async (req, res) => {
 });
 
 // User data endpoints
-app.post('/save-user-data', async (req, res) => {
+app.post('/save-user-data', (req, res) => {
   try {
-    const result = await saveUserData(req.body.userId, req.body.data);
-    res.json(result);
+    let data = { users: {} };
+    if (fs.existsSync(userDataFile)) {
+      data = JSON.parse(fs.readFileSync(userDataFile, 'utf8'));
+    }
+    data.users[req.body.userId] = req.body.data;
+    fs.writeFileSync(userDataFile, JSON.stringify(data, null, 2));
+    console.log(`Saved data for user: ${req.body.userId}`);
+    res.json({ success: true });
   } catch (error) {
+    console.error('Save error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-app.get('/load-user-data/:userId', async (req, res) => {
+app.get('/load-user-data/:userId', (req, res) => {
   try {
-    const result = await loadUserData(req.params.userId);
-    res.json(result);
+    if (!fs.existsSync(userDataFile)) {
+      return res.json({ success: true, data: { likedSongs: [], playlists: [] } });
+    }
+    const data = JSON.parse(fs.readFileSync(userDataFile, 'utf8'));
+    const userData = data.users[req.params.userId] || { likedSongs: [], playlists: [] };
+    console.log(`Loaded data for user: ${req.params.userId}`, userData);
+    res.json({ success: true, data: userData });
   } catch (error) {
+    console.error('Load error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

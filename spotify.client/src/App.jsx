@@ -24,6 +24,7 @@ function App() {
   const [authId, setAuthId] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [allUserUploads, setAllUserUploads] = useState([]);
+  const [personalLibrary, setPersonalLibrary] = useState([]);
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -58,6 +59,22 @@ function App() {
     if (savedApproved) {
       setUploadedSongs(JSON.parse(savedApproved));
     }
+    
+    // Load personal library when user changes
+    const loadPersonalLibrary = () => {
+      if (currentUser) {
+        const savedLibrary = localStorage.getItem(`personalLibrary_${currentUser}`);
+        if (savedLibrary) {
+          setPersonalLibrary(JSON.parse(savedLibrary));
+        } else {
+          setPersonalLibrary([]);
+        }
+      } else {
+        setPersonalLibrary([]);
+      }
+    };
+    
+    loadPersonalLibrary();
     
     // Check for GitHub updates via Cloudflare Pages
     const currentVersion = '1.6.2'; // Update this when you make changes
@@ -322,7 +339,8 @@ function App() {
       isDarkTheme,
       sidebarOpen,
       allUserUploads,
-      uploadedSongs
+      uploadedSongs,
+      personalLibrary
     };
     sessionStorage.setItem('appState', JSON.stringify(state));
   };
@@ -342,6 +360,7 @@ function App() {
       setSidebarOpen(state.sidebarOpen ?? true);
       if (state.allUserUploads) setAllUserUploads(state.allUserUploads);
       if (state.uploadedSongs) setUploadedSongs(state.uploadedSongs);
+      if (state.personalLibrary) setPersonalLibrary(state.personalLibrary);
     }
   };
   
@@ -889,6 +908,35 @@ function App() {
                       </div>
                     </div>
                     <div style={{display: 'flex', gap: '8px'}}>
+                      {currentUser && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const isInLibrary = personalLibrary.some(s => s.title === song.title);
+                            if (isInLibrary) {
+                              const updated = personalLibrary.filter(s => s.title !== song.title);
+                              setPersonalLibrary(updated);
+                              localStorage.setItem(`personalLibrary_${currentUser}`, JSON.stringify(updated));
+                              alert('Removed from your library!');
+                            } else {
+                              const updated = [...personalLibrary, song];
+                              setPersonalLibrary(updated);
+                              localStorage.setItem(`personalLibrary_${currentUser}`, JSON.stringify(updated));
+                              alert('Added to your library!');
+                            }
+                            saveAppState();
+                          }} 
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: personalLibrary.some(s => s.title === song.title) ? getCurrentColor() : '#b3b3b3',
+                            cursor: 'pointer',
+                            padding: '8px'
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </button>
+                      )}
                       {song.file && (
                         <button 
                           onClick={(e) => {e.stopPropagation(); downloadSong(song);}} 
@@ -980,6 +1028,70 @@ function App() {
             </div>
           )}
           
+          {activeMenu === 'My Library' && (
+            <div style={{padding: '20px'}}>
+              <h3 style={{fontSize: '24px', marginBottom: '24px', color: getCurrentColor()}}>My Personal Library</h3>
+              {currentUser ? (
+                personalLibrary.length > 0 ? (
+                  <div>
+                    {personalLibrary.map((song, index) => (
+                      <div key={index} onClick={() => {setCurrentSong(allSongs.indexOf(song)); setIsPlaying(true);}} style={{
+                        background: isDarkTheme ? '#181818' : '#f0f0f0',
+                        padding: '12px 16px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        marginBottom: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px'
+                      }}>
+                        <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                        </div>
+                        <div style={{flex: 1}}>
+                          <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
+                          <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
+                        </div>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const updated = personalLibrary.filter((_, i) => i !== index);
+                            setPersonalLibrary(updated);
+                            localStorage.setItem(`personalLibrary_${currentUser}`, JSON.stringify(updated));
+                            saveAppState();
+                            alert('Removed from your library!');
+                          }} 
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#ff4444',
+                            cursor: 'pointer',
+                            padding: '8px'
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{textAlign: 'center', padding: '60px 20px'}}>
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="#666" style={{marginBottom: '16px'}}>
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <p style={{color: '#b3b3b3', fontSize: '16px'}}>No songs in your library yet</p>
+                    <p style={{color: '#666', fontSize: '14px'}}>Add songs from the main library using the star button</p>
+                  </div>
+                )
+              ) : (
+                <div style={{textAlign: 'center', padding: '60px 20px'}}>
+                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>Please login to view your personal library</p>
+                  <p style={{color: '#666', fontSize: '14px'}}>Use the login button in the top header</p>
+                </div>
+              )}
+            </div>
+          )}
+          
           {activeMenu === 'Liked' && (
             <div style={{padding: '20px'}}>
               <h3 style={{fontSize: '24px', marginBottom: '24px', color: getCurrentColor()}}>Liked Songs</h3>
@@ -1052,7 +1164,7 @@ function App() {
                       </div>
                       <div style={{display: 'flex', gap: '8px'}}>
                         <button 
-                          onClick={() => {
+                          onClick={async () => {
                             const approvedSong = {
                               title: song.title,
                               artist: song.artist || `Uploaded by ${song.uploadedBy}`,
@@ -1062,7 +1174,23 @@ function App() {
                               isServerSong: true,
                               isPending: false
                             };
-                            // Don't add to songs array, keep in uploadedSongs only
+                            
+                            // Push to GitHub
+                            try {
+                              const response = await fetch('https://8af4e83e88ce.ngrok-free.app/push-to-github', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ filename: song.filename, title: song.title })
+                              });
+                              const result = await response.json();
+                              if (result.success) {
+                                console.log('Song pushed to GitHub:', result.githubUrl);
+                                approvedSong.githubUrl = result.githubUrl;
+                              }
+                            } catch (error) {
+                              console.log('GitHub push failed:', error);
+                            }
+                            
                             setUploadedSongs(prev => {
                               const updated = [...prev, approvedSong];
                               localStorage.setItem('uploadedSongs', JSON.stringify(updated));
@@ -1074,7 +1202,7 @@ function App() {
                               return updated;
                             });
                             console.log('Song approved and moved to library:', approvedSong.title);
-                            alert('Song approved and moved to main library!');
+                            alert('Song approved, moved to library, and pushed to GitHub!');
                           }}
                           style={{background: getCurrentColor(), color: 'white', padding: '8px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px'}}
                         >

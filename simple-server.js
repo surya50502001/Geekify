@@ -172,6 +172,56 @@ app.delete('/delete/:filename', (req, res) => {
   }
 });
 
+// Push approved song to GitHub
+app.post('/push-to-github', async (req, res) => {
+  const { filename, title } = req.body;
+  const filePath = path.join(songsDir, filename);
+  
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ success: false, error: 'File not found' });
+  }
+  
+  try {
+    // Read file as base64
+    const fileContent = fs.readFileSync(filePath, { encoding: 'base64' });
+    
+    // GitHub API call (you'll need to add your token)
+    const githubToken = 'YOUR_GITHUB_TOKEN'; // Replace with your token
+    const repo = 'surya50502001/Spotify-';
+    const githubPath = filename;
+    
+    const response = await fetch(`https://api.github.com/repos/${repo}/contents/${githubPath}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `Add approved song: ${title}`,
+        content: fileContent,
+        branch: 'main'
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (response.ok) {
+      console.log(`Song pushed to GitHub: ${title}`);
+      res.json({ 
+        success: true, 
+        githubUrl: result.content.download_url,
+        message: 'Song pushed to GitHub successfully' 
+      });
+    } else {
+      console.error('GitHub API error:', result);
+      res.status(500).json({ success: false, error: 'GitHub push failed' });
+    }
+  } catch (error) {
+    console.error('GitHub push error:', error);
+    res.status(500).json({ success: false, error: 'Failed to push to GitHub' });
+  }
+});
+
 // Health check endpoint
 app.get('/status', (req, res) => {
   res.json({ success: true, status: 'Server is running' });

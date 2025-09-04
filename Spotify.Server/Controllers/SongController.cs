@@ -25,12 +25,12 @@ namespace Spotify.Server.Controllers
             }
 
             var uploads = await LoadUploads();
-            uploads.Add(new
+            uploads.Add(new UploadedSong
             {
-                filename = fileName,
-                name = song.FileName,
-                uploader = uploader,
-                uploadDate = DateTime.Now
+                Filename = fileName,
+                Name = song.FileName,
+                Uploader = uploader,
+                UploadDate = DateTime.Now
             });
             await SaveUploads(uploads);
 
@@ -64,7 +64,7 @@ namespace Spotify.Server.Controllers
                 System.IO.File.Delete(filePath);
                 
                 var uploads = await LoadUploads();
-                uploads = uploads.Where(u => u.GetProperty("filename").GetString() != filename).ToList();
+                uploads = uploads.Where(u => u.Filename != filename).ToList();
                 await SaveUploads(uploads);
                 
                 return Ok(new { success = true });
@@ -72,19 +72,27 @@ namespace Spotify.Server.Controllers
             return NotFound(new { success = false });
         }
 
-        private async Task<List<JsonElement>> LoadUploads()
+        private async Task<List<UploadedSong>> LoadUploads()
         {
             if (!System.IO.File.Exists(_uploadsFile))
-                return new List<JsonElement>();
+                return new List<UploadedSong>();
 
             var json = await System.IO.File.ReadAllTextAsync(_uploadsFile);
-            return JsonSerializer.Deserialize<List<JsonElement>>(json) ?? new List<JsonElement>();
+            return JsonSerializer.Deserialize<List<UploadedSong>>(json) ?? new List<UploadedSong>();
         }
 
-        private async Task SaveUploads(object uploads)
+        private async Task SaveUploads(List<UploadedSong> uploads)
         {
             var json = JsonSerializer.Serialize(uploads, new JsonSerializerOptions { WriteIndented = true });
             await System.IO.File.WriteAllTextAsync(_uploadsFile, json);
         }
+    }
+
+    public class UploadedSong
+    {
+        public string Filename { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Uploader { get; set; } = string.Empty;
+        public DateTime UploadDate { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-function Sidebar({ activeMenu, setActiveMenu, setSidebarOpen, sidebarOpen, getCurrentColor, isDarkTheme }) {
+function Sidebar({ activeMenu, setActiveMenu, setSidebarOpen, sidebarOpen, getCurrentColor, isDarkTheme, currentUser }) {
   return (
     <div className="sidebar" style={{width: sidebarOpen ? '240px' : '0', background: isDarkTheme ? '#000000' : '#f8f9fa', padding: sidebarOpen ? '24px 12px' : '0', borderRight: isDarkTheme ? '1px solid #282828' : '1px solid #e0e0e0', overflow: 'hidden', transition: 'width 0.3s ease, padding 0.3s ease, background-color 0.3s ease'}}>
       <div style={{marginBottom: '32px'}}>
@@ -21,6 +21,12 @@ function Sidebar({ activeMenu, setActiveMenu, setSidebarOpen, sidebarOpen, getCu
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           Liked Songs
         </div>
+        {currentUser && (
+          <div onClick={() => {setActiveMenu('Your Uploaded Songs'); setSidebarOpen(false);}} style={{marginBottom: '8px', padding: '12px 16px', cursor: 'pointer', borderRadius: '4px', background: activeMenu === 'Your Uploaded Songs' ? `${getCurrentColor()}20` : 'transparent', display: 'flex', alignItems: 'center', gap: '16px', color: activeMenu === 'Your Uploaded Songs' ? getCurrentColor() : '#b3b3b3'}}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+            Your Uploaded Songs
+          </div>
+        )}
       </nav>
     </div>
   );

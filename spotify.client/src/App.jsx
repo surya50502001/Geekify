@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import MusicPlayer from './components/MusicPlayer';
+import { validateUser, registerUser } from './People';
 
 function App() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -18,6 +19,12 @@ function App() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showAuth, setShowAuth] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const [authId, setAuthId] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [userUploadedSongs, setUserUploadedSongs] = useState([]);
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
@@ -25,6 +32,12 @@ function App() {
   const audioRef = useRef(null);
   
   useEffect(() => {
+    // Load user session
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      setCurrentUser(savedUser);
+    }
+    
     // Load theme preference
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
@@ -83,7 +96,34 @@ function App() {
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
   };
   
+  const handleAuth = () => {
+    if (authMode === 'login') {
+      const user = validateUser(authId, authPassword);
+      if (user) {
+        setCurrentUser(user.id);
+        setShowAuth(false);
+        localStorage.setItem('currentUser', user.id);
+      } else {
+        alert('Invalid credentials');
+      }
+    } else {
+      const result = registerUser(authId, authPassword);
+      if (result.success) {
+        alert('Registration successful! Please login.');
+        setAuthMode('login');
+      } else {
+        alert(result.message);
+      }
+    }
+    setAuthId('');
+    setAuthPassword('');
+  };
+
   const handleFileUpload = async (event) => {
+    if (!currentUser) {
+      setShowAuth(true);
+      return;
+    }
     const file = event.target.files[0];
     if (file && file.type.startsWith('audio/')) {
       setIsUploading(true);
@@ -104,9 +144,10 @@ function App() {
       const url = URL.createObjectURL(file);
       const newSong = {
         title: file.name.replace(/\.[^/.]+$/, ''),
-        artist: 'Uploaded by User',
+        artist: `Uploaded by ${currentUser}`,
         url: url,
-        file: file
+        file: file,
+        uploadedBy: currentUser
       };
       
       // Send to your local server
@@ -129,6 +170,7 @@ function App() {
       setUploadProgress(100);
       setTimeout(() => {
         setUploadedSongs(prev => [...prev, newSong]);
+        setUserUploadedSongs(prev => [...prev, newSong]);
         setIsUploading(false);
         setUploadProgress(0);
       }, 500);
@@ -427,6 +469,7 @@ function App() {
           sidebarOpen={sidebarOpen}
           getCurrentColor={getCurrentColor}
           isDarkTheme={isDarkTheme}
+          currentUser={currentUser}
         />
         
         {/* Main Content */}
@@ -559,6 +602,14 @@ function App() {
                   >
                     📤 Share Upload Link
                   </button>
+                  {currentUser && (
+                    <button 
+                      onClick={() => setCurrentUser(null)}
+                      style={{background: 'transparent', border: `1px solid #ff4444`, color: '#ff4444', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                    >
+                      Logout ({currentUser})
+                    </button>
+                  )}
                   <label style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}>
                     + Upload Song
                     <input type="file" accept="audio/*" onChange={handleFileUpload} style={{display: 'none'}} />
@@ -708,8 +759,99 @@ function App() {
               )}
             </div>
           )}
+          
+          {activeMenu === 'Your Uploaded Songs' && (
+            <div>
+              <h3 style={{fontSize: '20px', margin: '0 0 24px 0'}}>Your Uploaded Songs</h3>
+              {currentUser ? (
+                userUploadedSongs.length > 0 ? (
+                  <div>
+                    {userUploadedSongs.map((song, index) => (
+                      <div key={index} onClick={() => {setCurrentSong(allSongs.indexOf(song)); setIsPlaying(true);}} style={{
+                        background: '#181818',
+                        padding: '12px 16px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        marginBottom: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px'
+                      }}>
+                        <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                        </div>
+                        <div style={{flex: 1}}>
+                          <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
+                          <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{textAlign: 'center', padding: '60px 20px'}}>
+                    <p style={{color: '#b3b3b3', fontSize: '16px'}}>No songs uploaded yet</p>
+                    <p style={{color: '#666', fontSize: '14px'}}>Upload your first song in the Library section</p>
+                  </div>
+                )
+              ) : (
+                <div style={{textAlign: 'center', padding: '60px 20px'}}>
+                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>Please login to view your uploaded songs</p>
+                  <button 
+                    onClick={() => setShowAuth(true)}
+                    style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '24px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: '500', marginTop: '16px'}}
+                  >
+                    Login / Register
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
+      
+      {/* Auth Modal */}
+      {showAuth && (
+        <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000}}>
+          <div style={{background: isDarkTheme ? '#1e1e1e' : '#ffffff', padding: '32px', borderRadius: '16px', width: '400px', maxWidth: '90vw'}}>
+            <h3 style={{fontSize: '24px', marginBottom: '24px', textAlign: 'center', color: getCurrentColor()}}>{authMode === 'login' ? 'Login' : 'Register'}</h3>
+            <input 
+              type="text" 
+              placeholder="User ID"
+              value={authId}
+              onChange={(e) => setAuthId(e.target.value)}
+              style={{width: '100%', padding: '12px', marginBottom: '16px', borderRadius: '8px', border: 'none', background: '#242424', color: 'white', fontSize: '16px', outline: 'none'}}
+            />
+            <input 
+              type="password" 
+              placeholder="Password"
+              value={authPassword}
+              onChange={(e) => setAuthPassword(e.target.value)}
+              style={{width: '100%', padding: '12px', marginBottom: '24px', borderRadius: '8px', border: 'none', background: '#242424', color: 'white', fontSize: '16px', outline: 'none'}}
+              onKeyPress={(e) => e.key === 'Enter' && handleAuth()}
+            />
+            <div style={{display: 'flex', gap: '12px', justifyContent: 'center'}}>
+              <button 
+                onClick={handleAuth}
+                style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}
+              >
+                {authMode === 'login' ? 'Login' : 'Register'}
+              </button>
+              <button 
+                onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
+                style={{background: 'transparent', border: `1px solid ${getCurrentColor()}`, color: getCurrentColor(), padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}
+              >
+                {authMode === 'login' ? 'Register' : 'Login'}
+              </button>
+              <button 
+                onClick={() => setShowAuth(false)}
+                style={{background: 'transparent', border: '1px solid #666', color: '#666', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Update Notification */}
       {showUpdateNotification && (

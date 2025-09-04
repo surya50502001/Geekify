@@ -205,39 +205,9 @@ function App() {
       setOurSongs(JSON.parse(savedOurSongs));
     }
     
-    // Check for GitHub updates via Cloudflare Pages
-    const currentVersion = '1.6.2'; // Update this when you make changes
-    const checkForUpdates = async () => {
-      try {
-        const lastCheck = localStorage.getItem('lastUpdateCheck');
-        const now = Date.now();
-        
-        if (!lastCheck || now - parseInt(lastCheck) > 60000) { // Check every minute
-          // Check Cloudflare Pages deployment for updates
-          const response = await fetch('https://geekifyzz.pages.dev/', { 
-            method: 'HEAD',
-            cache: 'no-cache',
-            headers: { 'Cache-Control': 'no-cache' }
-          });
-          
-          const deploymentId = response.headers.get('cf-ray') || response.headers.get('etag');
-          const storedDeployment = localStorage.getItem('lastDeployment');
-          
-          if (storedDeployment && deploymentId && deploymentId !== storedDeployment) {
-            setUpdateAvailable(true);
-          }
-          
-          if (deploymentId) localStorage.setItem('lastDeployment', deploymentId);
-          localStorage.setItem('lastUpdateCheck', now.toString());
-        }
-      } catch (error) {
-        console.log('Update check failed');
-      }
-    };
-    
-    // Check for updates every minute
-    const updateInterval = setInterval(checkForUpdates, 60000);
-    checkForUpdates(); // Initial check
+    // Update check disabled
+    // const checkForUpdates = async () => {};
+    // const updateInterval = null;
     
     // Simulate loading time
     const timer = setTimeout(() => {
@@ -269,7 +239,6 @@ function App() {
     
     return () => {
       clearTimeout(timer);
-      clearInterval(updateInterval);
       clearInterval(saveInterval);
       clearInterval(serverCheckInterval);
       clearInterval(playlistInterval);
@@ -844,7 +813,7 @@ function App() {
         <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #000000 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '120px', transition: 'background 0.3s ease'}}>
           <div className="header-section" style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px'}}>
             <div className="header-logo" style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'}}>
-              <svg width="clamp(16, 2.5vw, 20)" height="clamp(12, 2vw, 16)" viewBox="0 0 100 100" fill={getCurrentColor()}>
+              <svg width="clamp(12, 1.5vw, 16)" height="clamp(9, 1.2vw, 12)" viewBox="0 0 100 100" fill={getCurrentColor()}>
                 <circle cx="50" cy="50" r="45" fill="none" stroke={getCurrentColor()} strokeWidth="3"/>
                 <circle cx="50" cy="50" r="35" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
                 <circle cx="50" cy="50" r="25" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
@@ -852,13 +821,13 @@ function App() {
                 <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
               </svg>
               <div style={{
-                fontSize: 'clamp(8px, 1.5vw, 10px)',
+                fontSize: 'clamp(6px, 1vw, 8px)',
                 fontWeight: 'bold',
                 color: getCurrentColor(),
                 textShadow: `0 0 5px ${getCurrentColor()}, 0 0 10px ${getCurrentColor()}, 0 0 15px ${getCurrentColor()}`,
                 letterSpacing: '1px',
                 fontFamily: 'Arial, sans-serif',
-                width: 'clamp(24px, 4vw, 32px)',
+                width: 'clamp(18px, 3vw, 24px)',
                 textAlign: 'center'
               }}>GEEKIFY</div>
             </div>
@@ -1585,63 +1554,7 @@ function App() {
         </div>
       )}
       
-      {/* GitHub Update Notification */}
-      {updateAvailable && (
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 2001,
-          background: isDarkTheme ? '#1e1e1e' : '#ffffff',
-          border: `2px solid ${getCurrentColor()}`,
-          borderRadius: '16px',
-          padding: '24px',
-          boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
-          maxWidth: '400px',
-          textAlign: 'center',
-          animation: 'slideIn 0.3s ease'
-        }}>
-          <div style={{marginBottom: '16px'}}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill={getCurrentColor()} style={{marginBottom: '12px'}}>
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            <h3 style={{margin: 0, fontSize: '20px', color: getCurrentColor()}}>Code Updated!</h3>
-          </div>
-          <p style={{margin: '0 0 20px 0', fontSize: '16px', color: isDarkTheme ? '#b3b3b3' : '#666', lineHeight: '1.5'}}>New changes have been pushed to GitHub. Refresh to get the latest features and improvements.</p>
-          <div style={{display: 'flex', gap: '12px', justifyContent: 'center'}}>
-            <button 
-              onClick={handleRefresh}
-              style={{
-                background: getCurrentColor(),
-                border: 'none',
-                borderRadius: '8px',
-                padding: '12px 24px',
-                color: 'white',
-                fontSize: '16px',
-                cursor: 'pointer',
-                fontWeight: '600'
-              }}
-            >
-              🔄 Refresh Now
-            </button>
-            <button 
-              onClick={dismissUpdate}
-              style={{
-                background: 'transparent',
-                border: `1px solid ${isDarkTheme ? '#444' : '#ddd'}`,
-                borderRadius: '8px',
-                padding: '12px 24px',
-                color: isDarkTheme ? '#b3b3b3' : '#666',
-                fontSize: '16px',
-                cursor: 'pointer'
-              }}
-            >
-              Later
-            </button>
-          </div>
-        </div>
-      )}
+
       
       {/* Bottom Player */}
       <MusicPlayer 

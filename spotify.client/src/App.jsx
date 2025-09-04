@@ -194,6 +194,7 @@ function App() {
               console.log('Song uploaded to server and pending approval:', newSong.title);
               setIsUploading(false);
               setUploadProgress(0);
+              saveAppState(); // Save immediately after upload
               alert('Song uploaded to server! Waiting for admin approval.');
             }, 500);
             return;
@@ -225,6 +226,7 @@ function App() {
             console.log('Song stored locally and pending approval:', newSong.title);
             setIsUploading(false);
             setUploadProgress(0);
+            saveAppState(); // Save immediately after upload
             alert('Song uploaded locally! Waiting for admin approval.');
           }, 500);
         }
@@ -241,7 +243,7 @@ function App() {
         });
       }, 200);
       
-      audio.src = url;
+      // audio.src already set above
     }
   };
   
@@ -278,7 +280,9 @@ function App() {
       likedSongs: Array.from(likedSongs),
       comments,
       isDarkTheme,
-      sidebarOpen
+      sidebarOpen,
+      allUserUploads,
+      uploadedSongs
     };
     sessionStorage.setItem('appState', JSON.stringify(state));
   };
@@ -296,6 +300,8 @@ function App() {
       setComments(state.comments || []);
       setIsDarkTheme(state.isDarkTheme ?? true);
       setSidebarOpen(state.sidebarOpen ?? true);
+      if (state.allUserUploads) setAllUserUploads(state.allUserUploads);
+      if (state.uploadedSongs) setUploadedSongs(state.uploadedSongs);
     }
   };
   
@@ -377,28 +383,6 @@ function App() {
         console.log('Could not fetch uploaded songs:', error);
         // Fallback: show locally uploaded songs for testing
         console.log('Using local fallback songs');
-      }
-    };
-    
-    fetchUploadedSongs();
-    // Refresh uploaded songs every 30 seconds
-    const interval = setInterval(fetchUploadedSongs, 30000);
-    
-    return () => clearInterval(interval);
-  }, []);7bf6cd2efd.ngrok-free.app/songs');
-        const uploadedFiles = await response.json();
-        if (uploadedFiles.success) {
-          const serverSongs = uploadedFiles.songs.map(song => ({
-            title: song.name.replace(/\.[^/.]+$/, ''),
-            artist: `Uploaded by ${song.uploader || 'User'}`,
-            url: `https://2d7bf6cd2efd.ngrok-free.app/play/${song.filename}`,
-            uploadedBy: song.uploader,
-            isServerSong: true
-          }));
-          setAllUserUploads(serverSongs);
-        }
-      } catch (error) {
-        console.log('Could not fetch uploaded songs:', error);
       }
     };
     

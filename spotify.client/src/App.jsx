@@ -861,76 +861,31 @@ function App() {
           </div>
           
           {activeMenu === 'Home' && (
-            <div style={{padding: '16px'}}>
-              {/* Category Pills */}
-              <div style={{display: 'flex', gap: '8px', marginBottom: '20px', overflowX: 'auto'}}>
-                <div style={{background: getCurrentColor(), color: 'white', padding: '8px 20px', borderRadius: '25px', fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap', minWidth: 'fit-content'}}>All</div>
-                <div style={{background: '#2a2a2a', color: '#fff', padding: '8px 20px', borderRadius: '25px', fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap', cursor: 'pointer', minWidth: 'fit-content'}}>Music</div>
-                <div style={{background: '#2a2a2a', color: '#fff', padding: '8px 20px', borderRadius: '25px', fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap', cursor: 'pointer', minWidth: 'fit-content'}}>Podcasts</div>
-              </div>
+            <div style={{textAlign: 'center', padding: '60px 20px'}}>
+              <h2 style={{fontSize: '32px', fontWeight: '300', margin: '0 0 16px 0', color: getCurrentColor()}}>Welcome to Geekify</h2>
+              <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '40px'}}>Your music streaming experience starts here</p>
               
-              {/* Quick Access Grid */}
-              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px', marginBottom: '28px'}}>
-                <div onClick={() => setActiveMenu('Liked Songs')} style={{background: 'linear-gradient(135deg, #450af5, #8e2de2)', borderRadius: '6px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', minHeight: '64px'}}>
-                  <div style={{width: '40px', height: '40px', background: 'rgba(255,255,255,0.2)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0}}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                  </div>
-                  <span style={{color: 'white', fontSize: '14px', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis'}}>Liked Songs</span>
+              {allSongs.length > 0 && (
+                <div style={{background: '#181818', padding: '20px', borderRadius: '12px', maxWidth: '400px', margin: '0 auto'}}>
+                  <h3 style={{fontSize: '18px', marginBottom: '12px', color: '#fff'}}>{allSongs[currentSong]?.title || 'No Song Selected'}</h3>
+                  <p style={{color: '#b3b3b3', fontSize: '14px', marginBottom: '16px'}}>{allSongs[currentSong]?.artist || ''}</p>
+                  <button 
+                    onClick={() => {
+                      if (allSongs[currentSong]) {
+                        setIsPlaying(!isPlaying);
+                        if (!isPlaying) {
+                          audioRef.current?.play();
+                        } else {
+                          audioRef.current?.pause();
+                        }
+                      }
+                    }}
+                    style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '24px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                  >
+                    {isPlaying ? 'Pause' : 'Play'}
+                  </button>
                 </div>
-                
-                <div onClick={() => setActiveMenu('Our Songs')} style={{background: '#2a2a2a', borderRadius: '6px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', minHeight: '64px'}}>
-                  <div style={{width: '40px', height: '40px', background: getCurrentColor(), borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0}}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                  </div>
-                  <span style={{color: 'white', fontSize: '14px', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis'}}>Our Songs</span>
-                </div>
-                
-                <div onClick={() => setActiveMenu('Your Library')} style={{background: '#2a2a2a', borderRadius: '6px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', minHeight: '64px'}}>
-                  <div style={{width: '40px', height: '40px', background: '#ff6b35', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0}}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M14.5 2.134a1 1 0 0 1 1 0l6 3.464a1 1 0 0 1 .5.866V21a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6.464a1 1 0 0 1 .5-.866l6-3.464a1 1 0 0 1 1 0L12 3.732l2.5-1.598zM4 7.732V20h16V7.732l-5-2.887V8a1 1 0 0 1-2 0V4.845L9 7.732z"/></svg>
-                  </div>
-                  <span style={{color: 'white', fontSize: '14px', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis'}}>Your Library</span>
-                </div>
-                
-                <div onClick={() => setActiveMenu('Upload')} style={{background: '#2a2a2a', borderRadius: '6px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', minHeight: '64px'}}>
-                  <div style={{width: '40px', height: '40px', background: '#e22856', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0}}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
-                  </div>
-                  <span style={{color: 'white', fontSize: '14px', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis'}}>Upload</span>
-                </div>
-              </div>
-              
-              {/* Recently Played */}
-              <div style={{marginBottom: '28px'}}>
-                <h2 style={{fontSize: '22px', fontWeight: '700', marginBottom: '16px', color: 'white'}}>Recently played</h2>
-                <div style={{display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px'}}>
-                  {allSongs.slice(0, 6).map((song, index) => (
-                    <div key={index} onClick={() => {setCurrentSong(index); setIsPlaying(true);}} style={{minWidth: '140px', cursor: 'pointer', flexShrink: 0}}>
-                      <div style={{width: '140px', height: '140px', background: `linear-gradient(135deg, ${songColors[index % songColors.length]}, ${songColors[(index + 1) % songColors.length]})`, borderRadius: '8px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
-                      </div>
-                      <h3 style={{fontSize: '13px', fontWeight: '600', marginBottom: '2px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.title}</h3>
-                      <p style={{fontSize: '11px', color: '#a7a7a7', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.artist}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Charts */}
-              <div>
-                <h2 style={{fontSize: '22px', fontWeight: '700', marginBottom: '16px', color: 'white'}}>Charts</h2>
-                <div style={{display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px'}}>
-                  {allSongs.slice(0, 4).map((song, index) => (
-                    <div key={index} onClick={() => {setCurrentSong(index); setIsPlaying(true);}} style={{minWidth: '140px', cursor: 'pointer', flexShrink: 0}}>
-                      <div style={{width: '140px', height: '140px', background: `linear-gradient(135deg, ${songColors[(index + 2) % songColors.length]}, ${songColors[(index + 3) % songColors.length]})`, borderRadius: '8px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
-                      </div>
-                      <h3 style={{fontSize: '13px', fontWeight: '600', marginBottom: '2px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.title}</h3>
-                      <p style={{fontSize: '11px', color: '#a7a7a7', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.artist}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
           )}
           

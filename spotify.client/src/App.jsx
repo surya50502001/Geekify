@@ -180,7 +180,7 @@ function App() {
       const audio = new Audio();
       audio.src = URL.createObjectURL(file);
       
-      audio.onloadedmetadata = async () => {
+      const handleUpload = async () => {
         // Upload to server immediately
         const formData = new FormData();
         formData.append('song', file);
@@ -257,6 +257,23 @@ function App() {
         }
       };
       
+      // Set timeout for metadata loading
+      const metadataTimeout = setTimeout(() => {
+        console.log('Metadata loading timeout, proceeding with upload');
+        handleUpload();
+      }, 3000);
+      
+      audio.onloadedmetadata = () => {
+        clearTimeout(metadataTimeout);
+        handleUpload();
+      };
+      
+      audio.onerror = () => {
+        clearTimeout(metadataTimeout);
+        console.log('Audio error, proceeding with upload');
+        handleUpload();
+      };
+      
       // Simulate progress while loading metadata
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
@@ -268,7 +285,8 @@ function App() {
         });
       }, 200);
       
-      // audio.src already set above
+      // Load audio metadata
+      audio.load();
     }
   };
   

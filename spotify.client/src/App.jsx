@@ -384,7 +384,7 @@ function App() {
   };
   
   useEffect(() => {
-    // Load GitHub songs
+    // Load GitHub songs into main library
     fetch('https://api.github.com/repos/surya50502001/Spotify-/contents')
       .then(res => res.json())
       .then(files => {
@@ -392,9 +392,10 @@ function App() {
         const songList = mp3Files.map(file => ({
           title: file.name.replace('.mp3', '').replace(/%20/g, ' '),
           artist: 'Unknown Artist',
-          url: file.download_url
+          url: file.download_url,
+          isGitHubSong: true
         }));
-        setSongs(songList);
+        setUploadedSongs(prev => [...prev, ...songList]);
       })
       .catch(err => console.error('Error loading songs:', err));
     
@@ -890,20 +891,43 @@ function App() {
                         <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
                       </div>
                     </div>
-                    {song.file && (
-                      <button 
-                        onClick={(e) => {e.stopPropagation(); downloadSong(song);}} 
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: getCurrentColor(),
-                          cursor: 'pointer',
-                          padding: '8px'
-                        }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                      </button>
-                    )}
+                    <div style={{display: 'flex', gap: '8px'}}>
+                      {song.file && (
+                        <button 
+                          onClick={(e) => {e.stopPropagation(); downloadSong(song);}} 
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: getCurrentColor(),
+                            cursor: 'pointer',
+                            padding: '8px'
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                        </button>
+                      )}
+                      {!song.isGitHubSong && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const updatedSongs = allSongs.filter((_, i) => i !== index);
+                            setUploadedSongs(updatedSongs.filter(s => !songs.includes(s)));
+                            localStorage.setItem('uploadedSongs', JSON.stringify(updatedSongs.filter(s => !songs.includes(s))));
+                            saveAppState();
+                            alert('Song deleted from library!');
+                          }} 
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#ff4444',
+                            cursor: 'pointer',
+                            padding: '8px'
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )) : <div>Loading songs...</div>}
               </div>
@@ -1081,7 +1105,7 @@ function App() {
                               isServerSong: true,
                               isPending: false
                             };
-                            setSongs(prev => [...prev, approvedSong]);
+                            // Don't add to songs array, keep in uploadedSongs only
                             setUploadedSongs(prev => {
                               const updated = [...prev, approvedSong];
                               localStorage.setItem('uploadedSongs', JSON.stringify(updated));

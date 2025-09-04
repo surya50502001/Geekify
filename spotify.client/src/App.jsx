@@ -61,29 +61,29 @@ function App() {
       setUploadedSongs(JSON.parse(savedApproved));
     }
     
-    // Check for GitHub updates
-    const currentVersion = '1.6.1'; // Update this when you make changes
+    // Check for GitHub updates via Cloudflare Pages
+    const currentVersion = '1.6.2'; // Update this when you make changes
     const checkForUpdates = async () => {
       try {
-        // Check if app files have been modified (simulate GitHub push detection)
         const lastCheck = localStorage.getItem('lastUpdateCheck');
         const now = Date.now();
         
         if (!lastCheck || now - parseInt(lastCheck) > 60000) { // Check every minute
-          // Simulate checking for updates (replace with actual GitHub API call)
-          const response = await fetch(window.location.href, { 
+          // Check Cloudflare Pages deployment for updates
+          const response = await fetch('https://geekifyzz.pages.dev/', { 
             method: 'HEAD',
-            cache: 'no-cache'
+            cache: 'no-cache',
+            headers: { 'Cache-Control': 'no-cache' }
           });
           
-          const lastModified = response.headers.get('last-modified');
-          const storedModified = localStorage.getItem('lastModified');
+          const deploymentId = response.headers.get('cf-ray') || response.headers.get('etag');
+          const storedDeployment = localStorage.getItem('lastDeployment');
           
-          if (storedModified && lastModified !== storedModified) {
+          if (storedDeployment && deploymentId && deploymentId !== storedDeployment) {
             setUpdateAvailable(true);
           }
           
-          localStorage.setItem('lastModified', lastModified);
+          if (deploymentId) localStorage.setItem('lastDeployment', deploymentId);
           localStorage.setItem('lastUpdateCheck', now.toString());
         }
       } catch (error) {

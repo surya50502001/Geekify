@@ -3,6 +3,7 @@ const multer = require('multer');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
 
 const app = express();
 const PORT = 3001;
@@ -33,29 +34,79 @@ const upload = multer({ storage });
 // Store upload metadata (in production, use a database)
 let uploadedSongs = [];
 
-// Upload endpoint
+// Upload endpoint with AMR to MP3 conversion
 app.post('/upload', upload.single('song'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, error: 'No file uploaded' });
   }
   
   const uploader = req.body.uploader || 'Anonymous';
-  const songData = {
-    filename: req.file.filename,
-    name: req.file.originalname,
-    uploader: uploader,
-    uploadDate: new Date()
-  };
+  const inputPath = req.file.path;
+  const isAMR = req.file.originalname.toLowerCase().includes('amr') || req.file.mimetype === 'audio/amr';
   
-  uploadedSongs.push(songData);
-  console.log(`Song uploaded: ${req.file.originalname} by ${uploader}`);
-  
-  res.json({ 
-    success: true, 
-    originalName: req.file.originalname,
-    filename: req.file.filename,
-    uploader: uploader
-  });
+  if (isAMR) {
+    // Convert AMR to MP3
+    const mp3Filename = req.file.filename.replace(/\.[^/.]+$/, '') + '.mp3';
+    const outputPath = path.join(songsDir, mp3Filename);
+    
+    exec(`ffmpeg -i "${inputPath}" -ar 44100 -ac 2 -b:a 128k "${outputPath}"`, (error) => {
+      if (error) {
+        console.error('Conversion error:', error);
+        // Keep original file if conversion fails
+        const songData = {
+          filename: req.file.filename,
+          name: req.file.originalname,
+          uploader: uploader,
+          uploadDate: new Date()
+        };
+        uploadedSongs.push(songData);
+        return res.json({ 
+          success: true, 
+          originalName: req.file.originalname,
+          filename: req.file.filename,
+          uploader: uploader,
+          converted: false
+        });
+      }
+      
+      // Delete original AMR file and use MP3
+      fs.unlinkSync(inputPath);
+      const songData = {
+        filename: mp3Filename,
+        name: req.file.originalname.replace(/\.[^/.]+$/, '') + '.mp3',
+        uploader: uploader,
+        uploadDate: new Date()
+      };
+      uploadedSongs.push(songData);
+      console.log(`AMR converted to MP3: ${req.file.originalname} -> ${mp3Filename}`);
+      
+      res.json({ 
+        success: true, 
+        originalName: req.file.originalname,
+        filename: mp3Filename,
+        uploader: uploader,
+        converted: true
+      });
+    });
+  } else {
+    // Non-AMR files, process normally
+    const songData = {
+      filename: req.file.filename,
+      name: req.file.originalname,
+      uploader: uploader,
+      uploadDate: new Date()
+    };
+    uploadedSongs.push(songData);
+    console.log(`Song uploaded: ${req.file.originalname} by ${uploader}`);
+    
+    res.json({ 
+      success: true, 
+      originalName: req.file.originalname,
+      filename: req.file.filename,
+      uploader: uploader,
+      converted: false
+    });
+  }
 });
 
 // Get all uploaded songs

@@ -46,6 +46,17 @@ function App() {
       document.body.className = savedTheme === 'dark' ? 'dark-theme' : '';
     }
     
+    // Load saved uploads and approved songs
+    const savedUploads = localStorage.getItem('allUserUploads');
+    if (savedUploads) {
+      setAllUserUploads(JSON.parse(savedUploads));
+    }
+    
+    const savedApproved = localStorage.getItem('uploadedSongs');
+    if (savedApproved) {
+      setUploadedSongs(JSON.parse(savedApproved));
+    }
+    
     // Check for updates
     const currentVersion = '1.5.0'; // Update this when you make changes
     const lastVersion = localStorage.getItem('appVersion');
@@ -140,19 +151,22 @@ function App() {
         formData.append('song', file);
         formData.append('uploader', currentUser);
         
+        // Try server upload first, fallback to local storage
+        let serverUploaded = false;
         try {
-          const response = await fetch('https://2d7bf6cd2efd.ngrok-free.app/upload', {
+          const response = await fetch('https://8af4e83e88ce.ngrok-free.app/upload', {
             method: 'POST',
             body: formData
           });
           const result = await response.json();
           if (result.success) {
-            console.log('Song saved to your local server:', result.originalName);
+            console.log('Song saved to your local server via ngrok:', result.originalName);
+            serverUploaded = true;
             
             const newSong = {
               title: file.name.replace(/\.[^/.]+$/, ''),
               artist: `Uploaded by ${currentUser}`,
-              url: `https://2d7bf6cd2efd.ngrok-free.app/play/${result.filename}`,
+              url: `https://8af4e83e88ce.ngrok-free.app/play/${result.filename}`,
               uploadedBy: currentUser,
               duration: audio.duration,
               filename: result.filename,
@@ -162,18 +176,47 @@ function App() {
             
             setUploadProgress(100);
             setTimeout(() => {
-              setAllUserUploads(prev => [...prev, newSong]);
+              setAllUserUploads(prev => {
+                const updated = [...prev, newSong];
+                localStorage.setItem('allUserUploads', JSON.stringify(updated));
+                return updated;
+              });
               console.log('Song uploaded to server and pending approval:', newSong.title);
               setIsUploading(false);
               setUploadProgress(0);
-              alert('Song uploaded successfully! Waiting for admin approval.');
+              alert('Song uploaded to server! Waiting for admin approval.');
             }, 500);
+            return;
           }
         } catch (error) {
-          console.log('Server not available - upload failed');
-          alert('Upload failed - server not running');
-          setIsUploading(false);
-          setUploadProgress(0);
+          console.log('Server not available, using local storage only');
+        }
+        
+        // Fallback: Store locally without server
+        if (!serverUploaded) {
+          const newSong = {
+            title: file.name.replace(/\.[^/.]+$/, ''),
+            artist: `Uploaded by ${currentUser}`,
+            url: URL.createObjectURL(file),
+            uploadedBy: currentUser,
+            duration: audio.duration,
+            file: file,
+            isServerSong: false,
+            isPending: true
+          };
+          
+          setUploadProgress(100);
+          setTimeout(() => {
+            setAllUserUploads(prev => {
+              const updated = [...prev, newSong];
+              localStorage.setItem('allUserUploads', JSON.stringify(updated));
+              return updated;
+            });
+            console.log('Song stored locally and pending approval:', newSong.title);
+            setIsUploading(false);
+            setUploadProgress(0);
+            alert('Song uploaded locally! Waiting for admin approval.');
+          }, 500);
         }
       };
       
@@ -256,7 +299,7 @@ function App() {
     // Load uploaded songs from server
     const fetchUploadedSongs = async () => {
       try {
-        const response = await fetch('https://2d7bf6cd2efd.ngrok-free.app/songs');
+        const response = await fetch('https://8af4e83e88ce.ngrok-free.app/songs');
         const uploadedFiles = await response.json();
         console.log('Server response:', uploadedFiles);
         if (uploadedFiles.success) {
@@ -943,8 +986,16 @@ function App() {
                               isPending: false
                             };
                             setSongs(prev => [...prev, approvedSong]);
-                            setUploadedSongs(prev => [...prev, approvedSong]);
-                            setAllUserUploads(prev => prev.filter((_, i) => i !== index));
+                            setUploadedSongs(prev => {
+                              const updated = [...prev, approvedSong];
+                              localStorage.setItem('uploadedSongs', JSON.stringify(updated));
+                              return updated;
+                            });
+                            setAllUserUploads(prev => {
+                              const updated = prev.filter((_, i) => i !== index);
+                              localStorage.setItem('allUserUploads', JSON.stringify(updated));
+                              return updated;
+                            });
                             console.log('Song approved and moved to library:', approvedSong.title);
                             alert('Song approved and moved to main library!');
                           }}
@@ -954,7 +1005,11 @@ function App() {
                         </button>
                         <button 
                           onClick={() => {
-                            setAllUserUploads(prev => prev.filter((_, i) => i !== index));
+                            setAllUserUploads(prev => {
+                              const updated = prev.filter((_, i) => i !== index);
+                              localStorage.setItem('allUserUploads', JSON.stringify(updated));
+                              return updated;
+                            });
                             alert('Song rejected and removed.');
                           }}
                           style={{background: '#ff4444', color: 'white', padding: '8px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px'}}

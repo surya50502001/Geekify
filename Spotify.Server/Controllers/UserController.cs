@@ -66,6 +66,8 @@ namespace Spotify.Server.Controllers
         {
             try
             {
+                Console.WriteLine($"Saving global playlist: {request.Playlist.Name} by {request.Playlist.CreatedBy}");
+                
                 var playlists = new List<GlobalPlaylist>();
                 
                 if (System.IO.File.Exists(_globalPlaylistsFile))
@@ -77,11 +79,15 @@ namespace Spotify.Server.Controllers
                 playlists.Add(request.Playlist);
                 var jsonString = JsonSerializer.Serialize(playlists, new JsonSerializerOptions { WriteIndented = true });
                 await System.IO.File.WriteAllTextAsync(_globalPlaylistsFile, jsonString);
+                
+                Console.WriteLine($"Global playlist saved to: {_globalPlaylistsFile}");
+                Console.WriteLine($"Total playlists: {playlists.Count}");
 
                 return Ok(new { success = true });
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error saving global playlist: {ex.Message}");
                 return StatusCode(500, new { success = false, error = ex.Message });
             }
         }
@@ -91,18 +97,24 @@ namespace Spotify.Server.Controllers
         {
             try
             {
+                Console.WriteLine($"Loading global playlists from: {_globalPlaylistsFile}");
+                
                 if (!System.IO.File.Exists(_globalPlaylistsFile))
                 {
+                    Console.WriteLine("Global playlists file does not exist, returning empty list");
                     return Ok(new { success = true, playlists = new List<GlobalPlaylist>() });
                 }
 
                 var json = await System.IO.File.ReadAllTextAsync(_globalPlaylistsFile);
                 var playlists = JsonSerializer.Deserialize<List<GlobalPlaylist>>(json) ?? new List<GlobalPlaylist>();
+                
+                Console.WriteLine($"Loaded {playlists.Count} global playlists");
 
                 return Ok(new { success = true, playlists });
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error loading global playlists: {ex.Message}");
                 return StatusCode(500, new { success = false, error = ex.Message });
             }
         }

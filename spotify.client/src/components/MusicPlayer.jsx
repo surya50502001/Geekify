@@ -5,6 +5,8 @@ function MusicPlayer({
   currentTime, 
   duration, 
   userData,
+  setUserData,
+  saveAppState,
   audioRef,
   getCurrentColor,
   formatTime,
@@ -48,6 +50,31 @@ function MusicPlayer({
             <button onClick={toggleLike} style={{background: 'transparent', border: 'none', color: userData && allSongs[currentSong] && userData.isSongLiked(allSongs[currentSong]) ? getCurrentColor() : '#b3b3b3', cursor: 'pointer', padding: '8px', transition: 'color 0.3s ease'}}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
             </button>
+          )}
+          {userData && userData.playlists.length > 0 && (
+            <select 
+              onChange={(e) => {
+                if (e.target.value && allSongs[currentSong]) {
+                  userData.addToPlaylist(parseInt(e.target.value), allSongs[currentSong]);
+                  setUserData({...userData});
+                  saveAppState();
+                  e.target.value = '';
+                }
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#b3b3b3',
+                cursor: 'pointer',
+                fontSize: '16px',
+                padding: '4px'
+              }}
+            >
+              <option value="" style={{background: '#333', color: '#fff'}}>+</option>
+              {userData.playlists.map(playlist => (
+                <option key={playlist.id} value={playlist.id} style={{background: '#333', color: '#fff'}}>{playlist.name}</option>
+              ))}
+            </select>
           )}
         </div>
         

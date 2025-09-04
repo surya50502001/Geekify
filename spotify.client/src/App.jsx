@@ -965,22 +965,22 @@ function App() {
                             if (e.target.value) {
                               userData.addToPlaylist(parseInt(e.target.value), song);
                               setUserData({...userData});
-                              alert('Added to playlist!');
+                              saveAppState();
                               e.target.value = '';
                             }
                           }}
                           style={{
-                            background: '#333',
+                            background: 'transparent',
                             border: 'none',
                             color: '#b3b3b3',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px'
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                            padding: '8px'
                           }}
                         >
-                          <option value="">+ Playlist</option>
+                          <option value="" style={{background: '#333', color: '#fff'}}>+</option>
                           {userData.playlists.map(playlist => (
-                            <option key={playlist.id} value={playlist.id}>{playlist.name}</option>
+                            <option key={playlist.id} value={playlist.id} style={{background: '#333', color: '#fff'}}>{playlist.name}</option>
                           ))}
                         </select>
                       )}
@@ -1502,6 +1502,8 @@ function App() {
         currentTime={currentTime}
         duration={duration}
         userData={userData}
+        setUserData={setUserData}
+        saveAppState={saveAppState}
         audioRef={audioRef}
         getCurrentColor={getCurrentColor}
         formatTime={formatTime}

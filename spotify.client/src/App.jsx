@@ -992,6 +992,43 @@ function App() {
         playNext={playNext}
         toggleLike={toggleLike}
       />
+      
+      {/* Login Button - Bottom Right */}
+      {!currentUser && (
+        <button 
+          onClick={() => setShowAuth(true)}
+          style={{
+            position: 'fixed',
+            bottom: '100px',
+            right: '20px',
+            background: getCurrentColor(),
+            border: 'none',
+            borderRadius: '50px',
+            padding: '12px 20px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = 'scale(1)';
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M12 13C10.89 13 10 13.89 10 15V19H14V15C14 13.89 13.11 13 12 13Z"/>
+          </svg>
+          Login
+        </button>
+      )}
     </div>
   );
 }

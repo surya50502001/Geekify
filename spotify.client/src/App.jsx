@@ -29,6 +29,7 @@ function App() {
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
   const [spinnerColor, setSpinnerColor] = useState('#1db954');
   const audioRef = useRef(null);
   
@@ -57,38 +58,39 @@ function App() {
       setUploadedSongs(JSON.parse(savedApproved));
     }
     
-    // Check for updates
-    const currentVersion = '1.5.0'; // Update this when you make changes
-    const lastVersion = localStorage.getItem('appVersion');
-    const notifiedVersion = localStorage.getItem('notifiedVersion');
-    
-    // Show notification only if version changed and user hasn't been notified
-    if (lastVersion && lastVersion !== currentVersion && notifiedVersion !== currentVersion) {
-      setShowUpdateNotification(true);
-    } else if (!lastVersion && notifiedVersion !== currentVersion) {
-      setTimeout(() => setShowUpdateNotification(true), 5000);
-    }
-    localStorage.setItem('appVersion', currentVersion);
-    
-    // Real-time update checker
+    // Check for GitHub updates
+    const currentVersion = '1.6.1'; // Update this when you make changes
     const checkForUpdates = async () => {
       try {
-        const response = await fetch('/version.json?' + Date.now());
-        const data = await response.json();
-        if (data.version !== currentVersion) {
-          setShowUpdateNotification(true);
+        // Check if app files have been modified (simulate GitHub push detection)
+        const lastCheck = localStorage.getItem('lastUpdateCheck');
+        const now = Date.now();
+        
+        if (!lastCheck || now - parseInt(lastCheck) > 60000) { // Check every minute
+          // Simulate checking for updates (replace with actual GitHub API call)
+          const response = await fetch(window.location.href, { 
+            method: 'HEAD',
+            cache: 'no-cache'
+          });
+          
+          const lastModified = response.headers.get('last-modified');
+          const storedModified = localStorage.getItem('lastModified');
+          
+          if (storedModified && lastModified !== storedModified) {
+            setUpdateAvailable(true);
+          }
+          
+          localStorage.setItem('lastModified', lastModified);
+          localStorage.setItem('lastUpdateCheck', now.toString());
         }
       } catch (error) {
-        // Fallback: check every 30 seconds for changes
-        const stored = localStorage.getItem('appVersion');
-        if (stored !== currentVersion) {
-          setShowUpdateNotification(true);
-        }
+        console.log('Update check failed');
       }
     };
     
-    // Check for updates every 30 seconds
-    const updateInterval = setInterval(checkForUpdates, 30000);
+    // Check for updates every minute
+    const updateInterval = setInterval(checkForUpdates, 60000);
+    checkForUpdates(); // Initial check
     
     // Simulate loading time
     const timer = setTimeout(() => {
@@ -256,6 +258,16 @@ function App() {
       a.click();
       document.body.removeChild(a);
     }
+  };
+  
+  const handleRefresh = () => {
+    setUpdateAvailable(false);
+    window.location.reload();
+  };
+  
+  const dismissUpdate = () => {
+    setUpdateAvailable(false);
+    localStorage.setItem('updateDismissed', Date.now().toString());
   };
   
   const allSongs = [...songs, ...uploadedSongs];
@@ -1082,59 +1094,55 @@ function App() {
         </div>
       )}
       
-      {/* Update Notification */}
-      {showUpdateNotification && (
+      {/* GitHub Update Notification */}
+      {updateAvailable && (
         <div style={{
           position: 'fixed',
-          top: '80px',
-          right: '20px',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
           zIndex: 2001,
           background: isDarkTheme ? '#1e1e1e' : '#ffffff',
           border: `2px solid ${getCurrentColor()}`,
-          borderRadius: '12px',
-          padding: '16px 20px',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-          maxWidth: '300px',
+          borderRadius: '16px',
+          padding: '24px',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
+          maxWidth: '400px',
+          textAlign: 'center',
           animation: 'slideIn 0.3s ease'
         }}>
-          <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px'}}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill={getCurrentColor()}>
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v-6h-2v6zm0-8h2V7h-2v2z"/>
+          <div style={{marginBottom: '16px'}}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill={getCurrentColor()} style={{marginBottom: '12px'}}>
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
-            <h4 style={{margin: 0, fontSize: '16px', color: getCurrentColor()}}>Update Available!</h4>
+            <h3 style={{margin: 0, fontSize: '20px', color: getCurrentColor()}}>Code Updated!</h3>
           </div>
-          <p style={{margin: '0 0 16px 0', fontSize: '14px', color: isDarkTheme ? '#b3b3b3' : '#666', lineHeight: '1.4'}}>New features and improvements are ready. Refresh to get the latest version.</p>
-          <div style={{display: 'flex', gap: '8px'}}>
+          <p style={{margin: '0 0 20px 0', fontSize: '16px', color: isDarkTheme ? '#b3b3b3' : '#666', lineHeight: '1.5'}}>New changes have been pushed to GitHub. Refresh to get the latest features and improvements.</p>
+          <div style={{display: 'flex', gap: '12px', justifyContent: 'center'}}>
             <button 
-              onClick={() => {
-                localStorage.setItem('notifiedVersion', '1.5.0');
-                window.location.reload();
-              }}
+              onClick={handleRefresh}
               style={{
                 background: getCurrentColor(),
                 border: 'none',
-                borderRadius: '6px',
-                padding: '8px 16px',
+                borderRadius: '8px',
+                padding: '12px 24px',
                 color: 'white',
-                fontSize: '14px',
+                fontSize: '16px',
                 cursor: 'pointer',
-                fontWeight: '500'
+                fontWeight: '600'
               }}
             >
-              Refresh Now
+              🔄 Refresh Now
             </button>
             <button 
-              onClick={() => {
-                localStorage.setItem('notifiedVersion', '1.5.0');
-                setShowUpdateNotification(false);
-              }}
+              onClick={dismissUpdate}
               style={{
                 background: 'transparent',
                 border: `1px solid ${isDarkTheme ? '#444' : '#ddd'}`,
-                borderRadius: '6px',
-                padding: '8px 16px',
+                borderRadius: '8px',
+                padding: '12px 24px',
                 color: isDarkTheme ? '#b3b3b3' : '#666',
-                fontSize: '14px',
+                fontSize: '16px',
                 cursor: 'pointer'
               }}
             >

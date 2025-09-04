@@ -192,7 +192,9 @@ function App() {
       setTimeout(() => {
         setUploadedSongs(prev => [...prev, newSong]);
         setUserUploadedSongs(prev => [...prev, newSong]);
+        // Add to admin panel immediately for testing
         setAllUserUploads(prev => [...prev, newSong]);
+        console.log('Song added locally:', newSong);
         setIsUploading(false);
         setUploadProgress(0);
       }, 500);
@@ -264,6 +266,32 @@ function App() {
     const fetchUploadedSongs = async () => {
       try {
         const response = await fetch('https://2d7bf6cd2efd.ngrok-free.app/songs');
+        const uploadedFiles = await response.json();
+        console.log('Server response:', uploadedFiles);
+        if (uploadedFiles.success) {
+          const serverSongs = uploadedFiles.songs.map(song => ({
+            title: song.name.replace(/\.[^/.]+$/, ''),
+            artist: `Uploaded by ${song.uploader || 'User'}`,
+            url: `https://2d7bf6cd2efd.ngrok-free.app/play/${song.filename}`,
+            uploadedBy: song.uploader,
+            isServerSong: true
+          }));
+          console.log('Processed server songs:', serverSongs);
+          setAllUserUploads(serverSongs);
+        }
+      } catch (error) {
+        console.log('Could not fetch uploaded songs:', error);
+        // Fallback: show locally uploaded songs for testing
+        console.log('Using local fallback songs');
+      }
+    };
+    
+    fetchUploadedSongs();
+    // Refresh uploaded songs every 30 seconds
+    const interval = setInterval(fetchUploadedSongs, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);7bf6cd2efd.ngrok-free.app/songs');
         const uploadedFiles = await response.json();
         if (uploadedFiles.success) {
           const serverSongs = uploadedFiles.songs.map(song => ({

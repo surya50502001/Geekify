@@ -130,7 +130,55 @@ function App() {
       setIsUploading(true);
       setUploadProgress(0);
       
-      // Simulate upload progress
+      // Create audio element to get duration
+      const audio = new Audio();
+      const url = URL.createObjectURL(file);
+      
+      audio.onloadedmetadata = async () => {
+        const newSong = {
+          title: file.name.replace(/\.[^/.]+$/, ''),
+          artist: `Uploaded by ${currentUser}`,
+          url: url,
+          file: file,
+          uploadedBy: currentUser,
+          duration: audio.duration
+        };
+        
+        // Try to upload to server
+        const formData = new FormData();
+        formData.append('song', file);
+        formData.append('uploader', currentUser);
+        
+        let serverUploaded = false;
+        try {
+          const response = await fetch('https://2d7bf6cd2efd.ngrok-free.app/upload', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (result.success) {
+            console.log('Song saved to local server:', result.originalName);
+            // Use server URL instead of blob URL
+            newSong.url = `https://2d7bf6cd2efd.ngrok-free.app/play/${result.filename}`;
+            newSong.isServerSong = true;
+            serverUploaded = true;
+          }
+        } catch (error) {
+          console.log('Server not available - using local blob URL');
+        }
+        
+        setUploadProgress(100);
+        setTimeout(() => {
+          setUploadedSongs(prev => [...prev, newSong]);
+          setUserUploadedSongs(prev => [...prev, newSong]);
+          setAllUserUploads(prev => [...prev, newSong]);
+          console.log('Song added:', newSong.title, serverUploaded ? '(Server)' : '(Local)');
+          setIsUploading(false);
+          setUploadProgress(0);
+        }, 500);
+      };
+      
+      // Simulate progress while loading metadata
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
           if (prev >= 90) {
@@ -141,63 +189,7 @@ function App() {
         });
       }, 200);
       
-      // Create local preview
-      const url = URL.createObjectURL(file);
-      const newSong = {
-        title: file.name.replace(/\.[^/.]+$/, ''),
-        artist: `Uploaded by ${currentUser}`,
-        url: url,
-        file: file,
-        uploadedBy: currentUser
-      };
-      
-      // Send to your local server
-      const formData = new FormData();
-      formData.append('song', file);
-      formData.append('uploader', currentUser);
-      
-      try {
-        const response = await fetch('https://2d7bf6cd2efd.ngrok-free.app/upload', {
-          method: 'POST',
-          body: formData
-        });
-        const result = await response.json();
-        if (result.success) {
-          console.log('Song saved to your computer:', result.originalName);
-          // Refresh uploaded songs list
-          setTimeout(async () => {
-            try {
-              const songsResponse = await fetch('https://2d7bf6cd2efd.ngrok-free.app/songs');
-              const uploadedFiles = await songsResponse.json();
-              if (uploadedFiles.success) {
-                const serverSongs = uploadedFiles.songs.map(song => ({
-                  title: song.name.replace(/\.[^/.]+$/, ''),
-                  artist: `Uploaded by ${song.uploader || 'User'}`,
-                  url: `https://2d7bf6cd2efd.ngrok-free.app/play/${song.filename}`,
-                  uploadedBy: song.uploader,
-                  isServerSong: true
-                }));
-                setAllUserUploads(serverSongs);
-              }
-            } catch (error) {
-              console.log('Could not refresh uploaded songs:', error);
-            }
-          }, 1000);
-        }
-      } catch (error) {
-          console.log('Server not running - song only available locally', error);
-      }
-      
-      setUploadProgress(100);
-      setTimeout(() => {
-        setUploadedSongs(prev => [...prev, newSong]);
-        setUserUploadedSongs(prev => [...prev, newSong]);
-        // Add to admin panel immediately for testing
-        setAllUserUploads(prev => [...prev, newSong]);
-        console.log('Song added locally:', newSong);
-        setIsUploading(false);
-        setUploadProgress(0);
-      }, 500);
+      audio.src = url;
     }
   };
   
@@ -912,8 +904,16 @@ function App() {
                       <div style={{display: 'flex', gap: '8px'}}>
                         <button 
                           onClick={() => {
-                            setSongs(prev => [...prev, {...song, artist: song.artist || song.title}]);
-                            setUploadedSongs(prev => [...prev, song]);
+                            const approvedSong = {
+                              title: song.title,
+                              artist: song.artist || `Uploaded by ${song.uploadedBy}`,
+                              url: song.url,
+                              duration: song.duration,
+                              file: song.file,
+                              isServerSong: song.isServerSong
+                            };
+                            setSongs(prev => [...prev, approvedSong]);
+                            setUploadedSongs(prev => [...prev, approvedSong]);
                             setAllUserUploads(prev => prev.filter((_, i) => i !== index));
                             alert('Song moved to main library!');
                           }}

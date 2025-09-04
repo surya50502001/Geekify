@@ -39,15 +39,30 @@ const createUserData = async (userId) => {
     isSongLiked(song) {
       return this.likedSongs.some(s => s.title === song.title);
     },
-    createPlaylist(name) {
+    async createPlaylist(name, isGlobal = false) {
       const playlist = {
         id: Date.now(),
         name: name,
         songs: [],
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        createdBy: this.userId
       };
-      this.playlists.push(playlist);
-      this.save();
+      
+      if (isGlobal) {
+        // Save as global playlist
+        try {
+          await fetch('https://8af4e83e88ce.ngrok-free.app/api/user/save-global-playlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playlist })
+          });
+        } catch (error) {
+          console.log('Global playlist save failed');
+        }
+      } else {
+        this.playlists.push(playlist);
+        this.save();
+      }
       return playlist;
     },
     addToPlaylist(playlistId, song) {
@@ -101,6 +116,7 @@ function App() {
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [currentPlaylist, setCurrentPlaylist] = useState(null);
+  const [globalPlaylists, setGlobalPlaylists] = useState([]);
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -153,6 +169,23 @@ function App() {
         setUserData(userData);
       });
     }
+    
+    // Load global playlists
+    const loadGlobalPlaylists = async () => {
+      try {
+        const response = await fetch('https://8af4e83e88ce.ngrok-free.app/api/user/global-playlists');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setGlobalPlaylists(result.playlists);
+          }
+        }
+      } catch (error) {
+        console.log('Failed to load global playlists');
+      }
+    };
+    
+    loadGlobalPlaylists();
     
     // Load theme preference (override cache if exists)
     const savedTheme = localStorage.getItem('theme');
@@ -231,11 +264,15 @@ function App() {
     // Auto-save state periodically
     const saveInterval = setInterval(saveAppState, 10000); // Save every 10 seconds
     
+    // Refresh global playlists every 30 seconds
+    const playlistInterval = setInterval(loadGlobalPlaylists, 30000);
+    
     return () => {
       clearTimeout(timer);
       clearInterval(updateInterval);
       clearInterval(saveInterval);
       clearInterval(serverCheckInterval);
+      clearInterval(playlistInterval);
       saveAppState(); // Save on unmount
     };
   }, []);
@@ -1091,31 +1128,68 @@ function App() {
                     </div>
                   </div>
                   
+                  {/* Global Playlists */}
+                  {globalPlaylists.length > 0 && (
+                    <>
+                      <div style={{color: '#b3b3b3', fontSize: '12px', fontWeight: '600', margin: '16px 0 8px 0', textTransform: 'uppercase', letterSpacing: '1px'}}>Global Playlists</div>
+                      {globalPlaylists.map(playlist => (
+                        <div 
+                          key={`global-${playlist.id}`}
+                          onClick={() => {setCurrentPlaylist(playlist); setActiveMenu('Playlist View');}}
+                          style={{
+                            background: '#181818',
+                            padding: '12px 16px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            marginBottom: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '16px',
+                            border: '1px solid #333'
+                          }}
+                        >
+                          <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, #ff6b35, #f7931e)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                          </div>
+                          <div>
+                            <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{playlist.name}</div>
+                            <div style={{color: '#b3b3b3', fontSize: '12px'}}>{playlist.songs.length} songs • by {playlist.createdBy}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                  
                   {/* User Playlists */}
-                  {userData.playlists.map(playlist => (
-                    <div 
-                      key={playlist.id}
-                      onClick={() => {setCurrentPlaylist(playlist); setActiveMenu('Playlist View');}}
-                      style={{
-                        background: '#181818',
-                        padding: '12px 16px',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        marginBottom: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px'
-                      }}
-                    >
-                      <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                      </div>
-                      <div>
-                        <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{playlist.name}</div>
-                        <div style={{color: '#b3b3b3', fontSize: '12px'}}>{playlist.songs.length} songs</div>
-                      </div>
-                    </div>
-                  ))}
+                  {userData.playlists.length > 0 && (
+                    <>
+                      <div style={{color: '#b3b3b3', fontSize: '12px', fontWeight: '600', margin: '16px 0 8px 0', textTransform: 'uppercase', letterSpacing: '1px'}}>Your Playlists</div>
+                      {userData.playlists.map(playlist => (
+                        <div 
+                          key={playlist.id}
+                          onClick={() => {setCurrentPlaylist(playlist); setActiveMenu('Playlist View');}}
+                          style={{
+                            background: '#181818',
+                            padding: '12px 16px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            marginBottom: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '16px'
+                          }}
+                        >
+                          <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                          </div>
+                          <div>
+                            <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{playlist.name}</div>
+                            <div style={{color: '#b3b3b3', fontSize: '12px'}}>{playlist.songs.length} songs</div>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
               ) : (
                 <div style={{textAlign: 'center', padding: '60px 20px'}}>
@@ -1419,13 +1493,28 @@ function App() {
             />
             <div style={{display: 'flex', gap: '12px', justifyContent: 'center'}}>
               <button 
-                onClick={() => {
+                onClick={async () => {
                   if (newPlaylistName.trim()) {
-                    userData.createPlaylist(newPlaylistName.trim());
+                    const isGlobal = isAdmin(currentUser);
+                    await userData.createPlaylist(newPlaylistName.trim(), isGlobal);
+                    if (isGlobal) {
+                      // Refresh global playlists
+                      try {
+                        const response = await fetch('https://8af4e83e88ce.ngrok-free.app/api/user/global-playlists');
+                        if (response.ok) {
+                          const result = await response.json();
+                          if (result.success) {
+                            setGlobalPlaylists(result.playlists);
+                          }
+                        }
+                      } catch (error) {
+                        console.log('Failed to refresh global playlists');
+                      }
+                    }
                     setUserData({...userData});
                     setNewPlaylistName('');
                     setShowCreatePlaylist(false);
-                    alert('Playlist created!');
+                    alert(isGlobal ? 'Global playlist created! All users can see it.' : 'Playlist created!');
                   }
                 }}
                 style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}

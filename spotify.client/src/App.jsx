@@ -132,7 +132,7 @@ function App() {
       
       // Create audio element to get duration
       const audio = new Audio();
-      const url = URL.createObjectURL(file);
+      audio.src = URL.createObjectURL(file);
       
       audio.onloadedmetadata = async () => {
         // Upload to server immediately

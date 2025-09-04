@@ -1,4 +1,4 @@
-function Sidebar({ activeMenu, setActiveMenu, setSidebarOpen, sidebarOpen, getCurrentColor, isDarkTheme, currentUser }) {
+function Sidebar({ activeMenu, setActiveMenu, setSidebarOpen, sidebarOpen, getCurrentColor, isDarkTheme, currentUser, isAdmin }) {
   return (
     <div className="sidebar" style={{width: sidebarOpen ? '240px' : '0', background: isDarkTheme ? '#000000' : '#f8f9fa', padding: sidebarOpen ? '24px 12px' : '0', borderRight: isDarkTheme ? '1px solid #282828' : '1px solid #e0e0e0', overflow: 'hidden', transition: 'width 0.3s ease, padding 0.3s ease, background-color 0.3s ease'}}>
       <div style={{marginBottom: '32px'}}>
@@ -25,6 +25,12 @@ function Sidebar({ activeMenu, setActiveMenu, setSidebarOpen, sidebarOpen, getCu
           <div onClick={() => {setActiveMenu('Your Uploaded Songs'); setSidebarOpen(false);}} style={{marginBottom: '8px', padding: '12px 16px', cursor: 'pointer', borderRadius: '4px', background: activeMenu === 'Your Uploaded Songs' ? `${getCurrentColor()}20` : 'transparent', display: 'flex', alignItems: 'center', gap: '16px', color: activeMenu === 'Your Uploaded Songs' ? getCurrentColor() : '#b3b3b3'}}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
             Your Uploaded Songs
+          </div>
+        )}
+        {isAdmin && (
+          <div onClick={() => {setActiveMenu('Admin Panel'); setSidebarOpen(false);}} style={{marginBottom: '8px', padding: '12px 16px', cursor: 'pointer', borderRadius: '4px', background: activeMenu === 'Admin Panel' ? `${getCurrentColor()}20` : 'transparent', display: 'flex', alignItems: 'center', gap: '16px', color: activeMenu === 'Admin Panel' ? getCurrentColor() : '#b3b3b3'}}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+            Admin Panel
           </div>
         )}
       </nav>

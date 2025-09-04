@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import MusicPlayer from './components/MusicPlayer';
-import { validateUser, registerUser } from './People';
+import { validateUser, registerUser, isAdmin } from './People';
 
 function App() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -25,6 +25,7 @@ function App() {
   const [authId, setAuthId] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [userUploadedSongs, setUserUploadedSongs] = useState([]);
+  const [allUserUploads, setAllUserUploads] = useState([]);
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
@@ -171,6 +172,7 @@ function App() {
       setTimeout(() => {
         setUploadedSongs(prev => [...prev, newSong]);
         setUserUploadedSongs(prev => [...prev, newSong]);
+        setAllUserUploads(prev => [...prev, newSong]);
         setIsUploading(false);
         setUploadProgress(0);
       }, 500);
@@ -470,6 +472,7 @@ function App() {
           getCurrentColor={getCurrentColor}
           isDarkTheme={isDarkTheme}
           currentUser={currentUser}
+          isAdmin={isAdmin(currentUser)}
         />
         
         {/* Main Content */}
@@ -802,6 +805,63 @@ function App() {
                   >
                     Login / Register
                   </button>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {activeMenu === 'Admin Panel' && isAdmin(currentUser) && (
+            <div>
+              <h3 style={{fontSize: '20px', margin: '0 0 24px 0', color: getCurrentColor()}}>Admin Panel - All User Uploads</h3>
+              {allUserUploads.length > 0 ? (
+                <div>
+                  {allUserUploads.map((song, index) => (
+                    <div key={index} style={{
+                      background: '#181818',
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      marginBottom: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}>
+                      <div style={{display: 'flex', alignItems: 'center', gap: '16px', flex: 1}}>
+                        <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                        </div>
+                        <div style={{flex: 1}}>
+                          <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
+                          <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
+                        </div>
+                      </div>
+                      <div style={{display: 'flex', gap: '8px'}}>
+                        <button 
+                          onClick={() => {
+                            setSongs(prev => [...prev, {...song, artist: song.title, url: song.url}]);
+                            setAllUserUploads(prev => prev.filter((_, i) => i !== index));
+                            alert('Song moved to main library!');
+                          }}
+                          style={{background: getCurrentColor(), color: 'white', padding: '8px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px'}}
+                        >
+                          ✓ Approve & Move to Library
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setAllUserUploads(prev => prev.filter((_, i) => i !== index));
+                            alert('Song rejected and removed.');
+                          }}
+                          style={{background: '#ff4444', color: 'white', padding: '8px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px'}}
+                        >
+                          ✗ Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{textAlign: 'center', padding: '60px 20px'}}>
+                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>No pending uploads</p>
+                  <p style={{color: '#666', fontSize: '14px'}}>User uploads will appear here for approval</p>
                 </div>
               )}
             </div>

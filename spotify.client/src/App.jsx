@@ -114,7 +114,7 @@ function App() {
       formData.append('song', file);
       
       try {
-        const response = await fetch('http://localhost:3001/upload', {
+        const response = await fetch('https://2d7bf6cd2efd.ngrok-free.app/upload', {
           method: 'POST',
           body: formData
         });

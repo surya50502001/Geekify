@@ -359,7 +359,7 @@ function App() {
     localStorage.setItem('updateDismissed', Date.now().toString());
   };
   
-  const allSongs = [...songs, ...uploadedSongs];
+  const allSongs = [...uploadedSongs]; // All songs now in uploadedSongs including GitHub songs
   
   const songColors = ['#1db954', '#e22856', '#ff6600', '#8e44ad', '#3498db', '#f39c12', '#e74c3c', '#9b59b6'];
   
@@ -736,7 +736,7 @@ function App() {
             <div style={{textAlign: 'center', padding: '60px 20px'}}>
               <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '40px'}}>Your music streaming experience starts here</p>
               
-              {songs.length > 0 && (
+              {allSongs.length > 0 && (
                 <div className="home-card" style={{background: 'linear-gradient(145deg, #1e1e1e, #2a2a2a)', padding: '40px', borderRadius: '20px', maxWidth: '480px', margin: '0 auto', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', border: '1px solid #333'}}>
                   <div className="home-card-content" style={{display: 'flex', gap: '24px', marginBottom: '32px'}}>
                     <div 
@@ -760,14 +760,14 @@ function App() {
                       </svg>
                     </div>
                     <div className="home-card-details" style={{flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-                      <h3 style={{fontSize: '24px', fontWeight: '700', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#fff', maxWidth: '280px'}}>{songs[currentSong]?.title || 'No Song Selected'}</h3>
+                      <h3 style={{fontSize: '24px', fontWeight: '700', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#fff', maxWidth: '280px'}}>{allSongs[currentSong]?.title || 'No Song Selected'}</h3>
                       <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px'}}>
                         <img 
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(songs[currentSong]?.artist || 'Artist')}&background=${getCurrentColor().slice(1)}&color=fff&size=32&rounded=true`}
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(allSongs[currentSong]?.artist || 'Artist')}&background=${getCurrentColor().slice(1)}&color=fff&size=32&rounded=true`}
                           alt="Artist"
                           style={{width: '32px', height: '32px', borderRadius: '50%', border: `2px solid ${getCurrentColor()}`}}
                         />
-                        <span style={{color: getCurrentColor(), fontSize: '16px', fontWeight: '500'}}>{songs[currentSong]?.artist || ''}</span>
+                        <span style={{color: getCurrentColor(), fontSize: '16px', fontWeight: '500'}}>{allSongs[currentSong]?.artist || ''}</span>
                       </div>
                     </div>
                   </div>

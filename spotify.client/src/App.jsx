@@ -31,6 +31,7 @@ function App() {
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [spinnerColor, setSpinnerColor] = useState('#1db954');
+  const [serverStatus, setServerStatus] = useState('checking');
   const audioRef = useRef(null);
   
   useEffect(() => {
@@ -100,6 +101,29 @@ function App() {
       setIsLoading(false);
     }, 2000);
     
+    // Check server status
+    const checkServerStatus = async () => {
+      try {
+        const response = await fetch('https://8af4e83e88ce.ngrok-free.app/status', { 
+          method: 'GET',
+          timeout: 5000
+        });
+        if (response.ok) {
+          setServerStatus('online');
+          console.log('✅ Server is running');
+        } else {
+          setServerStatus('offline');
+          console.log('❌ Server responded but not healthy');
+        }
+      } catch (error) {
+        setServerStatus('offline');
+        console.log('❌ Server is offline:', error.message);
+      }
+    };
+    
+    checkServerStatus();
+    const serverCheckInterval = setInterval(checkServerStatus, 30000);
+    
     // Auto-save state periodically
     const saveInterval = setInterval(saveAppState, 10000); // Save every 10 seconds
     
@@ -107,6 +131,7 @@ function App() {
       clearTimeout(timer);
       clearInterval(updateInterval);
       clearInterval(saveInterval);
+      clearInterval(serverCheckInterval);
       saveAppState(); // Save on unmount
     };
   }, []);
@@ -655,8 +680,14 @@ function App() {
             </div>
             <div style={{flex: 1}}>
               <h2 style={{fontSize: '24px', fontWeight: '300', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic'}}>Hello Melophile</h2>
-              {/* Login/Logout Buttons */}
-              <div style={{display: 'flex', gap: '12px', alignItems: 'center', marginTop: '8px'}}>
+              {/* Server Status & Login/Logout Buttons */}
+              <div style={{display: 'flex', gap: '12px', alignItems: 'center', marginTop: '8px', flexWrap: 'wrap'}}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 8px', borderRadius: '12px', background: serverStatus === 'online' ? 'rgba(34, 197, 94, 0.2)' : serverStatus === 'offline' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(156, 163, 175, 0.2)', border: `1px solid ${serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af'}`}}>
+                  <div style={{width: '6px', height: '6px', borderRadius: '50%', background: serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af'}}></div>
+                  <span style={{fontSize: '11px', color: serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af', fontWeight: '500'}}>
+                    Server {serverStatus === 'checking' ? 'Checking...' : serverStatus === 'online' ? 'Online' : 'Offline'}
+                  </span>
+                </div>
                 {currentUser ? (
                   <>
                     <span style={{color: getCurrentColor(), fontSize: '14px', fontWeight: '500'}}>Welcome, {currentUser}</span>

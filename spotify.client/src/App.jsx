@@ -879,11 +879,11 @@ function App() {
                           }
                         }
                       }}
-                      style={{width: '80px', height: '80px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 8px 24px ${getCurrentColor()}40`, cursor: 'pointer', transition: 'transform 0.2s ease'}}
+                      style={{width: '50px', height: '50px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 12px ${getCurrentColor()}40`, cursor: 'pointer', transition: 'transform 0.2s ease'}}
                       onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
                       onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                     >
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
                         <path d={isPlaying ? "M6 19h4V5H6v14zm8-14v14h4V5h-4z" : "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"}/>
                       </svg>
                     </div>

@@ -13,16 +13,34 @@ namespace Spotify.Server.Controllers
         [HttpPost("upload")]
         public async Task<IActionResult> Upload(IFormFile song, string uploader)
         {
+            Console.WriteLine($"Upload request received from: {uploader}");
+            
             if (song == null || song.Length == 0)
+            {
+                Console.WriteLine("No file uploaded");
                 return BadRequest(new { success = false, error = "No file uploaded" });
+            }
+
+            Console.WriteLine($"Uploading file: {song.FileName}, Size: {song.Length} bytes");
+            
+            // Ensure directory exists
+            if (!Directory.Exists(_songsPath))
+            {
+                Directory.CreateDirectory(_songsPath);
+                Console.WriteLine($"Created directory: {_songsPath}");
+            }
 
             var fileName = $"{DateTime.Now.Ticks}-{song.FileName}";
             var filePath = Path.Combine(_songsPath, fileName);
+            
+            Console.WriteLine($"Saving to: {filePath}");
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await song.CopyToAsync(stream);
             }
+            
+            Console.WriteLine($"File saved successfully: {fileName}");
 
             var uploads = await LoadUploads();
             uploads.Add(new UploadedSong
@@ -33,6 +51,8 @@ namespace Spotify.Server.Controllers
                 UploadDate = DateTime.Now
             });
             await SaveUploads(uploads);
+            
+            Console.WriteLine($"Upload record saved. Total uploads: {uploads.Count}");
 
             return Ok(new { success = true, filename = fileName, originalName = song.FileName });
         }

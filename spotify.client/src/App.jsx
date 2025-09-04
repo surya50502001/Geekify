@@ -439,7 +439,10 @@ function App() {
     } else {
       userData.likeSong(song);
     }
-    setUserData({...userData}); // Trigger re-render
+    // Force re-render by creating new userData object
+    setUserData({...userData});
+    // Save state immediately
+    saveAppState();
   };
   
   useEffect(() => {
@@ -937,19 +940,19 @@ function App() {
                             e.stopPropagation();
                             if (userData.isSongLiked(song)) {
                               userData.unlikeSong(song);
-                              alert('Removed from liked songs!');
                             } else {
                               userData.likeSong(song);
-                              alert('Added to liked songs!');
                             }
                             setUserData({...userData});
+                            saveAppState();
                           }} 
                           style={{
                             background: 'transparent',
                             border: 'none',
                             color: userData.isSongLiked(song) ? '#1db954' : '#b3b3b3',
                             cursor: 'pointer',
-                            padding: '8px'
+                            padding: '8px',
+                            transition: 'color 0.3s ease'
                           }}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -1054,7 +1057,8 @@ function App() {
                       marginBottom: '8px',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '16px'
+                      gap: '16px',
+                      transition: 'background 0.2s ease'
                     }}
                   >
                     <div style={{width: '48px', height: '48px', background: 'linear-gradient(135deg, #1db954, #1ed760)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
@@ -1101,20 +1105,36 @@ function App() {
           )}
           
           {activeMenu === 'Liked Songs' && (
-            <div style={{padding: '20px'}}>
-              <h3 style={{fontSize: '24px', marginBottom: '24px', color: getCurrentColor()}}>Liked Songs</h3>
+            <div>
+              <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px'}}>
+                <div style={{width: '48px', height: '48px', background: 'linear-gradient(135deg, #1db954, #1ed760)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </div>
+                <div>
+                  <h3 style={{fontSize: '24px', margin: 0, color: getCurrentColor()}}>Liked Songs</h3>
+                  <p style={{color: '#b3b3b3', fontSize: '14px', margin: '4px 0 0 0'}}>{currentUser && userData ? userData.likedSongs.length : 0} songs</p>
+                </div>
+              </div>
+              
               {currentUser && userData && userData.likedSongs.length > 0 ? (
                 <div>
                   {userData.likedSongs.map((song, index) => (
-                    <div key={index} onClick={() => {setCurrentSong(allSongs.findIndex(s => s.title === song.title)); setIsPlaying(true);}} style={{
-                      background: isDarkTheme ? '#181818' : '#f0f0f0',
+                    <div key={`${song.title}-${index}`} onClick={() => {
+                      const songIndex = allSongs.findIndex(s => s.title === song.title && s.artist === song.artist);
+                      if (songIndex !== -1) {
+                        setCurrentSong(songIndex);
+                        setIsPlaying(true);
+                      }
+                    }} style={{
+                      background: '#181818',
                       padding: '12px 16px',
                       borderRadius: '8px',
                       cursor: 'pointer',
                       marginBottom: '8px',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '16px'
+                      gap: '16px',
+                      transition: 'background 0.2s ease'
                     }}>
                       <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
@@ -1128,13 +1148,15 @@ function App() {
                           e.stopPropagation();
                           userData.unlikeSong(song);
                           setUserData({...userData});
+                          saveAppState();
                         }} 
                         style={{
                           background: 'transparent',
                           border: 'none',
                           color: '#1db954',
                           cursor: 'pointer',
-                          padding: '8px'
+                          padding: '8px',
+                          transition: 'color 0.3s ease'
                         }}
                       >
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -1150,7 +1172,7 @@ function App() {
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                   </svg>
                   <p style={{color: '#b3b3b3', fontSize: '16px'}}>No liked songs yet</p>
-                  <p style={{color: '#666', fontSize: '14px'}}>Songs you like will appear here</p>
+                  <p style={{color: '#666', fontSize: '14px'}}>Like songs from "Our Songs" and they'll appear here</p>
                 </div>
               )}
             </div>

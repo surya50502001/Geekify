@@ -988,10 +988,10 @@ function App() {
             </div>
           )}
           
-          {activeMenu === 'Library' && (
+          {activeMenu === 'Upload' && (
             <div>
               <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
-                <h3 style={{fontSize: '20px', margin: 0}}>Your Library</h3>
+                <h3 style={{fontSize: '20px', margin: 0}}>Upload Songs</h3>
                 <div style={{display: 'flex', gap: '12px'}}>
                   <button 
                     onClick={() => {
@@ -1017,116 +1017,12 @@ function App() {
                 </div>
               )}
               
-              <div style={{marginBottom: '32px'}}>
-                {allSongs.length > 0 ? allSongs.map((song, index) => (
-                  <div key={index} onClick={() => {setCurrentSong(index); setIsPlaying(true);}} style={{
-                    background: '#181818',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    marginBottom: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    ':hover': {background: '#282828'}
-                  }}>
-                    <div style={{display: 'flex', alignItems: 'center', gap: '16px', flex: 1}}>
-                      <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-                      </div>
-                      <div style={{flex: 1}}>
-                        <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
-                        <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
-                      </div>
-                    </div>
-                    <div style={{display: 'flex', gap: '8px'}}>
-                      {song.file && (
-                        <button 
-                          onClick={(e) => {e.stopPropagation(); downloadSong(song);}} 
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: getCurrentColor(),
-                            cursor: 'pointer',
-                            padding: '8px'
-                          }}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                        </button>
-                      )}
-                      {!song.isGitHubSong && (
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const updatedSongs = allSongs.filter((_, i) => i !== index);
-                            setOurSongs(updatedSongs);
-                            localStorage.setItem('ourSongs', JSON.stringify(updatedSongs));
-                            saveAppState();
-                            alert('Song deleted from library!');
-                          }} 
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#ff4444',
-                            cursor: 'pointer',
-                            padding: '8px'
-                          }}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )) : <div>Loading songs...</div>}
-              </div>
-              
-              <div style={{background: '#181818', padding: '20px', borderRadius: '12px'}}>
-                <h4 style={{fontSize: '18px', marginBottom: '16px', color: getCurrentColor()}}>Comments</h4>
-                <div style={{marginBottom: '16px'}}>
-                  <div style={{display: 'flex', gap: '8px'}}>
-                    <input 
-                      type="text" 
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Add a comment..."
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        borderRadius: '20px',
-                        border: 'none',
-                        background: '#242424',
-                        color: 'white',
-                        fontSize: '14px',
-                        outline: 'none'
-                      }}
-                      onKeyPress={(e) => e.key === 'Enter' && addComment()}
-                    />
-                    <button 
-                      onClick={addComment}
-                      style={{
-                        background: getCurrentColor(),
-                        border: 'none',
-                        borderRadius: '20px',
-                        padding: '8px 16px',
-                        color: 'white',
-                        cursor: 'pointer',
-                        fontSize: '14px'
-                      }}
-                    >
-                      Post
-                    </button>
-                  </div>
-                </div>
-                <div style={{maxHeight: '200px', overflowY: 'auto'}}>
-                  {comments.length > 0 ? comments.map(comment => (
-                    <div key={comment.id} style={{padding: '8px 0', borderBottom: '1px solid #333'}}>
-                      <div style={{fontSize: '14px', marginBottom: '4px'}}>{comment.text}</div>
-                      <div style={{fontSize: '11px', color: '#666'}}>{comment.timestamp}</div>
-                    </div>
-                  )) : (
-                    <div style={{color: '#666', fontSize: '14px'}}>No comments yet. Be the first to comment!</div>
-                  )}
-                </div>
+              <div style={{textAlign: 'center', padding: '60px 20px'}}>
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="#666" style={{marginBottom: '16px'}}>
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                </svg>
+                <p style={{color: '#b3b3b3', fontSize: '16px'}}>Upload your music here</p>
+                <p style={{color: '#666', fontSize: '14px'}}>Share your favorite songs with the community</p>
               </div>
             </div>
           )}

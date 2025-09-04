@@ -549,10 +549,21 @@ function App() {
             <div>
               <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
                 <h3 style={{fontSize: '20px', margin: 0}}>Your Library</h3>
-                <label style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}>
-                  + Upload Song
-                  <input type="file" accept="audio/*" onChange={handleFileUpload} style={{display: 'none'}} />
-                </label>
+                <div style={{display: 'flex', gap: '12px'}}>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      alert('Share link copied! Your friends can upload songs here.');
+                    }}
+                    style={{background: 'transparent', border: `1px solid ${getCurrentColor()}`, color: getCurrentColor(), padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                  >
+                    📤 Share Upload Link
+                  </button>
+                  <label style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}>
+                    + Upload Song
+                    <input type="file" accept="audio/*" onChange={handleFileUpload} style={{display: 'none'}} />
+                  </label>
+                </div>
               </div>
               {isUploading && (
                 <div style={{background: '#181818', padding: '16px', borderRadius: '8px', marginBottom: '16px'}}>

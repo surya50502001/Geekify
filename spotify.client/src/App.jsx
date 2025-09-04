@@ -543,53 +543,52 @@ function App() {
         
         {/* Main Content */}
         <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #000000 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '120px', transition: 'background 0.3s ease'}}>
-          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px'}}>
-            <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
-              <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'}}>
-                <svg width="48" height="36" viewBox="0 0 100 100" fill={getCurrentColor()}>
-                  <circle cx="50" cy="50" r="45" fill="none" stroke={getCurrentColor()} strokeWidth="3"/>
-                  <circle cx="50" cy="50" r="35" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
-                  <circle cx="50" cy="50" r="25" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
-                  <circle cx="50" cy="50" r="8" fill={getCurrentColor()}/>
-                  <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
-                </svg>
-                <div style={{
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  color: getCurrentColor(),
-                  textShadow: `0 0 5px ${getCurrentColor()}, 0 0 10px ${getCurrentColor()}, 0 0 15px ${getCurrentColor()}`,
-                  letterSpacing: '1px',
-                  fontFamily: 'Arial, sans-serif',
-                  width: '48px',
-                  textAlign: 'center'
-                }}>GEEKIFY</div>
-              </div>
-              <h2 style={{fontSize: '24px', fontWeight: '300', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic'}}>Hello Melophile</h2>
+          <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px'}}>
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'}}>
+              <svg width="48" height="36" viewBox="0 0 100 100" fill={getCurrentColor()}>
+                <circle cx="50" cy="50" r="45" fill="none" stroke={getCurrentColor()} strokeWidth="3"/>
+                <circle cx="50" cy="50" r="35" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
+                <circle cx="50" cy="50" r="25" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
+                <circle cx="50" cy="50" r="8" fill={getCurrentColor()}/>
+                <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
+              </svg>
+              <div style={{
+                fontSize: '12px',
+                fontWeight: 'bold',
+                color: getCurrentColor(),
+                textShadow: `0 0 5px ${getCurrentColor()}, 0 0 10px ${getCurrentColor()}, 0 0 15px ${getCurrentColor()}`,
+                letterSpacing: '1px',
+                fontFamily: 'Arial, sans-serif',
+                width: '48px',
+                textAlign: 'center'
+              }}>GEEKIFY</div>
             </div>
-            
-            {/* Login/Logout Buttons */}
-            <div style={{display: 'flex', gap: '12px', alignItems: 'center'}}>
-              {currentUser ? (
-                <>
-                  <span style={{color: getCurrentColor(), fontSize: '14px', fontWeight: '500'}}>Welcome, {currentUser}</span>
+            <div style={{flex: 1}}>
+              <h2 style={{fontSize: '24px', fontWeight: '300', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic'}}>Hello Melophile</h2>
+              {/* Login/Logout Buttons */}
+              <div style={{display: 'flex', gap: '12px', alignItems: 'center', marginTop: '8px'}}>
+                {currentUser ? (
+                  <>
+                    <span style={{color: getCurrentColor(), fontSize: '14px', fontWeight: '500'}}>Welcome, {currentUser}</span>
+                    <button 
+                      onClick={() => {
+                        setCurrentUser(null);
+                        localStorage.removeItem('currentUser');
+                      }}
+                      style={{background: 'transparent', border: `1px solid #ff4444`, color: '#ff4444', padding: '6px 12px', borderRadius: '16px', cursor: 'pointer', fontSize: '12px', fontWeight: '500'}}
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
                   <button 
-                    onClick={() => {
-                      setCurrentUser(null);
-                      localStorage.removeItem('currentUser');
-                    }}
-                    style={{background: 'transparent', border: `1px solid #ff4444`, color: '#ff4444', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                    onClick={() => setShowAuth(true)}
+                    style={{background: getCurrentColor(), color: 'white', padding: '6px 12px', borderRadius: '16px', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '500'}}
                   >
-                    Logout
+                    Login / Register
                   </button>
-                </>
-              ) : (
-                <button 
-                  onClick={() => setShowAuth(true)}
-                  style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
-                >
-                  Login / Register
-                </button>
-              )}
+                )}
+              </div>
             </div>
           </div>
           

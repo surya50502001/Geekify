@@ -607,25 +607,34 @@ function App() {
       <style>{`
         @media (max-width: 768px) {
           .sidebar { width: ${sidebarOpen ? '100vw' : '0'} !important; position: fixed !important; z-index: 999 !important; height: 100vh !important; }
-          .main-content { padding: 16px 12px !important; }
-          .home-card { max-width: 100% !important; padding: 24px 16px !important; margin: 0 8px !important; }
-          .library-list { padding: 8px !important; }
+          .main-content { padding: 12px 8px !important; padding-top: 60px !important; }
+          .home-card { max-width: 100% !important; padding: 16px 12px !important; margin: 0 4px !important; }
+          .library-list { padding: 4px !important; }
           .library-item { flex-direction: column !important; text-align: center !important; }
-          .search-input { width: calc(100% - 24px) !important; max-width: none !important; }
-          .player-controls { width: 50% !important; }
-          .song-info { width: 35% !important; font-size: 12px !important; }
-          .song-info div { max-width: 100px !important; }
+          .search-input { width: calc(100% - 16px) !important; max-width: none !important; }
+          .player-controls { width: 45% !important; }
+          .song-info { width: 30% !important; font-size: 11px !important; }
+          .song-info div { max-width: 80px !important; }
           .volume-section { display: none !important; }
           .home-card-content { flex-direction: column !important; text-align: center !important; }
-          .home-card-image { width: 120px !important; height: 120px !important; margin: 0 auto 16px !important; }
+          .home-card-image { width: 100px !important; height: 100px !important; margin: 0 auto 12px !important; }
           .home-card-details { width: 100% !important; }
-          .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; padding: 16px !important; }
-          .hamburger-btn { top: 16px !important; right: 16px !important; width: 48px !important; height: 36px !important; }
-          .bottom-player { padding: 0 12px !important; height: 80px !important; }
-          .song-card { padding: 12px !important; }
-          .song-card-image { height: 120px !important; }
-          .song-title { font-size: 13px !important; }
-          .song-artist { font-size: 11px !important; }
+          .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; padding: 12px !important; }
+          .bottom-player { padding: 0 8px !important; height: 70px !important; }
+          .song-card { padding: 8px !important; }
+          .song-card-image { height: 100px !important; }
+          .song-title { font-size: 12px !important; }
+          .song-artist { font-size: 10px !important; }
+        }
+        @media (max-width: 480px) {
+          .main-content { padding: 8px 4px !important; padding-top: 50px !important; }
+          .home-card { padding: 12px 8px !important; }
+          .player-controls { width: 40% !important; }
+          .song-info { width: 25% !important; }
+          .song-info div { max-width: 60px !important; font-size: 10px !important; }
+          .bottom-player { height: 60px !important; padding: 0 4px !important; }
+          .stats-grid { grid-template-columns: 1fr !important; gap: 4px !important; padding: 8px !important; }
+          .home-card-image { width: 80px !important; height: 80px !important; }
         }
         @keyframes bounce {
           0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
@@ -667,63 +676,47 @@ function App() {
       `}</style>
       <div style={{display: 'flex', flex: 1}}>
         {/* Top Controls */}
-        <div style={{position: 'fixed', top: '20px', right: '20px', zIndex: 1001, display: 'flex', gap: '12px'}}>
-          {/* Theme Toggle Button */}
+        <div style={{position: 'fixed', top: '16px', right: '16px', zIndex: 1001, display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
           <button 
             onClick={toggleTheme}
             style={{
               background: `rgba(${parseInt(getCurrentColor().slice(1,3), 16)}, ${parseInt(getCurrentColor().slice(3,5), 16)}, ${parseInt(getCurrentColor().slice(5,7), 16)}, 0.9)`,
               border: 'none',
-              borderRadius: '12px',
-              width: '40px',
-              height: '40px',
+              borderRadius: '8px',
+              width: '36px',
+              height: '36px',
               color: 'white',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-              transition: 'all 0.2s ease',
-              backdropFilter: 'blur(10px)'
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+              transition: 'all 0.2s ease'
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d={isDarkTheme ? "M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z" : "M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"} />
             </svg>
           </button>
           
-          {/* Hamburger Button */}
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hamburger-btn"
             style={{
               background: `rgba(${parseInt(getCurrentColor().slice(1,3), 16)}, ${parseInt(getCurrentColor().slice(3,5), 16)}, ${parseInt(getCurrentColor().slice(5,7), 16)}, 0.9)`,
               border: 'none',
-              borderRadius: '12px',
-              width: '56px',
-              height: '40px',
+              borderRadius: '8px',
+              width: '36px',
+              height: '36px',
               color: 'white',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-              transition: 'all 0.2s ease',
-              backdropFilter: 'blur(10px)'
-            }}
-            onMouseEnter={(e) => {
-              const color = getCurrentColor();
-              e.target.style.background = color;
-            }}
-            onMouseLeave={(e) => {
-              const color = getCurrentColor();
-              const r = parseInt(color.slice(1,3), 16);
-              const g = parseInt(color.slice(3,5), 16);
-              const b = parseInt(color.slice(5,7), 16);
-              e.target.style.background = `rgba(${r}, ${g}, ${b}, 0.9)`;
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+              transition: 'all 0.2s ease'
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{transition: 'transform 0.2s ease'}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
             </svg>
           </button>
@@ -745,7 +738,7 @@ function App() {
         <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #000000 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '120px', transition: 'background 0.3s ease'}}>
           <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px'}}>
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'}}>
-              <svg width="48" height="36" viewBox="0 0 100 100" fill={getCurrentColor()}>
+              <svg width="clamp(32, 6vw, 48)" height="clamp(24, 4.5vw, 36)" viewBox="0 0 100 100" fill={getCurrentColor()}>
                 <circle cx="50" cy="50" r="45" fill="none" stroke={getCurrentColor()} strokeWidth="3"/>
                 <circle cx="50" cy="50" r="35" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
                 <circle cx="50" cy="50" r="25" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
@@ -753,36 +746,35 @@ function App() {
                 <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
               </svg>
               <div style={{
-                fontSize: '12px',
+                fontSize: 'clamp(10px, 2vw, 12px)',
                 fontWeight: 'bold',
                 color: getCurrentColor(),
                 textShadow: `0 0 5px ${getCurrentColor()}, 0 0 10px ${getCurrentColor()}, 0 0 15px ${getCurrentColor()}`,
                 letterSpacing: '1px',
                 fontFamily: 'Arial, sans-serif',
-                width: '48px',
+                width: 'clamp(32px, 6vw, 48px)',
                 textAlign: 'center'
               }}>GEEKIFY</div>
             </div>
             <div style={{flex: 1}}>
-              <h2 style={{fontSize: '24px', fontWeight: '300', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic'}}>Hello Melophile</h2>
-              {/* Server Status & Login/Logout Buttons */}
-              <div style={{display: 'flex', gap: '12px', alignItems: 'center', marginTop: '8px', flexWrap: 'wrap'}}>
-                <div style={{display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 8px', borderRadius: '12px', background: serverStatus === 'online' ? 'rgba(34, 197, 94, 0.2)' : serverStatus === 'offline' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(156, 163, 175, 0.2)', border: `1px solid ${serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af'}`}}>
-                  <div style={{width: '6px', height: '6px', borderRadius: '50%', background: serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af'}}></div>
-                  <span style={{fontSize: '11px', color: serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af', fontWeight: '500'}}>
-                    Server {serverStatus === 'checking' ? 'Checking...' : serverStatus === 'online' ? 'Online' : 'Offline'}
+              <h2 style={{fontSize: 'clamp(18px, 4vw, 24px)', fontWeight: '300', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic'}}>Hello Melophile</h2>
+              <div style={{display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px', flexWrap: 'wrap'}}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 6px', borderRadius: '8px', background: serverStatus === 'online' ? 'rgba(34, 197, 94, 0.2)' : serverStatus === 'offline' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(156, 163, 175, 0.2)', border: `1px solid ${serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af'}`}}>
+                  <div style={{width: '4px', height: '4px', borderRadius: '50%', background: serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af'}}></div>
+                  <span style={{fontSize: '10px', color: serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af', fontWeight: '500'}}>
+                    {serverStatus === 'checking' ? 'Checking...' : serverStatus === 'online' ? 'Online' : 'Offline'}
                   </span>
                 </div>
                 {currentUser ? (
                   <>
-                    <span style={{color: getCurrentColor(), fontSize: '14px', fontWeight: '500'}}>Welcome, {currentUser}</span>
+                    <span style={{color: getCurrentColor(), fontSize: '12px', fontWeight: '500'}}>Hi, {currentUser}</span>
                     <button 
                       onClick={() => {
                         setCurrentUser(null);
                         setUserData(null);
                         localStorage.removeItem('currentUser');
                       }}
-                      style={{background: 'transparent', border: `1px solid #ff4444`, color: '#ff4444', padding: '6px 12px', borderRadius: '16px', cursor: 'pointer', fontSize: '12px', fontWeight: '500'}}
+                      style={{background: 'transparent', border: `1px solid #ff4444`, color: '#ff4444', padding: '4px 8px', borderRadius: '12px', cursor: 'pointer', fontSize: '10px', fontWeight: '500'}}
                     >
                       Logout
                     </button>
@@ -790,9 +782,9 @@ function App() {
                 ) : (
                   <button 
                     onClick={() => setShowAuth(true)}
-                    style={{background: getCurrentColor(), color: 'white', padding: '6px 12px', borderRadius: '16px', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '500'}}
+                    style={{background: getCurrentColor(), color: 'white', padding: '4px 8px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '10px', fontWeight: '500'}}
                   >
-                    Login / Register
+                    Login
                   </button>
                 )}
               </div>

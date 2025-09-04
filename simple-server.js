@@ -101,6 +101,31 @@ app.get('/play/:filename', (req, res) => {
   }
 });
 
+// Delete file endpoint (admin only)
+app.delete('/delete/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(songsDir, filename);
+  
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      uploadedSongs = uploadedSongs.filter(song => song.filename !== filename);
+      console.log(`File deleted: ${filename}`);
+      res.json({ success: true, message: 'File deleted successfully' });
+    } else {
+      res.status(404).json({ success: false, error: 'File not found' });
+    }
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete file' });
+  }
+});
+
+// Health check endpoint
+app.get('/status', (req, res) => {
+  res.json({ success: true, status: 'Server is running' });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log('Songs will be saved to:', songsDir);

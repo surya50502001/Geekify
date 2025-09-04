@@ -4,6 +4,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
+const { saveUserData, loadUserData } = require('./database');
 
 const app = express();
 const PORT = 3001;
@@ -219,6 +220,25 @@ app.post('/push-to-github', async (req, res) => {
   } catch (error) {
     console.error('GitHub push error:', error);
     res.status(500).json({ success: false, error: 'Failed to push to GitHub' });
+  }
+});
+
+// User data endpoints
+app.post('/save-user-data', async (req, res) => {
+  try {
+    const result = await saveUserData(req.body.userId, req.body.data);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/load-user-data/:userId', async (req, res) => {
+  try {
+    const result = await loadUserData(req.params.userId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

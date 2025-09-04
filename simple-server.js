@@ -11,16 +11,16 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
+// Create songs directory if it doesn't exist
+const songsDir = path.join(__dirname, 'spotify.client', 'public', 'songs');
+if (!fs.existsSync(songsDir)) {
+  fs.mkdirSync(songsDir, { recursive: true });
 }
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadsDir);
+    cb(null, songsDir);
   },
   filename: (req, file, cb) => {
     const uniqueName = Date.now() + '-' + file.originalname;
@@ -67,7 +67,7 @@ app.get('/songs', (req, res) => {
 // Stream audio files
 app.get('/play/:filename', (req, res) => {
   const filename = req.params.filename;
-  const filePath = path.join(uploadsDir, filename);
+  const filePath = path.join(songsDir, filename);
   
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ error: 'File not found' });
@@ -103,5 +103,5 @@ app.get('/play/:filename', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  console.log('Uploads will be saved to:', uploadsDir);
+  console.log('Songs will be saved to:', songsDir);
 });

@@ -844,7 +844,7 @@ function App() {
         <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #000000 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '120px', transition: 'background 0.3s ease'}}>
           <div className="header-section" style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px'}}>
             <div className="header-logo" style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'}}>
-              <svg width="clamp(24, 4vw, 32)" height="clamp(18, 3vw, 24)" viewBox="0 0 100 100" fill={getCurrentColor()}>
+              <svg width="clamp(16, 2.5vw, 20)" height="clamp(12, 2vw, 16)" viewBox="0 0 100 100" fill={getCurrentColor()}>
                 <circle cx="50" cy="50" r="45" fill="none" stroke={getCurrentColor()} strokeWidth="3"/>
                 <circle cx="50" cy="50" r="35" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
                 <circle cx="50" cy="50" r="25" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
@@ -852,13 +852,13 @@ function App() {
                 <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
               </svg>
               <div style={{
-                fontSize: 'clamp(10px, 2vw, 12px)',
+                fontSize: 'clamp(8px, 1.5vw, 10px)',
                 fontWeight: 'bold',
                 color: getCurrentColor(),
                 textShadow: `0 0 5px ${getCurrentColor()}, 0 0 10px ${getCurrentColor()}, 0 0 15px ${getCurrentColor()}`,
                 letterSpacing: '1px',
                 fontFamily: 'Arial, sans-serif',
-                width: 'clamp(32px, 6vw, 48px)',
+                width: 'clamp(24px, 4vw, 32px)',
                 textAlign: 'center'
               }}>GEEKIFY</div>
             </div>

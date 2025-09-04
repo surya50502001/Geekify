@@ -517,14 +517,8 @@ function App() {
           url: file.download_url,
           isGitHubSong: true
         }));
-        setOurSongs(prev => {
-          const newSongs = songList.filter(newSong => 
-            !prev.some(existingSong => existingSong.title === newSong.title && existingSong.url === newSong.url)
-          );
-          const updated = [...prev, ...newSongs];
-          localStorage.setItem('ourSongs', JSON.stringify(updated));
-          return updated;
-        });
+        setOurSongs(songList);
+        localStorage.setItem('ourSongs', JSON.stringify(songList));
       })
       .catch(err => console.error('Error loading songs:', err));
     
@@ -546,14 +540,8 @@ function App() {
             isPending: true
           }));
           console.log('Loaded server songs:', serverSongs);
-          setAllUserUploads(prev => {
-            const newSongs = serverSongs.filter(newSong => 
-              !prev.some(existingSong => existingSong.filename === newSong.filename)
-            );
-            const updated = [...prev, ...newSongs];
-            localStorage.setItem('allUserUploads', JSON.stringify(updated));
-            return updated;
-          });
+          setAllUserUploads(serverSongs);
+          localStorage.setItem('allUserUploads', JSON.stringify(serverSongs));
         }
       } catch (error) {
         console.log('Could not fetch uploaded songs:', error);

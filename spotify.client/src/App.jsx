@@ -2,7 +2,62 @@ import { useState, useRef, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import MusicPlayer from './components/MusicPlayer';
 import { validateUser, registerUser, isAdmin } from './People';
-import { UserData } from './models/UserData';
+
+// Simple user data management
+const createUserData = (userId) => {
+  const userData = {
+    userId,
+    likedSongs: [],
+    playlists: [],
+    save() {
+      localStorage.setItem(`userData_${this.userId}`, JSON.stringify({
+        likedSongs: this.likedSongs,
+        playlists: this.playlists
+      }));
+    },
+    likeSong(song) {
+      if (!this.likedSongs.find(s => s.title === song.title)) {
+        this.likedSongs.push(song);
+        this.save();
+      }
+    },
+    unlikeSong(song) {
+      this.likedSongs = this.likedSongs.filter(s => s.title !== song.title);
+      this.save();
+    },
+    isSongLiked(song) {
+      return this.likedSongs.some(s => s.title === song.title);
+    },
+    createPlaylist(name) {
+      const playlist = {
+        id: Date.now(),
+        name: name,
+        songs: [],
+        createdAt: new Date().toISOString()
+      };
+      this.playlists.push(playlist);
+      this.save();
+      return playlist;
+    },
+    addToPlaylist(playlistId, song) {
+      const playlist = this.playlists.find(p => p.id === playlistId);
+      if (playlist && !playlist.songs.find(s => s.title === song.title)) {
+        playlist.songs.push(song);
+        this.save();
+      }
+    }
+  };
+  
+  // Load existing data
+  const saved = localStorage.getItem(`userData_${userId}`);
+  if (saved) {
+    const data = JSON.parse(saved);
+    userData.likedSongs = data.likedSongs || [];
+    userData.playlists = data.playlists || [];
+  }
+  
+  return userData;
+};
 
 function App() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -76,7 +131,7 @@ function App() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       setCurrentUser(savedUser);
-      setUserData(UserData.load(savedUser));
+      setUserData(createUserData(savedUser));
     }
     
     // Load theme preference (override cache if exists)
@@ -183,7 +238,7 @@ function App() {
       const user = validateUser(authId, authPassword);
       if (user) {
         setCurrentUser(user.id);
-        setUserData(UserData.load(user.id));
+        setUserData(createUserData(user.id));
         setShowAuth(false);
         localStorage.setItem('currentUser', user.id);
       } else {

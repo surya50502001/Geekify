@@ -284,26 +284,64 @@ function App() {
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
   };
   
-  const handleAuth = () => {
+  const handleAuth = async () => {
     if (authMode === 'login') {
-      const user = validateUser(authId, authPassword);
-      if (user) {
-        setCurrentUser(user.id);
-        createUserData(user.id).then(userData => {
-          setUserData(userData);
+      try {
+        const response = await fetch('https://ee2b3f9b8389.ngrok-free.app/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: authId, password: authPassword })
         });
-        setShowAuth(false);
-        localStorage.setItem('currentUser', user.id);
-      } else {
-        alert('Invalid credentials');
+        const result = await response.json();
+        
+        if (result.success) {
+          setCurrentUser(result.user.id);
+          createUserData(result.user.id).then(userData => {
+            setUserData(userData);
+          });
+          setShowAuth(false);
+          localStorage.setItem('currentUser', result.user.id);
+        } else {
+          alert('Invalid credentials');
+        }
+      } catch (error) {
+        // Fallback to client-side auth if server unavailable
+        const user = validateUser(authId, authPassword);
+        if (user) {
+          setCurrentUser(user.id);
+          createUserData(user.id).then(userData => {
+            setUserData(userData);
+          });
+          setShowAuth(false);
+          localStorage.setItem('currentUser', user.id);
+        } else {
+          alert('Invalid credentials');
+        }
       }
     } else {
-      const result = registerUser(authId, authPassword);
-      if (result.success) {
-        alert('Registration successful! Please login.');
-        setAuthMode('login');
-      } else {
-        alert(result.message);
+      try {
+        const response = await fetch('https://ee2b3f9b8389.ngrok-free.app/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: authId, password: authPassword })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Registration successful! Please login.');
+          setAuthMode('login');
+        } else {
+          alert(result.message);
+        }
+      } catch (error) {
+        // Fallback to client-side auth if server unavailable
+        const result = registerUser(authId, authPassword);
+        if (result.success) {
+          alert('Registration successful! Please login.');
+          setAuthMode('login');
+        } else {
+          alert(result.message);
+        }
       }
     }
     setAuthId('');

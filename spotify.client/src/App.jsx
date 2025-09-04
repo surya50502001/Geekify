@@ -3,7 +3,7 @@ import Sidebar from './components/Sidebar';
 import MusicPlayer from './components/MusicPlayer';
 import { validateUser, registerUser, isAdmin } from './People';
 
-// Simple user data management
+// File-based user data management
 const createUserData = async (userId) => {
   const userData = {
     userId,
@@ -14,17 +14,17 @@ const createUserData = async (userId) => {
         likedSongs: this.likedSongs,
         playlists: this.playlists
       };
-      localStorage.setItem(`userData_${this.userId}`, JSON.stringify(data));
       
-      // Sync to server
+      // Save to file system via server
       try {
-        await fetch('https://8af4e83e88ce.ngrok-free.app/sync-user-data', {
+        await fetch('https://8af4e83e88ce.ngrok-free.app/save-user-data', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: this.userId, ...data })
+          body: JSON.stringify({ userId: this.userId, data })
         });
       } catch (error) {
-        console.log('Server sync failed, using local storage only');
+        console.log('File save failed, using localStorage');
+        localStorage.setItem(`userData_${this.userId}`, JSON.stringify(data));
       }
     },
     likeSong(song) {
@@ -60,19 +60,19 @@ const createUserData = async (userId) => {
     }
   };
   
-  // Load from server first, fallback to localStorage
+  // Load from file system first
   try {
-    const response = await fetch(`https://8af4e83e88ce.ngrok-free.app/get-user-data/${userId}`);
+    const response = await fetch(`https://8af4e83e88ce.ngrok-free.app/load-user-data/${userId}`);
     if (response.ok) {
-      const serverData = await response.json();
-      if (serverData.success) {
-        userData.likedSongs = serverData.data.likedSongs || [];
-        userData.playlists = serverData.data.playlists || [];
+      const result = await response.json();
+      if (result.success && result.data) {
+        userData.likedSongs = result.data.likedSongs || [];
+        userData.playlists = result.data.playlists || [];
         return userData;
       }
     }
   } catch (error) {
-    console.log('Server load failed, using local storage');
+    console.log('File load failed, using localStorage');
   }
   
   // Fallback to localStorage
@@ -1058,12 +1058,25 @@ function App() {
               <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
                 <h3 style={{fontSize: '20px', margin: 0}}>Your Library</h3>
                 {currentUser && (
-                  <button 
-                    onClick={() => setShowCreatePlaylist(true)}
-                    style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
-                  >
-                    + Create Playlist
-                  </button>
+                  <div style={{display: 'flex', gap: '8px'}}>
+                    <button 
+                      onClick={async () => {
+                        if (userData) {
+                          const refreshedData = await createUserData(currentUser);
+                          setUserData(refreshedData);
+                        }
+                      }}
+                      style={{background: 'transparent', border: `1px solid ${getCurrentColor()}`, color: getCurrentColor(), padding: '6px 12px', borderRadius: '16px', cursor: 'pointer', fontSize: '12px', fontWeight: '500'}}
+                    >
+                      🔄 Refresh
+                    </button>
+                    <button 
+                      onClick={() => setShowCreatePlaylist(true)}
+                      style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                    >
+                      + Create Playlist
+                    </button>
+                  </div>
                 )}
               </div>
               

@@ -13,14 +13,20 @@ namespace Spotify.Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
+            Console.WriteLine($"Login request received for user: {request.UserId}");
+            
             var users = await LoadUsers();
+            Console.WriteLine($"Loaded {users.Count} users from file");
+            
             var user = users.FirstOrDefault(u => u.Id == request.UserId && u.Password == request.Password);
             
             if (user != null)
             {
+                Console.WriteLine($"Login successful for user: {user.Id}, isAdmin: {user.IsAdmin}");
                 return Ok(new { success = true, user = new { id = user.Id, isAdmin = user.IsAdmin } });
             }
             
+            Console.WriteLine($"Login failed for user: {request.UserId}");
             return Ok(new { success = false });
         }
 

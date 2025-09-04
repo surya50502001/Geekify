@@ -912,7 +912,8 @@ function App() {
                       <div style={{display: 'flex', gap: '8px'}}>
                         <button 
                           onClick={() => {
-                            setSongs(prev => [...prev, {...song, artist: song.title, url: song.url}]);
+                            setSongs(prev => [...prev, {...song, artist: song.artist || song.title}]);
+                            setUploadedSongs(prev => [...prev, song]);
                             setAllUserUploads(prev => prev.filter((_, i) => i !== index));
                             alert('Song moved to main library!');
                           }}

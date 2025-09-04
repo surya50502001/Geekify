@@ -862,62 +862,28 @@ function App() {
           
           {activeMenu === 'Home' && (
             <div style={{textAlign: 'center', padding: '60px 20px'}}>
+              <h2 style={{fontSize: '32px', fontWeight: '300', margin: '0 0 16px 0', color: getCurrentColor()}}>Welcome to Geekify</h2>
               <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '40px'}}>Your music streaming experience starts here</p>
               
               {allSongs.length > 0 && (
-                <div className="home-card" style={{background: 'linear-gradient(145deg, #1e1e1e, #2a2a2a)', padding: '40px', borderRadius: '20px', maxWidth: '480px', margin: '0 auto', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', border: '1px solid #333'}}>
-                  <div className="home-card-content" style={{display: 'flex', gap: '24px', marginBottom: '32px'}}>
-                    <div 
-                      className="home-card-image" 
-                      onClick={() => {
-                        if (allSongs[currentSong]) {
-                          setIsPlaying(!isPlaying);
-                          if (!isPlaying) {
-                            audioRef.current?.play();
-                          } else {
-                            audioRef.current?.pause();
-                          }
+                <div style={{background: '#181818', padding: '20px', borderRadius: '12px', maxWidth: '400px', margin: '0 auto'}}>
+                  <h3 style={{fontSize: '18px', marginBottom: '12px', color: '#fff'}}>{allSongs[currentSong]?.title || 'No Song Selected'}</h3>
+                  <p style={{color: '#b3b3b3', fontSize: '14px', marginBottom: '16px'}}>{allSongs[currentSong]?.artist || ''}</p>
+                  <button 
+                    onClick={() => {
+                      if (allSongs[currentSong]) {
+                        setIsPlaying(!isPlaying);
+                        if (!isPlaying) {
+                          audioRef.current?.play();
+                        } else {
+                          audioRef.current?.pause();
                         }
-                      }}
-                      style={{width: '50px', height: '50px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 12px ${getCurrentColor()}40`, cursor: 'pointer', transition: 'transform 0.2s ease'}}
-                      onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-                      onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                        <path d={isPlaying ? "M6 19h4V5H6v14zm8-14v14h4V5h-4z" : "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"}/>
-                      </svg>
-                    </div>
-                    <div className="home-card-details" style={{flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-                      <h3 style={{fontSize: '24px', fontWeight: '700', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#fff', maxWidth: '280px'}}>{allSongs[currentSong]?.title || 'No Song Selected'}</h3>
-                      <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px'}}>
-                        <img 
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(allSongs[currentSong]?.artist || 'Artist')}&background=${getCurrentColor().slice(1)}&color=fff&size=32&rounded=true`}
-                          alt="Artist"
-                          style={{width: '32px', height: '32px', borderRadius: '50%', border: `2px solid ${getCurrentColor()}`}}
-                        />
-                        <span style={{color: getCurrentColor(), fontSize: '16px', fontWeight: '500'}}>{allSongs[currentSong]?.artist || ''}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="stats-grid" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', padding: '24px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', border: '1px solid #444'}}>
-                    <div style={{textAlign: 'center'}}>
-                      <div style={{color: getCurrentColor(), fontSize: '18px', fontWeight: '600'}}>{formatTime(duration) || '--:--'}</div>
-                      <div style={{color: '#888', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px'}}>Duration</div>
-                    </div>
-                    <div style={{textAlign: 'center'}}>
-                      <div style={{color: getCurrentColor(), fontSize: '18px', fontWeight: '600'}}>Pop</div>
-                      <div style={{color: '#888', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px'}}>Genre</div>
-                    </div>
-                    <div style={{textAlign: 'center'}}>
-                      <div style={{color: getCurrentColor(), fontSize: '18px', fontWeight: '600'}}>2023</div>
-                      <div style={{color: '#888', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px'}}>Release</div>
-                    </div>
-                    <div style={{textAlign: 'center'}}>
-                      <div style={{color: getCurrentColor(), fontSize: '18px', fontWeight: '600'}}>320kbps</div>
-                      <div style={{color: '#888', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px'}}>Quality</div>
-                    </div>
-                  </div>
+                      }
+                    }}
+                    style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '24px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                  >
+                    {isPlaying ? 'Pause' : 'Play'}
+                  </button>
                 </div>
               )}
             </div>

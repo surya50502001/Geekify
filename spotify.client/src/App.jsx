@@ -34,13 +34,16 @@ function App() {
   const audioRef = useRef(null);
   
   useEffect(() => {
+    // Load cached app state first
+    loadAppState();
+    
     // Load user session
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       setCurrentUser(savedUser);
     }
     
-    // Load theme preference
+    // Load theme preference (override cache if exists)
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       setIsDarkTheme(savedTheme === 'dark');
@@ -97,9 +100,14 @@ function App() {
       setIsLoading(false);
     }, 2000);
     
+    // Auto-save state periodically
+    const saveInterval = setInterval(saveAppState, 10000); // Save every 10 seconds
+    
     return () => {
       clearTimeout(timer);
       clearInterval(updateInterval);
+      clearInterval(saveInterval);
+      saveAppState(); // Save on unmount
     };
   }, []);
   
@@ -260,7 +268,39 @@ function App() {
     }
   };
   
+  const saveAppState = () => {
+    const state = {
+      currentSong,
+      isPlaying,
+      currentTime,
+      activeMenu,
+      searchTerm,
+      likedSongs: Array.from(likedSongs),
+      comments,
+      isDarkTheme,
+      sidebarOpen
+    };
+    sessionStorage.setItem('appState', JSON.stringify(state));
+  };
+  
+  const loadAppState = () => {
+    const saved = sessionStorage.getItem('appState');
+    if (saved) {
+      const state = JSON.parse(saved);
+      setCurrentSong(state.currentSong || 0);
+      setIsPlaying(false); // Don't auto-play on refresh
+      setCurrentTime(state.currentTime || 0);
+      setActiveMenu(state.activeMenu || 'Home');
+      setSearchTerm(state.searchTerm || '');
+      setLikedSongs(new Set(state.likedSongs || []));
+      setComments(state.comments || []);
+      setIsDarkTheme(state.isDarkTheme ?? true);
+      setSidebarOpen(state.sidebarOpen ?? true);
+    }
+  };
+  
   const handleRefresh = () => {
+    saveAppState();
     setUpdateAvailable(false);
     window.location.reload();
   };
@@ -291,6 +331,7 @@ function App() {
       newLiked.add(currentSong);
     }
     setLikedSongs(newLiked);
+    saveAppState();
   };
   
   useEffect(() => {
@@ -411,6 +452,7 @@ function App() {
       audioRef.current.play();
     }
     setIsPlaying(!isPlaying);
+    saveAppState();
   };
 
   const playNext = () => {
@@ -419,6 +461,7 @@ function App() {
     setIsPlaying(true);
     setCurrentTime(0);
     setDuration(0);
+    saveAppState();
   };
 
   const playPrev = () => {
@@ -427,6 +470,7 @@ function App() {
     setIsPlaying(true);
     setCurrentTime(0);
     setDuration(0);
+    saveAppState();
   };
 
   if (isLoading) {

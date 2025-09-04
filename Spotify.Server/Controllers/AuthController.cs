@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Spotify.Server.Data;
 using Spotify.Server.Models;
 using System.Text.Json;
 
@@ -8,7 +10,12 @@ namespace Spotify.Server.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly string _usersFile = Path.Combine(Directory.GetCurrentDirectory(), "users.json");
+        private readonly AppDbContext _context;
+        
+        public AuthController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
@@ -33,44 +40,34 @@ namespace Spotify.Server.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            var users = await LoadUsers();
-            
-            if (users.Any(u => u.Id == request.UserId))
+            if (await _context.Users.AnyAsync(u => u.Id == request.UserId))
             {
                 return Ok(new { success = false, message = "User already exists" });
             }
 
-            users.Add(new User 
+            var newUser = new User 
             { 
                 Id = request.UserId, 
                 Password = request.Password, 
                 IsAdmin = false 
-            });
+            };
             
-            await SaveUsers(users);
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
             return Ok(new { success = true });
         }
 
         private async Task<List<User>> LoadUsers()
         {
-            if (!System.IO.File.Exists(_usersFile))
+            var users = await _context.Users.ToListAsync();
+            if (!users.Any())
             {
-                var defaultUsers = new List<User>
-                {
-                    new User { Id = "admin", Password = "admin123", IsAdmin = true }
-                };
-                await SaveUsers(defaultUsers);
-                return defaultUsers;
+                var defaultUser = new User { Id = "admin", Password = "admin123", IsAdmin = true };
+                _context.Users.Add(defaultUser);
+                await _context.SaveChangesAsync();
+                users.Add(defaultUser);
             }
-
-            var json = await System.IO.File.ReadAllTextAsync(_usersFile);
-            return JsonSerializer.Deserialize<List<User>>(json) ?? new List<User>();
-        }
-
-        private async Task SaveUsers(List<User> users)
-        {
-            var json = JsonSerializer.Serialize(users, new JsonSerializerOptions { WriteIndented = true });
-            await System.IO.File.WriteAllTextAsync(_usersFile, json);
+            return users;
         }
     }
 

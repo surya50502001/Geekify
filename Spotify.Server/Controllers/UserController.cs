@@ -131,22 +131,7 @@ namespace Spotify.Server.Controllers
         public GlobalPlaylist Playlist { get; set; } = new();
     }
 
-    public class GlobalPlaylist
-    {
-        public long Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public List<Song> Songs { get; set; } = new();
-        public string CreatedBy { get; set; } = string.Empty;
-        public string CreatedAt { get; set; } = string.Empty;
-    }
 
-    public class Song
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Artist { get; set; } = string.Empty;
-        public string Url { get; set; } = string.Empty;
-        public string Duration { get; set; } = string.Empty;
-    }
 
     public class UserDataWrapper
     {

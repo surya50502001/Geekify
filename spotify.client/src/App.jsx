@@ -211,23 +211,17 @@ function App() {
       setIsLoading(false);
     }, 2000);
     
-    // Check server status
+    // Check C# server status
     const checkServerStatus = async () => {
       try {
-        const response = await fetch('https://8af4e83e88ce.ngrok-free.app/status', { 
-          method: 'GET',
-          timeout: 5000
-        });
+        const response = await fetch('https://8af4e83e88ce.ngrok-free.app/api/song/songs');
         if (response.ok) {
           setServerStatus('online');
-          console.log('✅ Server is running');
         } else {
           setServerStatus('offline');
-          console.log('❌ Server responded but not healthy');
         }
       } catch (error) {
         setServerStatus('offline');
-        console.log('❌ Server is offline:', error.message);
       }
     };
     
@@ -1281,21 +1275,7 @@ function App() {
                               isPending: false
                             };
                             
-                            // Push to GitHub
-                            try {
-                              const response = await fetch('https://8af4e83e88ce.ngrok-free.app/push-to-github', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ filename: song.filename, title: song.title })
-                              });
-                              const result = await response.json();
-                              if (result.success) {
-                                console.log('Song pushed to GitHub:', result.githubUrl);
-                                approvedSong.githubUrl = result.githubUrl;
-                              }
-                            } catch (error) {
-                              console.log('GitHub push failed:', error);
-                            }
+                            // Note: GitHub push functionality needs to be implemented in C# server
                             
                             setOurSongs(prev => {
                               const updated = [...prev, approvedSong];

@@ -35,6 +35,39 @@ function App() {
   const [serverStatus, setServerStatus] = useState('checking');
   const audioRef = useRef(null);
   
+  const saveAppState = () => {
+    const state = {
+      currentSong,
+      isPlaying,
+      currentTime,
+      activeMenu,
+      searchTerm,
+      comments,
+      isDarkTheme,
+      sidebarOpen,
+      allUserUploads,
+      ourSongs
+    };
+    sessionStorage.setItem('appState', JSON.stringify(state));
+  };
+  
+  const loadAppState = () => {
+    const saved = sessionStorage.getItem('appState');
+    if (saved) {
+      const state = JSON.parse(saved);
+      setCurrentSong(state.currentSong || 0);
+      setIsPlaying(false);
+      setCurrentTime(state.currentTime || 0);
+      setActiveMenu(state.activeMenu || 'Home');
+      setSearchTerm(state.searchTerm || '');
+      setComments(state.comments || []);
+      setIsDarkTheme(state.isDarkTheme ?? true);
+      setSidebarOpen(state.sidebarOpen ?? true);
+      if (state.allUserUploads) setAllUserUploads(state.allUserUploads);
+      if (state.ourSongs) setOurSongs(state.ourSongs);
+    }
+  };
+  
   useEffect(() => {
     // Load cached app state first
     loadAppState();
@@ -316,38 +349,7 @@ function App() {
     }
   };
   
-  const saveAppState = () => {
-    const state = {
-      currentSong,
-      isPlaying,
-      currentTime,
-      activeMenu,
-      searchTerm,
-      comments,
-      isDarkTheme,
-      sidebarOpen,
-      allUserUploads,
-      ourSongs
-    };
-    sessionStorage.setItem('appState', JSON.stringify(state));
-  };
-  
-  const loadAppState = () => {
-    const saved = sessionStorage.getItem('appState');
-    if (saved) {
-      const state = JSON.parse(saved);
-      setCurrentSong(state.currentSong || 0);
-      setIsPlaying(false); // Don't auto-play on refresh
-      setCurrentTime(state.currentTime || 0);
-      setActiveMenu(state.activeMenu || 'Home');
-      setSearchTerm(state.searchTerm || '');
-      setComments(state.comments || []);
-      setIsDarkTheme(state.isDarkTheme ?? true);
-      setSidebarOpen(state.sidebarOpen ?? true);
-      if (state.allUserUploads) setAllUserUploads(state.allUserUploads);
-      if (state.ourSongs) setOurSongs(state.ourSongs);
-    }
-  };
+
   
   const handleRefresh = () => {
     saveAppState();
@@ -1238,49 +1240,7 @@ function App() {
             </div>
           )}
           
-          {activeMenu === 'Liked' && (
-            <div style={{padding: '20px'}}>
-              <h3 style={{fontSize: '24px', marginBottom: '24px', color: getCurrentColor()}}>Liked Songs</h3>
-              {Array.from(likedSongs).length > 0 ? (
-                <div>
-                  {Array.from(likedSongs).map(songIndex => {
-                    const song = allSongs[songIndex];
-                    return song ? (
-                      <div key={songIndex} onClick={() => {setCurrentSong(songIndex); setIsPlaying(true);}} style={{
-                        background: isDarkTheme ? '#181818' : '#f0f0f0',
-                        padding: '12px 16px',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        marginBottom: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px'
-                      }}>
-                        <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-                        </div>
-                        <div style={{flex: 1}}>
-                          <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
-                          <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
-                        </div>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill={getCurrentColor()}>
-                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                        </svg>
-                      </div>
-                    ) : null;
-                  })}
-                </div>
-              ) : (
-                <div style={{textAlign: 'center', padding: '60px 20px'}}>
-                  <svg width="64" height="64" viewBox="0 0 24 24" fill="#666" style={{marginBottom: '16px'}}>
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                  </svg>
-                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>No liked songs yet</p>
-                  <p style={{color: '#666', fontSize: '14px'}}>Songs you like will appear here</p>
-                </div>
-              )}
-            </div>
-          )}
+
           
 
           
@@ -1568,7 +1528,7 @@ function App() {
         isPlaying={isPlaying}
         currentTime={currentTime}
         duration={duration}
-        likedSongs={likedSongs}
+        userData={userData}
         audioRef={audioRef}
         getCurrentColor={getCurrentColor}
         formatTime={formatTime}

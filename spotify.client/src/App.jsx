@@ -302,7 +302,7 @@ function App() {
         // Try server upload first, fallback to local storage
         let serverUploaded = false;
         try {
-          const response = await fetch('https://8af4e83e88ce.ngrok-free.app/upload', {
+          const response = await fetch('https://8af4e83e88ce.ngrok-free.app/api/song/upload', {
             method: 'POST',
             body: formData
           });
@@ -314,7 +314,7 @@ function App() {
             const newSong = {
               title: file.name.replace(/\.[^/.]+$/, ''),
               artist: `Uploaded by ${currentUser}`,
-              url: `https://8af4e83e88ce.ngrok-free.app/play/${result.filename}`,
+              url: `https://8af4e83e88ce.ngrok-free.app/api/song/play/${result.filename}`,
               uploadedBy: currentUser,
               duration: audio.duration,
               filename: result.filename,
@@ -490,14 +490,14 @@ function App() {
     // Load uploaded songs from server
     const fetchUploadedSongs = async () => {
       try {
-        const response = await fetch('https://8af4e83e88ce.ngrok-free.app/songs');
+        const response = await fetch('https://8af4e83e88ce.ngrok-free.app/api/song/songs');
         const uploadedFiles = await response.json();
         console.log('Server response:', uploadedFiles);
         if (uploadedFiles.success) {
           const serverSongs = uploadedFiles.songs.map(song => ({
             title: song.name.replace(/\.[^/.]+$/, ''),
             artist: `Uploaded by ${song.uploader || 'User'}`,
-            url: `https://8af4e83e88ce.ngrok-free.app/play/${song.filename}`,
+            url: `https://8af4e83e88ce.ngrok-free.app/api/song/play/${song.filename}`,
             uploadedBy: song.uploader,
             filename: song.filename,
             duration: 0,
@@ -1332,7 +1332,7 @@ function App() {
                             onClick={async () => {
                               if (confirm(`Delete ${song.title} from server permanently?`)) {
                                 try {
-                                  const response = await fetch(`https://8af4e83e88ce.ngrok-free.app/delete/${song.filename}`, {
+                                  const response = await fetch(`https://8af4e83e88ce.ngrok-free.app/api/song/delete/${song.filename}`, {
                                     method: 'DELETE'
                                   });
                                   const result = await response.json();

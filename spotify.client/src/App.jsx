@@ -244,7 +244,7 @@ function App() {
   const playNext = () => {
     const nextSong = (currentSong + 1) % allSongs.length;
     setCurrentSong(nextSong);
-    setIsPlaying(false);
+    setIsPlaying(true);
     setCurrentTime(0);
     setDuration(0);
   };
@@ -252,7 +252,7 @@ function App() {
   const playPrev = () => {
     const prevSong = currentSong === 0 ? allSongs.length - 1 : currentSong - 1;
     setCurrentSong(prevSong);
-    setIsPlaying(false);
+    setIsPlaying(true);
     setCurrentTime(0);
     setDuration(0);
   };
@@ -418,7 +418,16 @@ function App() {
         
         {/* Main Content */}
         <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #000000 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '120px', transition: 'background 0.3s ease'}}>
-          <h2 style={{fontSize: '32px', fontWeight: 'bold', marginBottom: '24px'}}>Hello Melophile</h2>
+          <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px'}}>
+            <svg width="48" height="36" viewBox="0 0 100 100" fill={getCurrentColor()}>
+              <circle cx="50" cy="50" r="45" fill="none" stroke={getCurrentColor()} strokeWidth="3"/>
+              <circle cx="50" cy="50" r="35" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
+              <circle cx="50" cy="50" r="25" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
+              <circle cx="50" cy="50" r="8" fill={getCurrentColor()}/>
+              <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
+            </svg>
+            <h2 style={{fontSize: '24px', fontWeight: '600', margin: 0, fontFamily: 'Arial, sans-serif'}}>Hello Melophile</h2>
+          </div>
           
           {activeMenu === 'Home' && (
             <div style={{textAlign: 'center', padding: '60px 20px'}}>
@@ -494,7 +503,7 @@ function App() {
                     song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     song.artist.toLowerCase().includes(searchTerm.toLowerCase())
                   ).map((song, index) => (
-                    <div key={index} onClick={() => {setCurrentSong(allSongs.indexOf(song)); setIsPlaying(false);}} className="song-card" style={{
+                    <div key={index} onClick={() => {setCurrentSong(allSongs.indexOf(song)); setIsPlaying(true);}} className="song-card" style={{
                       background: '#181818',
                       padding: '16px',
                       borderRadius: '8px',
@@ -532,7 +541,7 @@ function App() {
               
               <div style={{marginBottom: '32px'}}>
                 {allSongs.length > 0 ? allSongs.map((song, index) => (
-                  <div key={index} onClick={() => {setCurrentSong(index); setIsPlaying(false);}} style={{
+                  <div key={index} onClick={() => {setCurrentSong(index); setIsPlaying(true);}} style={{
                     background: '#181818',
                     padding: '12px 16px',
                     borderRadius: '8px',
@@ -629,7 +638,7 @@ function App() {
                   {Array.from(likedSongs).map(songIndex => {
                     const song = allSongs[songIndex];
                     return song ? (
-                      <div key={songIndex} onClick={() => {setCurrentSong(songIndex); setIsPlaying(false);}} style={{
+                      <div key={songIndex} onClick={() => {setCurrentSong(songIndex); setIsPlaying(true);}} style={{
                         background: isDarkTheme ? '#181818' : '#f0f0f0',
                         padding: '12px 16px',
                         borderRadius: '8px',

@@ -1,17 +1,8 @@
 function Sidebar({ activeMenu, setActiveMenu, setSidebarOpen, sidebarOpen, getCurrentColor, isDarkTheme }) {
   return (
     <div className="sidebar" style={{width: sidebarOpen ? '240px' : '0', background: isDarkTheme ? '#000000' : '#f8f9fa', padding: sidebarOpen ? '24px 12px' : '0', borderRight: isDarkTheme ? '1px solid #282828' : '1px solid #e0e0e0', overflow: 'hidden', transition: 'width 0.3s ease, padding 0.3s ease, background-color 0.3s ease'}}>
-      <div style={{marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px'}}>
-        <div onClick={() => {setActiveMenu('Home'); setSidebarOpen(false);}} style={{cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px'}}>
-          <svg width="40" height="28" viewBox="0 0 100 100" fill={getCurrentColor()}>
-            <circle cx="50" cy="50" r="45" fill="none" stroke={getCurrentColor()} strokeWidth="3"/>
-            <circle cx="50" cy="50" r="35" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
-            <circle cx="50" cy="50" r="25" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
-            <circle cx="50" cy="50" r="8" fill={getCurrentColor()}/>
-            <polygon points="42,35 42,65 65,50" fill={getCurrentColor()}/>
-          </svg>
-          <h1 style={{fontSize: '24px', margin: 0, fontWeight: 'bold', color: getCurrentColor()}}>Welcome!</h1>
-        </div>
+      <div style={{marginBottom: '32px'}}>
+        <h1 style={{fontSize: '20px', margin: 0, fontWeight: '600', color: getCurrentColor(), fontFamily: 'Arial, sans-serif'}}>Menu</h1>
       </div>
       <nav>
         <div onClick={() => {setActiveMenu('Home'); setSidebarOpen(false);}} style={{marginBottom: '8px', padding: '12px 16px', cursor: 'pointer', borderRadius: '4px', background: activeMenu === 'Home' ? `${getCurrentColor()}20` : 'transparent', display: 'flex', alignItems: 'center', gap: '16px', color: activeMenu === 'Home' ? getCurrentColor() : '#b3b3b3'}}>

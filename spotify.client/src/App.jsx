@@ -261,11 +261,24 @@ function App() {
     return (
       <div style={{background: '#000', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial'}}>
         <div style={{textAlign: 'center'}}>
-          <div onClick={changeSpinnerColor} style={{width: '80px', height: '80px', margin: '0 auto 20px', position: 'relative', cursor: 'pointer'}}>
-            <svg width="80" height="80" viewBox="0 0 24 24" fill={spinnerColor} style={{animation: 'spin 2s linear infinite'}}>
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+          <div onClick={changeSpinnerColor} style={{width: '80px', height: '80px', margin: '0 auto 20px', cursor: 'pointer', background: 'transparent', border: 'none', padding: 0}}>
+            <svg width="80" height="80" viewBox="0 0 100 100" fill={spinnerColor} style={{animation: 'spin 2s linear infinite'}}>
+              <circle cx="50" cy="50" r="45" fill="none" stroke={spinnerColor} strokeWidth="3"/>
+              <circle cx="50" cy="50" r="35" fill="none" stroke={spinnerColor} strokeWidth="2"/>
+              <circle cx="50" cy="50" r="25" fill="none" stroke={spinnerColor} strokeWidth="2"/>
+              <circle cx="50" cy="50" r="8" fill={spinnerColor}/>
+              <polygon points="42,35 42,65 65,50" fill={spinnerColor}/>
             </svg>
           </div>
+          <div style={{
+            fontSize: '12px',
+            fontWeight: 'bold',
+            color: spinnerColor,
+            textShadow: `0 0 5px ${spinnerColor}, 0 0 10px ${spinnerColor}, 0 0 15px ${spinnerColor}`,
+            letterSpacing: '1px',
+            fontFamily: 'Arial, sans-serif',
+            marginBottom: '16px'
+          }}>GEEKIFY</div>
           <h2 style={{fontSize: '24px', fontWeight: 'bold', color: spinnerColor, margin: 0}}>Welcome!</h2>
           <p style={{color: '#b3b3b3', fontSize: '14px', marginTop: '8px'}}>Loading your music experience...</p>
         </div>

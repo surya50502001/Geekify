@@ -1136,6 +1136,36 @@ function App() {
                         >
                           ✗ Reject
                         </button>
+                        {song.filename && (
+                          <button 
+                            onClick={async () => {
+                              if (confirm(`Delete ${song.title} from server permanently?`)) {
+                                try {
+                                  const response = await fetch(`https://8af4e83e88ce.ngrok-free.app/delete/${song.filename}`, {
+                                    method: 'DELETE'
+                                  });
+                                  const result = await response.json();
+                                  if (result.success) {
+                                    setAllUserUploads(prev => {
+                                      const updated = prev.filter((_, i) => i !== index);
+                                      localStorage.setItem('allUserUploads', JSON.stringify(updated));
+                                      return updated;
+                                    });
+                                    alert('Song deleted from server!');
+                                  } else {
+                                    alert('Failed to delete from server');
+                                  }
+                                } catch (error) {
+                                  console.error('Delete error:', error);
+                                  alert('Error deleting from server');
+                                }
+                              }
+                            }}
+                            style={{background: '#dc2626', color: 'white', padding: '8px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px'}}
+                          >
+                            🗑️ Delete from Server
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}

@@ -698,34 +698,49 @@ function App() {
       <style>{`
         @media (max-width: 768px) {
           .sidebar { width: ${sidebarOpen ? '100vw' : '0'} !important; position: fixed !important; z-index: 999 !important; height: 100vh !important; }
-          .main-content { padding: 12px 8px !important; padding-top: 60px !important; }
-          .home-card { max-width: 100% !important; padding: 16px 12px !important; margin: 0 4px !important; }
-          .library-list { padding: 4px !important; }
-          .library-item { flex-direction: column !important; text-align: center !important; }
-          .search-input { width: calc(100% - 16px) !important; max-width: none !important; }
-          .player-controls { width: 45% !important; }
-          .song-info { width: 30% !important; font-size: 11px !important; }
-          .song-info div { max-width: 80px !important; }
-          .volume-section { display: none !important; }
-          .home-card-content { flex-direction: column !important; text-align: center !important; }
-          .home-card-image { width: 100px !important; height: 100px !important; margin: 0 auto 12px !important; }
+          .main-content { padding: 8px !important; padding-top: 70px !important; padding-bottom: 90px !important; }
+          .top-controls { top: 8px !important; right: 8px !important; gap: 4px !important; }
+          .top-controls button { width: 32px !important; height: 32px !important; }
+          .header-section { flex-direction: column !important; align-items: center !important; text-align: center !important; gap: 8px !important; margin-bottom: 16px !important; }
+          .header-logo { margin-bottom: 8px !important; }
+          .header-info { width: 100% !important; }
+          .header-info h2 { font-size: 18px !important; }
+          .user-controls { justify-content: center !important; flex-wrap: wrap !important; }
+          .home-card { max-width: 100% !important; padding: 16px !important; margin: 0 !important; }
+          .home-card-content { flex-direction: column !important; text-align: center !important; gap: 16px !important; }
+          .home-card-image { width: 120px !important; height: 120px !important; margin: 0 auto !important; }
           .home-card-details { width: 100% !important; }
-          .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; padding: 12px !important; }
-          .bottom-player { padding: 0 8px !important; height: 70px !important; }
-          .song-card { padding: 8px !important; }
-          .song-card-image { height: 100px !important; }
-          .song-title { font-size: 12px !important; }
-          .song-artist { font-size: 10px !important; }
+          .home-card-details h3 { font-size: 20px !important; max-width: 100% !important; }
+          .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; padding: 16px !important; }
+          .search-input { width: calc(100% - 16px) !important; max-width: none !important; }
+          .song-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; gap: 12px !important; }
+          .song-card { padding: 12px !important; }
+          .song-card-image { height: 120px !important; }
+          .song-title { font-size: 13px !important; }
+          .song-artist { font-size: 11px !important; }
+          .bottom-player { padding: 0 8px !important; height: 80px !important; }
+          .player-controls { width: 50% !important; }
+          .song-info { width: 35% !important; font-size: 11px !important; }
+          .song-info div { max-width: 100px !important; }
+          .volume-section { display: none !important; }
         }
         @media (max-width: 480px) {
-          .main-content { padding: 8px 4px !important; padding-top: 50px !important; }
-          .home-card { padding: 12px 8px !important; }
-          .player-controls { width: 40% !important; }
-          .song-info { width: 25% !important; }
-          .song-info div { max-width: 60px !important; font-size: 10px !important; }
-          .bottom-player { height: 60px !important; padding: 0 4px !important; }
-          .stats-grid { grid-template-columns: 1fr !important; gap: 4px !important; padding: 8px !important; }
-          .home-card-image { width: 80px !important; height: 80px !important; }
+          .main-content { padding: 4px !important; padding-top: 60px !important; padding-bottom: 85px !important; }
+          .top-controls { top: 4px !important; right: 4px !important; }
+          .top-controls button { width: 28px !important; height: 28px !important; }
+          .header-section { margin-bottom: 12px !important; }
+          .header-info h2 { font-size: 16px !important; }
+          .home-card { padding: 12px !important; }
+          .home-card-image { width: 100px !important; height: 100px !important; }
+          .home-card-details h3 { font-size: 18px !important; }
+          .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; padding: 12px !important; }
+          .song-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important; gap: 8px !important; }
+          .song-card { padding: 8px !important; }
+          .song-card-image { height: 100px !important; }
+          .bottom-player { height: 70px !important; padding: 0 4px !important; }
+          .player-controls { width: 45% !important; }
+          .song-info { width: 30% !important; }
+          .song-info div { max-width: 80px !important; font-size: 10px !important; }
         }
         @keyframes bounce {
           0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
@@ -767,7 +782,7 @@ function App() {
       `}</style>
       <div style={{display: 'flex', flex: 1}}>
         {/* Top Controls */}
-        <div style={{position: 'fixed', top: '16px', right: '16px', zIndex: 1001, display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+        <div className="top-controls" style={{position: 'fixed', top: '16px', right: '16px', zIndex: 1001, display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
           <button 
             onClick={toggleTheme}
             style={{
@@ -827,8 +842,8 @@ function App() {
         
         {/* Main Content */}
         <div className="main-content" style={{flex: 1, background: isDarkTheme ? `linear-gradient(180deg, ${getCurrentColor()}40 0%, #000000 100%)` : `linear-gradient(180deg, ${getCurrentColor()}20 0%, #f8f9fa 100%)`, padding: '24px', paddingBottom: '120px', transition: 'background 0.3s ease'}}>
-          <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px'}}>
-            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'}}>
+          <div className="header-section" style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px'}}>
+            <div className="header-logo" style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'}}>
               <svg width="clamp(32, 6vw, 48)" height="clamp(24, 4.5vw, 36)" viewBox="0 0 100 100" fill={getCurrentColor()}>
                 <circle cx="50" cy="50" r="45" fill="none" stroke={getCurrentColor()} strokeWidth="3"/>
                 <circle cx="50" cy="50" r="35" fill="none" stroke={getCurrentColor()} strokeWidth="2"/>
@@ -849,7 +864,7 @@ function App() {
             </div>
             <div style={{flex: 1}}>
               <h2 style={{fontSize: 'clamp(18px, 4vw, 24px)', fontWeight: '300', margin: 0, fontFamily: 'Georgia, serif', fontStyle: 'italic'}}>Hello Melophile</h2>
-              <div style={{display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px', flexWrap: 'wrap'}}>
+              <div className="user-controls" style={{display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px', flexWrap: 'wrap'}}>
                 <div style={{display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 6px', borderRadius: '8px', background: serverStatus === 'online' ? 'rgba(34, 197, 94, 0.2)' : serverStatus === 'offline' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(156, 163, 175, 0.2)', border: `1px solid ${serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af'}`}}>
                   <div style={{width: '4px', height: '4px', borderRadius: '50%', background: serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af'}}></div>
                   <span style={{fontSize: '10px', color: serverStatus === 'online' ? '#22c55e' : serverStatus === 'offline' ? '#ef4444' : '#9ca3af', fontWeight: '500'}}>

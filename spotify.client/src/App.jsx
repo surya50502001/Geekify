@@ -9,11 +9,23 @@ const createUserData = (userId) => {
     userId,
     likedSongs: [],
     playlists: [],
-    save() {
-      localStorage.setItem(`userData_${this.userId}`, JSON.stringify({
+    async save() {
+      const data = {
         likedSongs: this.likedSongs,
         playlists: this.playlists
-      }));
+      };
+      localStorage.setItem(`userData_${this.userId}`, JSON.stringify(data));
+      
+      // Sync to server
+      try {
+        await fetch('https://8af4e83e88ce.ngrok-free.app/sync-user-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: this.userId, ...data })
+        });
+      } catch (error) {
+        console.log('Server sync failed, using local storage only');
+      }
     },
     likeSong(song) {
       if (!this.likedSongs.find(s => s.title === song.title)) {
@@ -48,13 +60,32 @@ const createUserData = (userId) => {
     }
   };
   
-  // Load existing data
-  const saved = localStorage.getItem(`userData_${userId}`);
-  if (saved) {
-    const data = JSON.parse(saved);
-    userData.likedSongs = data.likedSongs || [];
-    userData.playlists = data.playlists || [];
-  }
+  // Load from server first, fallback to localStorage
+  const loadUserData = async () => {
+    try {
+      const response = await fetch(`https://8af4e83e88ce.ngrok-free.app/get-user-data/${userId}`);
+      if (response.ok) {
+        const serverData = await response.json();
+        if (serverData.success) {
+          userData.likedSongs = serverData.data.likedSongs || [];
+          userData.playlists = serverData.data.playlists || [];
+          return;
+        }
+      }
+    } catch (error) {
+      console.log('Server load failed, using local storage');
+    }
+    
+    // Fallback to localStorage
+    const saved = localStorage.getItem(`userData_${userId}`);
+    if (saved) {
+      const data = JSON.parse(saved);
+      userData.likedSongs = data.likedSongs || [];
+      userData.playlists = data.playlists || [];
+    }
+  };
+  
+  loadUserData();
   
   return userData;
 };
@@ -131,7 +162,10 @@ function App() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       setCurrentUser(savedUser);
-      setUserData(createUserData(savedUser));
+      const userData = createUserData(savedUser);
+      setUserData(userData);
+      // Force refresh after server sync
+      setTimeout(() => setUserData({...userData}), 1000);
     }
     
     // Load theme preference (override cache if exists)

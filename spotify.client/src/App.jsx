@@ -861,31 +861,76 @@ function App() {
           </div>
           
           {activeMenu === 'Home' && (
-            <div style={{textAlign: 'center', padding: '60px 20px'}}>
-              <h2 style={{fontSize: '32px', fontWeight: '300', margin: '0 0 16px 0', color: getCurrentColor()}}>Welcome to Geekify</h2>
-              <p style={{color: '#b3b3b3', fontSize: '16px', marginBottom: '40px'}}>Your music streaming experience starts here</p>
+            <div style={{padding: '0 16px'}}>
+              {/* Category Pills */}
+              <div style={{display: 'flex', gap: '8px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px'}}>
+                <div style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap'}}>All</div>
+                <div style={{background: '#333', color: '#fff', padding: '8px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap', cursor: 'pointer'}}>Music</div>
+                <div style={{background: '#333', color: '#fff', padding: '8px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap', cursor: 'pointer'}}>Podcasts</div>
+              </div>
               
-              {allSongs.length > 0 && (
-                <div style={{background: '#181818', padding: '20px', borderRadius: '12px', maxWidth: '400px', margin: '0 auto'}}>
-                  <h3 style={{fontSize: '18px', marginBottom: '12px', color: '#fff'}}>{allSongs[currentSong]?.title || 'No Song Selected'}</h3>
-                  <p style={{color: '#b3b3b3', fontSize: '14px', marginBottom: '16px'}}>{allSongs[currentSong]?.artist || ''}</p>
-                  <button 
-                    onClick={() => {
-                      if (allSongs[currentSong]) {
-                        setIsPlaying(!isPlaying);
-                        if (!isPlaying) {
-                          audioRef.current?.play();
-                        } else {
-                          audioRef.current?.pause();
-                        }
-                      }
-                    }}
-                    style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '24px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
-                  >
-                    {isPlaying ? 'Pause' : 'Play'}
-                  </button>
+              {/* Quick Access Grid */}
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '32px'}}>
+                <div onClick={() => setActiveMenu('Liked Songs')} style={{background: 'linear-gradient(135deg, #450af5, #8e2de2)', borderRadius: '8px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer'}}>
+                  <div style={{width: '48px', height: '48px', background: 'rgba(255,255,255,0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                  </div>
+                  <span style={{color: 'white', fontSize: '16px', fontWeight: '600'}}>Liked Songs</span>
                 </div>
-              )}
+                
+                <div onClick={() => setActiveMenu('Our Songs')} style={{background: '#333', borderRadius: '8px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer'}}>
+                  <div style={{width: '48px', height: '48px', background: getCurrentColor(), borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                  </div>
+                  <span style={{color: 'white', fontSize: '16px', fontWeight: '600'}}>Our Songs</span>
+                </div>
+                
+                <div onClick={() => setActiveMenu('Your Library')} style={{background: '#333', borderRadius: '8px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer'}}>
+                  <div style={{width: '48px', height: '48px', background: '#ff6b35', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M14.5 2.134a1 1 0 0 1 1 0l6 3.464a1 1 0 0 1 .5.866V21a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6.464a1 1 0 0 1 .5-.866l6-3.464a1 1 0 0 1 1 0L12 3.732l2.5-1.598zM4 7.732V20h16V7.732l-5-2.887V8a1 1 0 0 1-2 0V4.845L9 7.732z"/></svg>
+                  </div>
+                  <span style={{color: 'white', fontSize: '16px', fontWeight: '600'}}>Your Library</span>
+                </div>
+                
+                <div onClick={() => setActiveMenu('Upload')} style={{background: '#333', borderRadius: '8px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer'}}>
+                  <div style={{width: '48px', height: '48px', background: '#e22856', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+                  </div>
+                  <span style={{color: 'white', fontSize: '16px', fontWeight: '600'}}>Upload</span>
+                </div>
+              </div>
+              
+              {/* Recently Played */}
+              <div style={{marginBottom: '32px'}}>
+                <h2 style={{fontSize: '24px', fontWeight: '700', marginBottom: '16px', color: 'white'}}>Recently played</h2>
+                <div style={{display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '8px'}}>
+                  {allSongs.slice(0, 6).map((song, index) => (
+                    <div key={index} onClick={() => {setCurrentSong(index); setIsPlaying(true);}} style={{minWidth: '160px', cursor: 'pointer'}}>
+                      <div style={{width: '160px', height: '160px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                      </div>
+                      <h3 style={{fontSize: '14px', fontWeight: '600', marginBottom: '4px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.title}</h3>
+                      <p style={{fontSize: '12px', color: '#b3b3b3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.artist}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Charts */}
+              <div>
+                <h2 style={{fontSize: '24px', fontWeight: '700', marginBottom: '16px', color: 'white'}}>Charts</h2>
+                <div style={{display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '8px'}}>
+                  {allSongs.slice(0, 4).map((song, index) => (
+                    <div key={index} onClick={() => {setCurrentSong(index); setIsPlaying(true);}} style={{minWidth: '160px', cursor: 'pointer'}}>
+                      <div style={{width: '160px', height: '160px', background: `linear-gradient(135deg, ${songColors[index % songColors.length]}, ${songColors[index % songColors.length]}dd)`, borderRadius: '8px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                      </div>
+                      <h3 style={{fontSize: '14px', fontWeight: '600', marginBottom: '4px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.title}</h3>
+                      <p style={{fontSize: '12px', color: '#b3b3b3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{song.artist}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
           

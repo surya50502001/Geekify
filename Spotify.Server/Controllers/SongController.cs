@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Spotify.Server.Data;
+using Spotify.Server.Models;
 using System.Text.Json;
 
 namespace Spotify.Server.Controllers
@@ -8,7 +11,12 @@ namespace Spotify.Server.Controllers
     public class SongController : ControllerBase
     {
         private readonly string _songsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "songs");
-        private readonly string _uploadsFile = Path.Combine(Directory.GetCurrentDirectory(), "uploads.json");
+        private readonly AppDbContext _context;
+        
+        public SongController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpPost("upload")]
         public async Task<IActionResult> Upload(IFormFile song, string uploader)
@@ -42,17 +50,18 @@ namespace Spotify.Server.Controllers
             
             Console.WriteLine($"File saved successfully: {fileName}");
 
-            var uploads = await LoadUploads();
-            uploads.Add(new UploadedSong
+            var uploadedSong = new UploadedSong
             {
                 Filename = fileName,
                 Name = song.FileName,
                 Uploader = uploader,
                 UploadDate = DateTime.Now
-            });
-            await SaveUploads(uploads);
+            };
             
-            Console.WriteLine($"Upload record saved. Total uploads: {uploads.Count}");
+            _context.UploadedSongs.Add(uploadedSong);
+            await _context.SaveChangesAsync();
+            
+            Console.WriteLine($"Upload record saved successfully");
 
             return Ok(new { success = true, filename = fileName, originalName = song.FileName });
         }
@@ -60,7 +69,7 @@ namespace Spotify.Server.Controllers
         [HttpGet("songs")]
         public async Task<IActionResult> GetSongs()
         {
-            var uploads = await LoadUploads();
+            var uploads = await _context.UploadedSongs.ToListAsync();
             return Ok(new { success = true, songs = uploads });
         }
 
@@ -83,36 +92,17 @@ namespace Spotify.Server.Controllers
             {
                 System.IO.File.Delete(filePath);
                 
-                var uploads = await LoadUploads();
-                uploads = uploads.Where(u => u.Filename != filename).ToList();
-                await SaveUploads(uploads);
+                var uploadedSong = await _context.UploadedSongs.FirstOrDefaultAsync(u => u.Filename == filename);
+                if (uploadedSong != null)
+                {
+                    _context.UploadedSongs.Remove(uploadedSong);
+                    await _context.SaveChangesAsync();
+                }
                 
                 return Ok(new { success = true });
             }
             return NotFound(new { success = false });
         }
 
-        private async Task<List<UploadedSong>> LoadUploads()
-        {
-            if (!System.IO.File.Exists(_uploadsFile))
-                return new List<UploadedSong>();
-
-            var json = await System.IO.File.ReadAllTextAsync(_uploadsFile);
-            return JsonSerializer.Deserialize<List<UploadedSong>>(json) ?? new List<UploadedSong>();
-        }
-
-        private async Task SaveUploads(List<UploadedSong> uploads)
-        {
-            var json = JsonSerializer.Serialize(uploads, new JsonSerializerOptions { WriteIndented = true });
-            await System.IO.File.WriteAllTextAsync(_uploadsFile, json);
-        }
-    }
-
-    public class UploadedSong
-    {
-        public string Filename { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Uploader { get; set; } = string.Empty;
-        public DateTime UploadDate { get; set; }
     }
 }

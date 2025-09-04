@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Spotify.Server.Data;
 using Spotify.Server.Models;
 using System.Text.Json;
 
@@ -8,29 +10,30 @@ namespace Spotify.Server.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly string _dataFile = Path.Combine(Directory.GetCurrentDirectory(), "user-data.json");
-        private readonly string _globalPlaylistsFile = Path.Combine(Directory.GetCurrentDirectory(), "global-playlists.json");
+        private readonly AppDbContext _context;
+        
+        public UserController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpPost("save-user-data")]
         public async Task<IActionResult> SaveUserData([FromBody] SaveUserDataRequest request)
         {
             try
             {
-                var allData = new Dictionary<string, UserData>();
+                var userData = await _context.UserDatas.FirstOrDefaultAsync(u => u.UserId == request.UserId);
                 
-                if (System.IO.File.Exists(_dataFile))
+                if (userData == null)
                 {
-                    var json = await System.IO.File.ReadAllTextAsync(_dataFile);
-                    var wrapper = JsonSerializer.Deserialize<UserDataWrapper>(json);
-                    allData = wrapper?.Users ?? new Dictionary<string, UserData>();
+                    userData = new UserData { UserId = request.UserId };
+                    _context.UserDatas.Add(userData);
                 }
-
-                allData[request.UserId] = request.Data;
-
-                var wrapperData = new UserDataWrapper { Users = allData };
-                var jsonString = JsonSerializer.Serialize(wrapperData, new JsonSerializerOptions { WriteIndented = true });
-                await System.IO.File.WriteAllTextAsync(_dataFile, jsonString);
-
+                
+                userData.LikedSongs = JsonSerializer.Serialize(request.Data.LikedSongs);
+                userData.Playlists = JsonSerializer.Serialize(request.Data.Playlists);
+                
+                await _context.SaveChangesAsync();
                 return Ok(new { success = true });
             }
             catch (Exception ex)
@@ -44,16 +47,20 @@ namespace Spotify.Server.Controllers
         {
             try
             {
-                if (!System.IO.File.Exists(_dataFile))
+                var userData = await _context.UserDatas.FirstOrDefaultAsync(u => u.UserId == userId);
+                
+                if (userData == null)
                 {
-                    return Ok(new { success = true, data = new UserData() });
+                    return Ok(new { success = true, data = new { LikedSongs = new List<object>(), Playlists = new List<object>() } });
                 }
-
-                var json = await System.IO.File.ReadAllTextAsync(_dataFile);
-                var wrapper = JsonSerializer.Deserialize<UserDataWrapper>(json);
-                var userData = wrapper?.Users?.GetValueOrDefault(userId) ?? new UserData();
-
-                return Ok(new { success = true, data = userData });
+                
+                var result = new
+                {
+                    LikedSongs = string.IsNullOrEmpty(userData.LikedSongs) ? new List<object>() : JsonSerializer.Deserialize<List<object>>(userData.LikedSongs),
+                    Playlists = string.IsNullOrEmpty(userData.Playlists) ? new List<object>() : JsonSerializer.Deserialize<List<object>>(userData.Playlists)
+                };
+                
+                return Ok(new { success = true, data = result });
             }
             catch (Exception ex)
             {
@@ -66,28 +73,12 @@ namespace Spotify.Server.Controllers
         {
             try
             {
-                Console.WriteLine($"Saving global playlist: {request.Playlist.Name} by {request.Playlist.CreatedBy}");
-                
-                var playlists = new List<GlobalPlaylist>();
-                
-                if (System.IO.File.Exists(_globalPlaylistsFile))
-                {
-                    var json = await System.IO.File.ReadAllTextAsync(_globalPlaylistsFile);
-                    playlists = JsonSerializer.Deserialize<List<GlobalPlaylist>>(json) ?? new List<GlobalPlaylist>();
-                }
-
-                playlists.Add(request.Playlist);
-                var jsonString = JsonSerializer.Serialize(playlists, new JsonSerializerOptions { WriteIndented = true });
-                await System.IO.File.WriteAllTextAsync(_globalPlaylistsFile, jsonString);
-                
-                Console.WriteLine($"Global playlist saved to: {_globalPlaylistsFile}");
-                Console.WriteLine($"Total playlists: {playlists.Count}");
-
+                _context.GlobalPlaylists.Add(request.Playlist);
+                await _context.SaveChangesAsync();
                 return Ok(new { success = true });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving global playlist: {ex.Message}");
                 return StatusCode(500, new { success = false, error = ex.Message });
             }
         }
@@ -97,24 +88,11 @@ namespace Spotify.Server.Controllers
         {
             try
             {
-                Console.WriteLine($"Loading global playlists from: {_globalPlaylistsFile}");
-                
-                if (!System.IO.File.Exists(_globalPlaylistsFile))
-                {
-                    Console.WriteLine("Global playlists file does not exist, returning empty list");
-                    return Ok(new { success = true, playlists = new List<GlobalPlaylist>() });
-                }
-
-                var json = await System.IO.File.ReadAllTextAsync(_globalPlaylistsFile);
-                var playlists = JsonSerializer.Deserialize<List<GlobalPlaylist>>(json) ?? new List<GlobalPlaylist>();
-                
-                Console.WriteLine($"Loaded {playlists.Count} global playlists");
-
+                var playlists = await _context.GlobalPlaylists.ToListAsync();
                 return Ok(new { success = true, playlists });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading global playlists: {ex.Message}");
                 return StatusCode(500, new { success = false, error = ex.Message });
             }
         }
@@ -123,18 +101,17 @@ namespace Spotify.Server.Controllers
     public class SaveUserDataRequest
     {
         public string UserId { get; set; } = string.Empty;
-        public UserData Data { get; set; } = new();
+        public UserDataDto Data { get; set; } = new();
+    }
+    
+    public class UserDataDto
+    {
+        public List<object> LikedSongs { get; set; } = new();
+        public List<object> Playlists { get; set; } = new();
     }
 
     public class SaveGlobalPlaylistRequest
     {
         public GlobalPlaylist Playlist { get; set; } = new();
-    }
-
-
-
-    public class UserDataWrapper
-    {
-        public Dictionary<string, UserData> Users { get; set; } = new();
     }
 }

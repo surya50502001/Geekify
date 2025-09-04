@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import MusicPlayer from './components/MusicPlayer';
 import { validateUser, registerUser, isAdmin } from './People';
+import { UserData } from './models/UserData';
 
 function App() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -11,8 +12,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeMenu, setActiveMenu] = useState('Home');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [likedSongs, setLikedSongs] = useState(new Set());
-  const [uploadedSongs, setUploadedSongs] = useState([]);
+  const [ourSongs, setOurSongs] = useState([]); // GitHub + approved songs
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [comments, setComments] = useState([]);
@@ -24,7 +24,10 @@ function App() {
   const [authId, setAuthId] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [allUserUploads, setAllUserUploads] = useState([]);
-  const [personalLibrary, setPersonalLibrary] = useState([]);
+  const [userData, setUserData] = useState(null);
+  const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState('');
+  const [currentPlaylist, setCurrentPlaylist] = useState(null);
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -36,10 +39,11 @@ function App() {
     // Load cached app state first
     loadAppState();
     
-    // Load user session
+    // Load user session and data
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       setCurrentUser(savedUser);
+      setUserData(UserData.load(savedUser));
     }
     
     // Load theme preference (override cache if exists)
@@ -49,32 +53,16 @@ function App() {
       document.body.className = savedTheme === 'dark' ? 'dark-theme' : '';
     }
     
-    // Load saved uploads and approved songs
+    // Load saved uploads and Our Songs
     const savedUploads = localStorage.getItem('allUserUploads');
     if (savedUploads) {
       setAllUserUploads(JSON.parse(savedUploads));
     }
     
-    const savedApproved = localStorage.getItem('uploadedSongs');
-    if (savedApproved) {
-      setUploadedSongs(JSON.parse(savedApproved));
+    const savedOurSongs = localStorage.getItem('ourSongs');
+    if (savedOurSongs) {
+      setOurSongs(JSON.parse(savedOurSongs));
     }
-    
-    // Load personal library when user changes
-    const loadPersonalLibrary = () => {
-      if (currentUser) {
-        const savedLibrary = localStorage.getItem(`personalLibrary_${currentUser}`);
-        if (savedLibrary) {
-          setPersonalLibrary(JSON.parse(savedLibrary));
-        } else {
-          setPersonalLibrary([]);
-        }
-      } else {
-        setPersonalLibrary([]);
-      }
-    };
-    
-    loadPersonalLibrary();
     
     // Check for GitHub updates via Cloudflare Pages
     const currentVersion = '1.6.2'; // Update this when you make changes
@@ -162,6 +150,7 @@ function App() {
       const user = validateUser(authId, authPassword);
       if (user) {
         setCurrentUser(user.id);
+        setUserData(UserData.load(user.id));
         setShowAuth(false);
         localStorage.setItem('currentUser', user.id);
       } else {
@@ -334,13 +323,11 @@ function App() {
       currentTime,
       activeMenu,
       searchTerm,
-      likedSongs: Array.from(likedSongs),
       comments,
       isDarkTheme,
       sidebarOpen,
       allUserUploads,
-      uploadedSongs,
-      personalLibrary
+      ourSongs
     };
     sessionStorage.setItem('appState', JSON.stringify(state));
   };
@@ -354,13 +341,11 @@ function App() {
       setCurrentTime(state.currentTime || 0);
       setActiveMenu(state.activeMenu || 'Home');
       setSearchTerm(state.searchTerm || '');
-      setLikedSongs(new Set(state.likedSongs || []));
       setComments(state.comments || []);
       setIsDarkTheme(state.isDarkTheme ?? true);
       setSidebarOpen(state.sidebarOpen ?? true);
       if (state.allUserUploads) setAllUserUploads(state.allUserUploads);
-      if (state.uploadedSongs) setUploadedSongs(state.uploadedSongs);
-      if (state.personalLibrary) setPersonalLibrary(state.personalLibrary);
+      if (state.ourSongs) setOurSongs(state.ourSongs);
     }
   };
   
@@ -375,7 +360,7 @@ function App() {
     localStorage.setItem('updateDismissed', Date.now().toString());
   };
   
-  const allSongs = [...uploadedSongs]; // All songs now in uploadedSongs including GitHub songs
+  const allSongs = [...ourSongs]; // All songs from Our Songs playlist
   
   const songColors = ['#1db954', '#e22856', '#ff6600', '#8e44ad', '#3498db', '#f39c12', '#e74c3c', '#9b59b6'];
   
@@ -389,18 +374,19 @@ function App() {
   };
   
   const toggleLike = () => {
-    const newLiked = new Set(likedSongs);
-    if (newLiked.has(currentSong)) {
-      newLiked.delete(currentSong);
+    if (!userData || !allSongs[currentSong]) return;
+    
+    const song = allSongs[currentSong];
+    if (userData.isSongLiked(song)) {
+      userData.unlikeSong(song);
     } else {
-      newLiked.add(currentSong);
+      userData.likeSong(song);
     }
-    setLikedSongs(newLiked);
-    saveAppState();
+    setUserData({...userData}); // Trigger re-render
   };
   
   useEffect(() => {
-    // Load GitHub songs into main library
+    // Load GitHub songs into Our Songs playlist
     fetch('https://api.github.com/repos/surya50502001/Spotify-/contents')
       .then(res => res.json())
       .then(files => {
@@ -411,7 +397,11 @@ function App() {
           url: file.download_url,
           isGitHubSong: true
         }));
-        setUploadedSongs(prev => [...prev, ...songList]);
+        setOurSongs(prev => {
+          const updated = [...prev, ...songList];
+          localStorage.setItem('ourSongs', JSON.stringify(updated));
+          return updated;
+        });
       })
       .catch(err => console.error('Error loading songs:', err));
     
@@ -729,6 +719,7 @@ function App() {
                     <button 
                       onClick={() => {
                         setCurrentUser(null);
+                        setUserData(null);
                         localStorage.removeItem('currentUser');
                       }}
                       style={{background: 'transparent', border: `1px solid #ff4444`, color: '#ff4444', padding: '6px 12px', borderRadius: '16px', cursor: 'pointer', fontSize: '12px', fontWeight: '500'}}
@@ -856,6 +847,90 @@ function App() {
             </div>
           )}
           
+          {activeMenu === 'Our Songs' && (
+            <div>
+              <h3 style={{fontSize: '20px', margin: '0 0 24px 0'}}>Our Songs</h3>
+              <p style={{color: '#b3b3b3', fontSize: '14px', marginBottom: '24px'}}>All available songs from GitHub and approved uploads</p>
+              
+              <div style={{marginBottom: '32px'}}>
+                {allSongs.length > 0 ? allSongs.map((song, index) => (
+                  <div key={index} onClick={() => {setCurrentSong(index); setIsPlaying(true);}} style={{
+                    background: '#181818',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '16px', flex: 1}}>
+                      <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                      </div>
+                      <div style={{flex: 1}}>
+                        <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
+                        <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
+                      </div>
+                    </div>
+                    <div style={{display: 'flex', gap: '8px'}}>
+                      {currentUser && userData && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (userData.isSongLiked(song)) {
+                              userData.unlikeSong(song);
+                              alert('Removed from liked songs!');
+                            } else {
+                              userData.likeSong(song);
+                              alert('Added to liked songs!');
+                            }
+                            setUserData({...userData});
+                          }} 
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: userData.isSongLiked(song) ? '#1db954' : '#b3b3b3',
+                            cursor: 'pointer',
+                            padding: '8px'
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        </button>
+                      )}
+                      {currentUser && userData && userData.playlists.length > 0 && (
+                        <select 
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              userData.addToPlaylist(parseInt(e.target.value), song);
+                              setUserData({...userData});
+                              alert('Added to playlist!');
+                              e.target.value = '';
+                            }
+                          }}
+                          style={{
+                            background: '#333',
+                            border: 'none',
+                            color: '#b3b3b3',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px'
+                          }}
+                        >
+                          <option value="">+ Playlist</option>
+                          {userData.playlists.map(playlist => (
+                            <option key={playlist.id} value={playlist.id}>{playlist.name}</option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  </div>
+                )) : <div>Loading songs...</div>}
+              </div>
+            </div>
+          )}
+          
           {activeMenu === 'Library' && (
             <div>
               <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
@@ -908,35 +983,6 @@ function App() {
                       </div>
                     </div>
                     <div style={{display: 'flex', gap: '8px'}}>
-                      {currentUser && (
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const isInLibrary = personalLibrary.some(s => s.title === song.title);
-                            if (isInLibrary) {
-                              const updated = personalLibrary.filter(s => s.title !== song.title);
-                              setPersonalLibrary(updated);
-                              localStorage.setItem(`personalLibrary_${currentUser}`, JSON.stringify(updated));
-                              alert('Removed from your library!');
-                            } else {
-                              const updated = [...personalLibrary, song];
-                              setPersonalLibrary(updated);
-                              localStorage.setItem(`personalLibrary_${currentUser}`, JSON.stringify(updated));
-                              alert('Added to your library!');
-                            }
-                            saveAppState();
-                          }} 
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: personalLibrary.some(s => s.title === song.title) ? getCurrentColor() : '#b3b3b3',
-                            cursor: 'pointer',
-                            padding: '8px'
-                          }}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        </button>
-                      )}
                       {song.file && (
                         <button 
                           onClick={(e) => {e.stopPropagation(); downloadSong(song);}} 
@@ -956,8 +1002,8 @@ function App() {
                           onClick={(e) => {
                             e.stopPropagation();
                             const updatedSongs = allSongs.filter((_, i) => i !== index);
-                            setUploadedSongs(updatedSongs.filter(s => !songs.includes(s)));
-                            localStorage.setItem('uploadedSongs', JSON.stringify(updatedSongs.filter(s => !songs.includes(s))));
+                            setOurSongs(updatedSongs);
+                            localStorage.setItem('ourSongs', JSON.stringify(updatedSongs));
                             saveAppState();
                             alert('Song deleted from library!');
                           }} 
@@ -1028,15 +1074,52 @@ function App() {
             </div>
           )}
           
-          {activeMenu === 'My Library' && (
-            <div style={{padding: '20px'}}>
-              <h3 style={{fontSize: '24px', marginBottom: '24px', color: getCurrentColor()}}>My Personal Library</h3>
-              {currentUser ? (
-                personalLibrary.length > 0 ? (
-                  <div>
-                    {personalLibrary.map((song, index) => (
-                      <div key={index} onClick={() => {setCurrentSong(allSongs.indexOf(song)); setIsPlaying(true);}} style={{
-                        background: isDarkTheme ? '#181818' : '#f0f0f0',
+          {activeMenu === 'Your Library' && (
+            <div>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+                <h3 style={{fontSize: '20px', margin: 0}}>Your Library</h3>
+                {currentUser && (
+                  <button 
+                    onClick={() => setShowCreatePlaylist(true)}
+                    style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                  >
+                    + Create Playlist
+                  </button>
+                )}
+              </div>
+              
+              {currentUser && userData ? (
+                <div>
+                  {/* Liked Songs */}
+                  <div 
+                    onClick={() => setActiveMenu('Liked Songs')}
+                    style={{
+                      background: '#181818',
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      marginBottom: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px'
+                    }}
+                  >
+                    <div style={{width: '48px', height: '48px', background: 'linear-gradient(135deg, #1db954, #1ed760)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </div>
+                    <div>
+                      <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>Liked Songs</div>
+                      <div style={{color: '#b3b3b3', fontSize: '12px'}}>{userData.likedSongs.length} songs</div>
+                    </div>
+                  </div>
+                  
+                  {/* User Playlists */}
+                  {userData.playlists.map(playlist => (
+                    <div 
+                      key={playlist.id}
+                      onClick={() => {setCurrentPlaylist(playlist); setActiveMenu('Playlist View');}}
+                      style={{
+                        background: '#181818',
                         padding: '12px 16px',
                         borderRadius: '8px',
                         cursor: 'pointer',
@@ -1044,49 +1127,112 @@ function App() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '16px'
-                      }}>
-                        <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-                        </div>
-                        <div style={{flex: 1}}>
-                          <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
-                          <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
-                        </div>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const updated = personalLibrary.filter((_, i) => i !== index);
-                            setPersonalLibrary(updated);
-                            localStorage.setItem(`personalLibrary_${currentUser}`, JSON.stringify(updated));
-                            saveAppState();
-                            alert('Removed from your library!');
-                          }} 
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#ff4444',
-                            cursor: 'pointer',
-                            padding: '8px'
-                          }}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                        </button>
+                      }}
+                    >
+                      <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{textAlign: 'center', padding: '60px 20px'}}>
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="#666" style={{marginBottom: '16px'}}>
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                    <p style={{color: '#b3b3b3', fontSize: '16px'}}>No songs in your library yet</p>
-                    <p style={{color: '#666', fontSize: '14px'}}>Add songs from the main library using the star button</p>
-                  </div>
-                )
+                      <div>
+                        <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{playlist.name}</div>
+                        <div style={{color: '#b3b3b3', fontSize: '12px'}}>{playlist.songs.length} songs</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div style={{textAlign: 'center', padding: '60px 20px'}}>
-                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>Please login to view your personal library</p>
-                  <p style={{color: '#666', fontSize: '14px'}}>Use the login button in the top header</p>
+                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>Please login to view your library</p>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {activeMenu === 'Liked Songs' && (
+            <div style={{padding: '20px'}}>
+              <h3 style={{fontSize: '24px', marginBottom: '24px', color: getCurrentColor()}}>Liked Songs</h3>
+              {currentUser && userData && userData.likedSongs.length > 0 ? (
+                <div>
+                  {userData.likedSongs.map((song, index) => (
+                    <div key={index} onClick={() => {setCurrentSong(allSongs.findIndex(s => s.title === song.title)); setIsPlaying(true);}} style={{
+                      background: isDarkTheme ? '#181818' : '#f0f0f0',
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      marginBottom: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px'
+                    }}>
+                      <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                      </div>
+                      <div style={{flex: 1}}>
+                        <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
+                        <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
+                      </div>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          userData.unlikeSong(song);
+                          setUserData({...userData});
+                        }} 
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#1db954',
+                          cursor: 'pointer',
+                          padding: '8px'
+                        }}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{textAlign: 'center', padding: '60px 20px'}}>
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="#666" style={{marginBottom: '16px'}}>
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>No liked songs yet</p>
+                  <p style={{color: '#666', fontSize: '14px'}}>Songs you like will appear here</p>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {activeMenu === 'Playlist View' && currentPlaylist && (
+            <div style={{padding: '20px'}}>
+              <h3 style={{fontSize: '24px', marginBottom: '24px', color: getCurrentColor()}}>{currentPlaylist.name}</h3>
+              {currentPlaylist.songs.length > 0 ? (
+                <div>
+                  {currentPlaylist.songs.map((song, index) => (
+                    <div key={index} onClick={() => {setCurrentSong(allSongs.findIndex(s => s.title === song.title)); setIsPlaying(true);}} style={{
+                      background: isDarkTheme ? '#181818' : '#f0f0f0',
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      marginBottom: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px'
+                    }}>
+                      <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                      </div>
+                      <div style={{flex: 1}}>
+                        <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
+                        <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{textAlign: 'center', padding: '60px 20px'}}>
+                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>No songs in this playlist</p>
+                  <p style={{color: '#666', fontSize: '14px'}}>Add songs from Our Songs</p>
                 </div>
               )}
             </div>
@@ -1191,9 +1337,9 @@ function App() {
                               console.log('GitHub push failed:', error);
                             }
                             
-                            setUploadedSongs(prev => {
+                            setOurSongs(prev => {
                               const updated = [...prev, approvedSong];
-                              localStorage.setItem('uploadedSongs', JSON.stringify(updated));
+                              localStorage.setItem('ourSongs', JSON.stringify(updated));
                               return updated;
                             });
                             setAllUserUploads(prev => {
@@ -1202,7 +1348,7 @@ function App() {
                               return updated;
                             });
                             console.log('Song approved and moved to library:', approvedSong.title);
-                            alert('Song approved, moved to library, and pushed to GitHub!');
+                            alert('Song approved, added to Our Songs, and pushed to GitHub!');
                           }}
                           style={{background: getCurrentColor(), color: 'white', padding: '8px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px'}}
                         >
@@ -1301,6 +1447,53 @@ function App() {
               </button>
               <button 
                 onClick={() => setShowAuth(false)}
+                style={{background: 'transparent', border: '1px solid #666', color: '#666', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Create Playlist Modal */}
+      {showCreatePlaylist && (
+        <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000}}>
+          <div style={{background: isDarkTheme ? '#1e1e1e' : '#ffffff', padding: '32px', borderRadius: '16px', width: '400px', maxWidth: '90vw'}}>
+            <h3 style={{fontSize: '24px', marginBottom: '24px', textAlign: 'center', color: getCurrentColor()}}>Create Playlist</h3>
+            <input 
+              type="text" 
+              placeholder="Playlist name"
+              value={newPlaylistName}
+              onChange={(e) => setNewPlaylistName(e.target.value)}
+              style={{width: '100%', padding: '12px', marginBottom: '24px', borderRadius: '8px', border: 'none', background: '#242424', color: 'white', fontSize: '16px', outline: 'none'}}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && newPlaylistName.trim()) {
+                  userData.createPlaylist(newPlaylistName.trim());
+                  setUserData({...userData});
+                  setNewPlaylistName('');
+                  setShowCreatePlaylist(false);
+                  alert('Playlist created!');
+                }
+              }}
+            />
+            <div style={{display: 'flex', gap: '12px', justifyContent: 'center'}}>
+              <button 
+                onClick={() => {
+                  if (newPlaylistName.trim()) {
+                    userData.createPlaylist(newPlaylistName.trim());
+                    setUserData({...userData});
+                    setNewPlaylistName('');
+                    setShowCreatePlaylist(false);
+                    alert('Playlist created!');
+                  }
+                }}
+                style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}
+              >
+                Create
+              </button>
+              <button 
+                onClick={() => {setShowCreatePlaylist(false); setNewPlaylistName('');}}
                 style={{background: 'transparent', border: '1px solid #666', color: '#666', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}
               >
                 Cancel

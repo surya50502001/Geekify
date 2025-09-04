@@ -154,6 +154,7 @@ function App() {
       // Send to your local server
       const formData = new FormData();
       formData.append('song', file);
+      formData.append('uploader', currentUser);
       
       try {
         const response = await fetch('https://2d7bf6cd2efd.ngrok-free.app/upload', {
@@ -163,6 +164,25 @@ function App() {
         const result = await response.json();
         if (result.success) {
           console.log('Song saved to your computer:', result.originalName);
+          // Refresh uploaded songs list
+          setTimeout(async () => {
+            try {
+              const songsResponse = await fetch('https://2d7bf6cd2efd.ngrok-free.app/songs');
+              const uploadedFiles = await songsResponse.json();
+              if (uploadedFiles.success) {
+                const serverSongs = uploadedFiles.songs.map(song => ({
+                  title: song.name.replace(/\.[^/.]+$/, ''),
+                  artist: `Uploaded by ${song.uploader || 'User'}`,
+                  url: `https://2d7bf6cd2efd.ngrok-free.app/play/${song.filename}`,
+                  uploadedBy: song.uploader,
+                  isServerSong: true
+                }));
+                setAllUserUploads(serverSongs);
+              }
+            } catch (error) {
+              console.log('Could not refresh uploaded songs:', error);
+            }
+          }, 1000);
         }
       } catch (error) {
           console.log('Server not running - song only available locally', error);
@@ -226,6 +246,7 @@ function App() {
   };
   
   useEffect(() => {
+    // Load GitHub songs
     fetch('https://api.github.com/repos/surya50502001/Spotify-/contents')
       .then(res => res.json())
       .then(files => {
@@ -238,6 +259,32 @@ function App() {
         setSongs(songList);
       })
       .catch(err => console.error('Error loading songs:', err));
+    
+    // Load uploaded songs from server
+    const fetchUploadedSongs = async () => {
+      try {
+        const response = await fetch('https://2d7bf6cd2efd.ngrok-free.app/songs');
+        const uploadedFiles = await response.json();
+        if (uploadedFiles.success) {
+          const serverSongs = uploadedFiles.songs.map(song => ({
+            title: song.name.replace(/\.[^/.]+$/, ''),
+            artist: `Uploaded by ${song.uploader || 'User'}`,
+            url: `https://2d7bf6cd2efd.ngrok-free.app/play/${song.filename}`,
+            uploadedBy: song.uploader,
+            isServerSong: true
+          }));
+          setAllUserUploads(serverSongs);
+        }
+      } catch (error) {
+        console.log('Could not fetch uploaded songs:', error);
+      }
+    };
+    
+    fetchUploadedSongs();
+    // Refresh uploaded songs every 30 seconds
+    const interval = setInterval(fetchUploadedSongs, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {

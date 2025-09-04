@@ -306,12 +306,19 @@ function App() {
           const serverSongs = uploadedFiles.songs.map(song => ({
             title: song.name.replace(/\.[^/.]+$/, ''),
             artist: `Uploaded by ${song.uploader || 'User'}`,
-            url: `https://2d7bf6cd2efd.ngrok-free.app/play/${song.filename}`,
+            url: `https://8af4e83e88ce.ngrok-free.app/play/${song.filename}`,
             uploadedBy: song.uploader,
-            isServerSong: true
+            filename: song.filename,
+            duration: 0,
+            isServerSong: true,
+            isPending: true
           }));
-          console.log('Processed server songs:', serverSongs);
-          setAllUserUploads(serverSongs);
+          console.log('Loaded server songs:', serverSongs);
+          setAllUserUploads(prev => {
+            const updated = [...serverSongs];
+            localStorage.setItem('allUserUploads', JSON.stringify(updated));
+            return updated;
+          });
         }
       } catch (error) {
         console.log('Could not fetch uploaded songs:', error);

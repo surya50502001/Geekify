@@ -99,13 +99,18 @@ function App() {
     // Check C# server status
     const checkServerStatus = async () => {
       try {
-        const response = await fetch('https://7fb4c4f68de7.ngrok-free.app/api/song/songs');
+        const response = await fetch('https://7fb4c4f68de7.ngrok-free.app/api/song/songs', {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
         if (response.ok) {
           setServerStatus('online');
         } else {
           setServerStatus('offline');
         }
       } catch (error) {
+        console.log('Server check failed:', error);
         setServerStatus('offline');
       }
     };

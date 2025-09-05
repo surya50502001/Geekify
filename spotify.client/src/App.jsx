@@ -1,96 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import MusicPlayer from './components/MusicPlayer';
-import { validateUser, registerUser, isAdmin } from './People';
 
-// C# server user data management
-const createUserData = async (userId) => {
-  const userData = {
-    userId,
-    likedSongs: [],
-    playlists: [],
-    async save() {
-      const data = {
-        likedSongs: this.likedSongs,
-        playlists: this.playlists
-      };
-      
-      // Save to file system via server
-      try {
-        await fetch('https://ee2b3f9b8389.ngrok-free.app/api/user/save-user-data', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: this.userId, data })
-        });
-      } catch (error) {
-        console.log('C# server save failed');
-      }
-    },
-    likeSong(song) {
-      if (!this.likedSongs.find(s => s.title === song.title)) {
-        this.likedSongs.push(song);
-        this.save();
-      }
-    },
-    unlikeSong(song) {
-      this.likedSongs = this.likedSongs.filter(s => s.title !== song.title);
-      this.save();
-    },
-    isSongLiked(song) {
-      return this.likedSongs.some(s => s.title === song.title);
-    },
-    async createPlaylist(name, isGlobal = false) {
-      const playlist = {
-        id: Date.now(),
-        name: name,
-        songs: [],
-        createdAt: new Date().toISOString(),
-        createdBy: this.userId
-      };
-      
-      if (isGlobal) {
-        // Save as global playlist
-        try {
-          await fetch('https://ee2b3f9b8389.ngrok-free.app/api/user/save-global-playlist', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ playlist })
-          });
-        } catch (error) {
-          console.log('Global playlist save failed');
-        }
-      } else {
-        this.playlists.push(playlist);
-        this.save();
-      }
-      return playlist;
-    },
-    addToPlaylist(playlistId, song) {
-      const playlist = this.playlists.find(p => p.id === playlistId);
-      if (playlist && !playlist.songs.find(s => s.title === song.title)) {
-        playlist.songs.push(song);
-        this.save();
-      }
-    }
-  };
-  
-  // Load from C# server
-  try {
-    const response = await fetch(`https://ee2b3f9b8389.ngrok-free.app/api/user/load-user-data/${userId}`);
-    if (response.ok) {
-      const result = await response.json();
-      if (result.success && result.data) {
-        userData.likedSongs = result.data.likedSongs || [];
-        userData.playlists = result.data.playlists || [];
-        return userData;
-      }
-    }
-  } catch (error) {
-    console.log('C# server unavailable');
-  }
-  
-  return userData;
-};
 
 function App() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -105,17 +16,7 @@ function App() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [showAuth, setShowAuth] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
-  const [authId, setAuthId] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
 
-  const [userData, setUserData] = useState(null);
-  const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
-  const [newPlaylistName, setNewPlaylistName] = useState('');
-  const [currentPlaylist, setCurrentPlaylist] = useState(null);
-  const [globalPlaylists, setGlobalPlaylists] = useState([]);
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -159,31 +60,7 @@ function App() {
     // Load cached app state first
     loadAppState();
     
-    // Load user session and data
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      setCurrentUser(savedUser);
-      createUserData(savedUser).then(userData => {
-        setUserData(userData);
-      });
-    }
-    
-    // Load global playlists
-    const loadGlobalPlaylists = async () => {
-      try {
-        const response = await fetch('https://ee2b3f9b8389.ngrok-free.app/api/user/global-playlists');
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success) {
-            setGlobalPlaylists(result.playlists);
-          }
-        }
-      } catch (error) {
-        console.log('Failed to load global playlists');
-      }
-    };
-    
-    loadGlobalPlaylists();
+
     
     // Load theme preference (override cache if exists)
     const savedTheme = localStorage.getItem('theme');
@@ -228,14 +105,10 @@ function App() {
     // Auto-save state periodically
     const saveInterval = setInterval(saveAppState, 10000); // Save every 10 seconds
     
-    // Refresh global playlists every 30 seconds
-    const playlistInterval = setInterval(loadGlobalPlaylists, 30000);
-    
     return () => {
       clearTimeout(timer);
       clearInterval(saveInterval);
       clearInterval(serverCheckInterval);
-      clearInterval(playlistInterval);
       saveAppState(); // Save on unmount
     };
   }, []);
@@ -247,69 +120,7 @@ function App() {
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
   };
   
-  const handleAuth = async () => {
-    if (authMode === 'login') {
-      try {
-        const response = await fetch('https://ee2b3f9b8389.ngrok-free.app/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: authId, password: authPassword })
-        });
-        const result = await response.json();
-        
-        if (result.success) {
-          setCurrentUser(result.user.id);
-          createUserData(result.user.id).then(userData => {
-            setUserData(userData);
-          });
-          setShowAuth(false);
-          localStorage.setItem('currentUser', result.user.id);
-        } else {
-          alert('Invalid credentials');
-        }
-      } catch (error) {
-        // Fallback to client-side auth if server unavailable
-        const user = validateUser(authId, authPassword);
-        if (user) {
-          setCurrentUser(user.id);
-          createUserData(user.id).then(userData => {
-            setUserData(userData);
-          });
-          setShowAuth(false);
-          localStorage.setItem('currentUser', user.id);
-        } else {
-          alert('Invalid credentials');
-        }
-      }
-    } else {
-      try {
-        const response = await fetch('https://ee2b3f9b8389.ngrok-free.app/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: authId, password: authPassword })
-        });
-        const result = await response.json();
-        
-        if (result.success) {
-          alert('Registration successful! Please login.');
-          setAuthMode('login');
-        } else {
-          alert(result.message);
-        }
-      } catch (error) {
-        // Fallback to client-side auth if server unavailable
-        const result = registerUser(authId, authPassword);
-        if (result.success) {
-          alert('Registration successful! Please login.');
-          setAuthMode('login');
-        } else {
-          alert(result.message);
-        }
-      }
-    }
-    setAuthId('');
-    setAuthPassword('');
-  };
+
 
 
   
@@ -362,20 +173,7 @@ function App() {
     setSpinnerColor(randomColor);
   };
   
-  const toggleLike = () => {
-    if (!userData || !allSongs[currentSong]) return;
-    
-    const song = allSongs[currentSong];
-    if (userData.isSongLiked(song)) {
-      userData.unlikeSong(song);
-    } else {
-      userData.likeSong(song);
-    }
-    // Force re-render by creating new userData object
-    setUserData({...userData});
-    // Save state immediately
-    saveAppState();
-  };
+
   
   useEffect(() => {
     // Load GitHub songs into Our Songs playlist
@@ -694,28 +492,7 @@ function App() {
                     {serverStatus === 'checking' ? 'Checking...' : serverStatus === 'online' ? 'Online' : 'Offline'}
                   </span>
                 </div>
-                {currentUser ? (
-                  <>
-                    <span style={{color: getCurrentColor(), fontSize: '12px', fontWeight: '500'}}>Hi, {currentUser}</span>
-                    <button 
-                      onClick={() => {
-                        setCurrentUser(null);
-                        setUserData(null);
-                        localStorage.removeItem('currentUser');
-                      }}
-                      style={{background: 'transparent', border: `1px solid #ff4444`, color: '#ff4444', padding: '4px 8px', borderRadius: '12px', cursor: 'pointer', fontSize: '10px', fontWeight: '500'}}
-                    >
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <button 
-                    onClick={() => setShowAuth(true)}
-                    style={{background: getCurrentColor(), color: 'white', padding: '4px 8px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '10px', fontWeight: '500'}}
-                  >
-                    Login
-                  </button>
-                )}
+
               </div>
             </div>
           </div>
@@ -820,58 +597,7 @@ function App() {
                         <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
                       </div>
                     </div>
-                    <div style={{display: 'flex', gap: '8px'}}>
-                      {currentUser && userData && (
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (userData.isSongLiked(song)) {
-                              userData.unlikeSong(song);
-                            } else {
-                              userData.likeSong(song);
-                            }
-                            setUserData({...userData});
-                            saveAppState();
-                          }} 
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: userData.isSongLiked(song) ? '#1db954' : '#b3b3b3',
-                            cursor: 'pointer',
-                            padding: '8px',
-                            transition: 'color 0.3s ease'
-                          }}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                        </button>
-                      )}
-                      {currentUser && userData && userData.playlists.length > 0 && (
-                        <select 
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              userData.addToPlaylist(parseInt(e.target.value), song);
-                              setUserData({...userData});
-                              saveAppState();
-                              e.target.value = '';
-                            }
-                          }}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#b3b3b3',
-                            cursor: 'pointer',
-                            fontSize: '16px',
-                            padding: '8px'
-                          }}
-                        >
-                          <option value="" style={{background: '#333', color: '#fff'}}>+</option>
-                          {userData.playlists.map(playlist => (
-                            <option key={playlist.id} value={playlist.id} style={{background: '#333', color: '#fff'}}>{playlist.name}</option>
-                          ))}
-                        </select>
-                      )}
-                    </div>
+
                   </div>
                 )) : <div>Loading songs...</div>}
               </div>
@@ -881,237 +607,18 @@ function App() {
 
           
           {activeMenu === 'Your Library' && (
-            <div>
-              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
-                <h3 style={{fontSize: '20px', margin: 0}}>Your Library</h3>
-                {currentUser && (
-                  <div style={{display: 'flex', gap: '8px'}}>
-                    <button 
-                      onClick={async () => {
-                        if (userData) {
-                          const refreshedData = await createUserData(currentUser);
-                          setUserData(refreshedData);
-                        }
-                      }}
-                      style={{background: 'transparent', border: `1px solid ${getCurrentColor()}`, color: getCurrentColor(), padding: '6px 12px', borderRadius: '16px', cursor: 'pointer', fontSize: '12px', fontWeight: '500'}}
-                    >
-                      🔄 Refresh
-                    </button>
-                    <button 
-                      onClick={() => setShowCreatePlaylist(true)}
-                      style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
-                    >
-                      + Create Playlist
-                    </button>
-                  </div>
-                )}
-              </div>
-              
-              {currentUser && userData ? (
-                <div>
-                  {/* Liked Songs */}
-                  <div 
-                    onClick={() => setActiveMenu('Liked Songs')}
-                    style={{
-                      background: '#181818',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      marginBottom: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      transition: 'background 0.2s ease'
-                    }}
-                  >
-                    <div style={{width: '48px', height: '48px', background: 'linear-gradient(135deg, #1db954, #1ed760)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    </div>
-                    <div>
-                      <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>Liked Songs</div>
-                      <div style={{color: '#b3b3b3', fontSize: '12px'}}>{userData.likedSongs.length} songs</div>
-                    </div>
-                  </div>
-                  
-                  {/* Global Playlists */}
-                  {globalPlaylists.length > 0 && (
-                    <>
-                      <div style={{color: '#b3b3b3', fontSize: '12px', fontWeight: '600', margin: '16px 0 8px 0', textTransform: 'uppercase', letterSpacing: '1px'}}>Global Playlists</div>
-                      {globalPlaylists.map(playlist => (
-                        <div 
-                          key={`global-${playlist.id}`}
-                          onClick={() => {setCurrentPlaylist(playlist); setActiveMenu('Playlist View');}}
-                          style={{
-                            background: '#181818',
-                            padding: '12px 16px',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            marginBottom: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '16px',
-                            border: '1px solid #333'
-                          }}
-                        >
-                          <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, #ff6b35, #f7931e)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                          </div>
-                          <div>
-                            <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{playlist.name}</div>
-                            <div style={{color: '#b3b3b3', fontSize: '12px'}}>{playlist.songs.length} songs • by {playlist.createdBy}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                  
-                  {/* User Playlists */}
-                  {userData.playlists.length > 0 && (
-                    <>
-                      <div style={{color: '#b3b3b3', fontSize: '12px', fontWeight: '600', margin: '16px 0 8px 0', textTransform: 'uppercase', letterSpacing: '1px'}}>Your Playlists</div>
-                      {userData.playlists.map(playlist => (
-                        <div 
-                          key={playlist.id}
-                          onClick={() => {setCurrentPlaylist(playlist); setActiveMenu('Playlist View');}}
-                          style={{
-                            background: '#181818',
-                            padding: '12px 16px',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            marginBottom: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '16px'
-                          }}
-                        >
-                          <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                          </div>
-                          <div>
-                            <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{playlist.name}</div>
-                            <div style={{color: '#b3b3b3', fontSize: '12px'}}>{playlist.songs.length} songs</div>
-                          </div>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div style={{textAlign: 'center', padding: '60px 20px'}}>
-                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>Please login to view your library</p>
-                </div>
-              )}
+            <div style={{textAlign: 'center', padding: '60px 20px'}}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="#666" style={{marginBottom: '16px'}}>
+                <path d="M14.5 2.134a1 1 0 0 1 1 0l6 3.464a1 1 0 0 1 .5.866V21a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6.464a1 1 0 0 1 .5-.866l6-3.464a1 1 0 0 1 1 0L12 3.732l2.5-1.598zM4 7.732V20h16V7.732l-5-2.887V8a1 1 0 0 1-2 0V4.845L9 7.732z"/>
+              </svg>
+              <p style={{color: '#b3b3b3', fontSize: '16px'}}>Your Library</p>
+              <p style={{color: '#666', fontSize: '14px'}}>Personal library features coming soon</p>
             </div>
           )}
           
-          {activeMenu === 'Liked Songs' && (
-            <div>
-              <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px'}}>
-                <div style={{width: '48px', height: '48px', background: 'linear-gradient(135deg, #1db954, #1ed760)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                </div>
-                <div>
-                  <h3 style={{fontSize: '24px', margin: 0, color: getCurrentColor()}}>Liked Songs</h3>
-                  <p style={{color: '#b3b3b3', fontSize: '14px', margin: '4px 0 0 0'}}>{currentUser && userData ? userData.likedSongs.length : 0} songs</p>
-                </div>
-              </div>
-              
-              {currentUser && userData && userData.likedSongs.length > 0 ? (
-                <div>
-                  {userData.likedSongs.map((song, index) => (
-                    <div key={`${song.title}-${index}`} onClick={() => {
-                      const songIndex = allSongs.findIndex(s => s.title === song.title && s.artist === song.artist);
-                      if (songIndex !== -1) {
-                        setCurrentSong(songIndex);
-                        setIsPlaying(true);
-                      }
-                    }} style={{
-                      background: '#181818',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      marginBottom: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      transition: 'background 0.2s ease'
-                    }}>
-                      <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-                      </div>
-                      <div style={{flex: 1}}>
-                        <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
-                        <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
-                      </div>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          userData.unlikeSong(song);
-                          setUserData({...userData});
-                          saveAppState();
-                        }} 
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: '#1db954',
-                          cursor: 'pointer',
-                          padding: '8px',
-                          transition: 'color 0.3s ease'
-                        }}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{textAlign: 'center', padding: '60px 20px'}}>
-                  <svg width="64" height="64" viewBox="0 0 24 24" fill="#666" style={{marginBottom: '16px'}}>
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                  </svg>
-                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>No liked songs yet</p>
-                  <p style={{color: '#666', fontSize: '14px'}}>Like songs from "Our Songs" and they'll appear here</p>
-                </div>
-              )}
-            </div>
-          )}
+
           
-          {activeMenu === 'Playlist View' && currentPlaylist && (
-            <div style={{padding: '20px'}}>
-              <h3 style={{fontSize: '24px', marginBottom: '24px', color: getCurrentColor()}}>{currentPlaylist.name}</h3>
-              {currentPlaylist.songs.length > 0 ? (
-                <div>
-                  {currentPlaylist.songs.map((song, index) => (
-                    <div key={index} onClick={() => {setCurrentSong(allSongs.findIndex(s => s.title === song.title)); setIsPlaying(true);}} style={{
-                      background: isDarkTheme ? '#181818' : '#f0f0f0',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      marginBottom: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '16px'
-                    }}>
-                      <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-                      </div>
-                      <div style={{flex: 1}}>
-                        <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
-                        <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{textAlign: 'center', padding: '60px 20px'}}>
-                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>No songs in this playlist</p>
-                  <p style={{color: '#666', fontSize: '14px'}}>Add songs from Our Songs</p>
-                </div>
-              )}
-            </div>
-          )}
+
           
 
           
@@ -1121,111 +628,9 @@ function App() {
         </div>
       </div>
       
-      {/* Auth Modal */}
-      {showAuth && (
-        <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000}}>
-          <div style={{background: isDarkTheme ? '#1e1e1e' : '#ffffff', padding: '32px', borderRadius: '16px', width: '400px', maxWidth: '90vw'}}>
-            <h3 style={{fontSize: '24px', marginBottom: '24px', textAlign: 'center', color: getCurrentColor()}}>{authMode === 'login' ? 'Login' : 'Register'}</h3>
-            <input 
-              type="text" 
-              placeholder="User ID"
-              value={authId}
-              onChange={(e) => setAuthId(e.target.value)}
-              style={{width: '100%', padding: '12px', marginBottom: '16px', borderRadius: '8px', border: 'none', background: '#242424', color: 'white', fontSize: '16px', outline: 'none'}}
-            />
-            <input 
-              type="password" 
-              placeholder="Password"
-              value={authPassword}
-              onChange={(e) => setAuthPassword(e.target.value)}
-              style={{width: '100%', padding: '12px', marginBottom: '24px', borderRadius: '8px', border: 'none', background: '#242424', color: 'white', fontSize: '16px', outline: 'none'}}
-              onKeyPress={(e) => e.key === 'Enter' && handleAuth()}
-            />
-            <div style={{display: 'flex', gap: '12px', justifyContent: 'center'}}>
-              <button 
-                onClick={handleAuth}
-                style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}
-              >
-                {authMode === 'login' ? 'Login' : 'Register'}
-              </button>
-              <button 
-                onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
-                style={{background: 'transparent', border: `1px solid ${getCurrentColor()}`, color: getCurrentColor(), padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}
-              >
-                {authMode === 'login' ? 'Register' : 'Login'}
-              </button>
-              <button 
-                onClick={() => setShowAuth(false)}
-                style={{background: 'transparent', border: '1px solid #666', color: '#666', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
       
-      {/* Create Playlist Modal */}
-      {showCreatePlaylist && (
-        <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000}}>
-          <div style={{background: isDarkTheme ? '#1e1e1e' : '#ffffff', padding: '32px', borderRadius: '16px', width: '400px', maxWidth: '90vw'}}>
-            <h3 style={{fontSize: '24px', marginBottom: '24px', textAlign: 'center', color: getCurrentColor()}}>Create Playlist</h3>
-            <input 
-              type="text" 
-              placeholder="Playlist name"
-              value={newPlaylistName}
-              onChange={(e) => setNewPlaylistName(e.target.value)}
-              style={{width: '100%', padding: '12px', marginBottom: '24px', borderRadius: '8px', border: 'none', background: '#242424', color: 'white', fontSize: '16px', outline: 'none'}}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && newPlaylistName.trim()) {
-                  userData.createPlaylist(newPlaylistName.trim());
-                  setUserData({...userData});
-                  setNewPlaylistName('');
-                  setShowCreatePlaylist(false);
-                  alert('Playlist created!');
-                }
-              }}
-            />
-            <div style={{display: 'flex', gap: '12px', justifyContent: 'center'}}>
-              <button 
-                onClick={async () => {
-                  if (newPlaylistName.trim()) {
-                    const isGlobal = isAdmin(currentUser);
-                    await userData.createPlaylist(newPlaylistName.trim(), isGlobal);
-                    if (isGlobal) {
-                      // Refresh global playlists
-                      try {
-                        const response = await fetch('https://ee2b3f9b8389.ngrok-free.app/api/user/global-playlists');
-                        if (response.ok) {
-                          const result = await response.json();
-                          if (result.success) {
-                            setGlobalPlaylists(result.playlists);
-                          }
-                        }
-                      } catch (error) {
-                        console.log('Failed to refresh global playlists');
-                      }
-                    }
-                    setUserData({...userData});
-                    setNewPlaylistName('');
-                    setShowCreatePlaylist(false);
-                    alert(isGlobal ? 'Global playlist created! All users can see it.' : 'Playlist created!');
-                  }
-                }}
-                style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}
-              >
-                Create
-              </button>
-              <button 
-                onClick={() => {setShowCreatePlaylist(false); setNewPlaylistName('');}}
-                style={{background: 'transparent', border: '1px solid #666', color: '#666', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: '500'}}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
       
 
       
@@ -1253,8 +658,6 @@ function App() {
         isPlaying={isPlaying}
         currentTime={currentTime}
         duration={duration}
-        userData={userData}
-        setUserData={setUserData}
         saveAppState={saveAppState}
         audioRef={audioRef}
         getCurrentColor={getCurrentColor}
@@ -1263,7 +666,7 @@ function App() {
         playPrev={playPrev}
         togglePlay={togglePlay}
         playNext={playNext}
-        toggleLike={toggleLike}
+
       />
       
 

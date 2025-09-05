@@ -1,4 +1,4 @@
-const CACHE_NAME = 'geekify-v1';
+const CACHE_NAME = 'geekify-v2';
 const urlsToCache = [
   '/',
   '/static/js/bundle.js',

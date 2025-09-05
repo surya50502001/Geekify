@@ -23,7 +23,7 @@ function App() {
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [spinnerColor, setSpinnerColor] = useState('#1db954');
-  const [serverStatus, setServerStatus] = useState('checking');
+  const [serverStatus, setServerStatus] = useState('offline');
   const audioRef = useRef(null);
   
   const saveAppState = () => {
@@ -115,8 +115,8 @@ function App() {
       }
     };
     
-    checkServerStatus();
-    const serverCheckInterval = setInterval(checkServerStatus, 30000);
+    // checkServerStatus();
+    // const serverCheckInterval = setInterval(checkServerStatus, 30000);
     
     // Auto-save state periodically
     const saveInterval = setInterval(saveAppState, 10000); // Save every 10 seconds
@@ -124,7 +124,7 @@ function App() {
     return () => {
       clearTimeout(timer);
       clearInterval(saveInterval);
-      clearInterval(serverCheckInterval);
+      // clearInterval(serverCheckInterval);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       saveAppState(); // Save on unmount
     };

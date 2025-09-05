@@ -1,16 +1,21 @@
 {
-  "name": "Spotify Clone",
-  "short_name": "Spotify",
-  "description": "A Spotify clone music player",
+  "name": "Geekify Music",
+  "short_name": "Geekify",
+  "description": "Your music streaming experience",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#121212",
+  "background_color": "#000000",
   "theme_color": "#1db954",
   "icons": [
     {
-      "src": "vite.svg",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }

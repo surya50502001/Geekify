@@ -16,6 +16,8 @@ function App() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
 
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
@@ -57,6 +59,15 @@ function App() {
   };
   
   useEffect(() => {
+    // PWA install prompt
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallPrompt(true);
+    };
+    
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    
     // Load cached app state first
     loadAppState();
     
@@ -109,6 +120,7 @@ function App() {
       clearTimeout(timer);
       clearInterval(saveInterval);
       clearInterval(serverCheckInterval);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       saveAppState(); // Save on unmount
     };
   }, []);
@@ -171,6 +183,17 @@ function App() {
   const changeSpinnerColor = () => {
     const randomColor = songColors[Math.floor(Math.random() * songColors.length)];
     setSpinnerColor(randomColor);
+  };
+  
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setShowInstallPrompt(false);
+      }
+      setDeferredPrompt(null);
+    }
   };
   
 
@@ -492,7 +515,14 @@ function App() {
                     {serverStatus === 'checking' ? 'Checking...' : serverStatus === 'online' ? 'Online' : 'Offline'}
                   </span>
                 </div>
-
+                {showInstallPrompt && (
+                  <button 
+                    onClick={handleInstallApp}
+                    style={{background: getCurrentColor(), color: 'white', padding: '4px 8px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '10px', fontWeight: '500'}}
+                  >
+                    📱 Install App
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -506,21 +536,41 @@ function App() {
                 <div style={{background: '#181818', padding: '20px', borderRadius: '12px', maxWidth: '400px', margin: '0 auto'}}>
                   <h3 style={{fontSize: '18px', marginBottom: '12px', color: '#fff'}}>{allSongs[currentSong]?.title || 'No Song Selected'}</h3>
                   <p style={{color: '#b3b3b3', fontSize: '14px', marginBottom: '16px'}}>{allSongs[currentSong]?.artist || ''}</p>
-                  <button 
-                    onClick={() => {
-                      if (allSongs[currentSong]) {
-                        setIsPlaying(!isPlaying);
-                        if (!isPlaying) {
-                          audioRef.current?.play();
-                        } else {
-                          audioRef.current?.pause();
+                  <div style={{display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap'}}>
+                    <button 
+                      onClick={() => {
+                        if (allSongs[currentSong]) {
+                          setIsPlaying(!isPlaying);
+                          if (!isPlaying) {
+                            audioRef.current?.play();
+                          } else {
+                            audioRef.current?.pause();
+                          }
                         }
-                      }
-                    }}
-                    style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '24px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
-                  >
-                    {isPlaying ? 'Pause' : 'Play'}
-                  </button>
+                      }}
+                      style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '24px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                    >
+                      {isPlaying ? 'Pause' : 'Play'}
+                    </button>
+                    {!showInstallPrompt && (
+                      <button 
+                        onClick={() => {
+                          if (navigator.share) {
+                            navigator.share({
+                              title: 'Geekify Music App',
+                              text: 'Install Geekify Music App',
+                              url: window.location.href
+                            });
+                          } else {
+                            alert('Add this page to your home screen to install the app!');
+                          }
+                        }}
+                        style={{background: 'transparent', border: `1px solid ${getCurrentColor()}`, color: getCurrentColor(), padding: '12px 24px', borderRadius: '24px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                      >
+                        📱 Get App
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -611,8 +661,36 @@ function App() {
               <svg width="64" height="64" viewBox="0 0 24 24" fill="#666" style={{marginBottom: '16px'}}>
                 <path d="M14.5 2.134a1 1 0 0 1 1 0l6 3.464a1 1 0 0 1 .5.866V21a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6.464a1 1 0 0 1 .5-.866l6-3.464a1 1 0 0 1 1 0L12 3.732l2.5-1.598zM4 7.732V20h16V7.732l-5-2.887V8a1 1 0 0 1-2 0V4.845L9 7.732z"/>
               </svg>
-              <p style={{color: '#b3b3b3', fontSize: '16px'}}>Your Library</p>
-              <p style={{color: '#666', fontSize: '14px'}}>Personal library features coming soon</p>
+              <p style={{color: '#b3b3b3', fontSize: '16px'}}>Get Mobile App</p>
+              <p style={{color: '#666', fontSize: '14px', marginBottom: '24px'}}>Install Geekify for the best mobile experience</p>
+              
+              <div style={{display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap'}}>
+                {showInstallPrompt ? (
+                  <button 
+                    onClick={handleInstallApp}
+                    style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '24px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                  >
+                    📱 Install Now
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({
+                          title: 'Geekify Music App',
+                          text: 'Install Geekify Music App - Add to Home Screen',
+                          url: window.location.href
+                        });
+                      } else {
+                        alert('To install:\n\n📱 Android: Tap menu → "Add to Home Screen"\n🍎 iPhone: Tap share → "Add to Home Screen"');
+                      }
+                    }}
+                    style={{background: getCurrentColor(), color: 'white', padding: '12px 24px', borderRadius: '24px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
+                  >
+                    📱 Add to Home Screen
+                  </button>
+                )}
+              </div>
             </div>
           )}
           

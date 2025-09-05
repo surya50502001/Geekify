@@ -34,10 +34,10 @@ function MusicPlayer({
           <button onClick={playPrev} style={{background: 'transparent', border: 'none', color: '#b3b3b3', cursor: 'pointer', padding: '8px'}}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
           </button>
-          <button onClick={togglePlay} style={{background: getCurrentColor(), border: 'none', borderRadius: '50%', width: '40px', height: '40px', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <button onClick={togglePlay} style={{background: getCurrentColor(), border: 'none', borderRadius: '50%', width: '48px', height: '48px', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             {isPlaying ? 
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> : 
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> : 
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             }
           </button>
           <button onClick={playNext} style={{background: 'transparent', border: 'none', color: '#b3b3b3', cursor: 'pointer', padding: '8px'}}>

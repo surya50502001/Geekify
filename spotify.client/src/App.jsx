@@ -317,13 +317,13 @@ function App() {
   }
 
   return (
-    <div style={{background: isDarkTheme ? '#000000' : '#ffffff', color: isDarkTheme ? '#ffffff' : '#000000', minHeight: '100vh', fontFamily: 'Arial', display: 'flex', flexDirection: 'column', position: 'relative', transition: 'background-color 0.3s ease, color 0.3s ease'}}>
+    <div style={{background: isDarkTheme ? '#000000' : '#ffffff', color: isDarkTheme ? '#ffffff' : '#000000', minHeight: '100vh', fontFamily: 'Arial', display: 'flex', flexDirection: 'column', position: 'relative', transition: 'background-color 0.3s ease, color 0.3s ease', paddingTop: 'env(safe-area-inset-top)', paddingLeft: 'env(safe-area-inset-left)', paddingRight: 'env(safe-area-inset-right)'}}>
       <style>{`
         @media (max-width: 768px) {
           .sidebar { width: ${sidebarOpen ? '100vw' : '0'} !important; position: fixed !important; z-index: 999 !important; height: 100vh !important; }
           .main-content { padding: 8px !important; padding-top: 70px !important; padding-bottom: 90px !important; }
-          .top-controls { top: 8px !important; right: 8px !important; gap: 4px !important; }
-          .top-controls button { width: 32px !important; height: 32px !important; }
+          .top-controls { top: env(safe-area-inset-top, 8px) !important; right: 8px !important; gap: 4px !important; }
+          .top-controls button { width: 44px !important; height: 44px !important; }
           .header-section { flex-direction: column !important; align-items: center !important; text-align: center !important; gap: 8px !important; margin-bottom: 16px !important; }
           .header-logo { margin-bottom: 8px !important; }
           .header-info { width: 100% !important; }
@@ -341,7 +341,7 @@ function App() {
           .song-card-image { height: 120px !important; }
           .song-title { font-size: 13px !important; }
           .song-artist { font-size: 11px !important; }
-          .bottom-player { padding: 0 8px !important; height: 80px !important; }
+          .bottom-player { padding: 0 8px env(safe-area-inset-bottom, 8px) 8px !important; height: calc(80px + env(safe-area-inset-bottom, 0px)) !important; }
           .player-controls { width: 50% !important; }
           .song-info { width: 35% !important; font-size: 11px !important; }
           .song-info div { max-width: 100px !important; }

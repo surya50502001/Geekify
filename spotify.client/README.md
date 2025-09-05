@@ -1,12 +1,53 @@
-# React + Vite
+# Geekify Mobile Music App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Setup Instructions
 
-Currently, two official plugins are available:
+### 1. Install Dependencies
+```bash
+npm install
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 2. Build for Mobile
+```bash
+npm run build:mobile
+```
 
-## Expanding the ESLint configuration
+### 3. Add Platforms
+```bash
+npx cap add android
+npx cap add ios
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 4. Run on Device
+```bash
+# Android
+npm run android
+
+# iOS
+npm run ios
+```
+
+### 5. Deploy to Cloudflare Pages
+```bash
+# Install Wrangler CLI
+npm install -g wrangler
+
+# Login to Cloudflare
+wrangler login
+
+# Deploy
+npm run deploy
+```
+
+## Mobile Features
+- Native mobile app with Capacitor
+- Optimized touch controls
+- Status bar styling
+- Keyboard handling
+- Responsive design
+
+## Hosting
+- Hosted on Cloudflare Pages
+- Fast global CDN
+- Automatic HTTPS
+- Custom domain support

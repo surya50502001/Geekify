@@ -1,28 +1,12 @@
-* {
+body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  background: #000;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-:root {
-  --bg-primary: #ffffff;
-  --text-primary: #000000;
-  --accent-color: #1db954;
-}
-
-body.dark-theme {
-  --bg-primary: #121212;
-  --text-primary: #ffffff;
-}
-
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-#root {
-  width: 100%;
-  min-height: 100vh;
+* {
+  -webkit-tap-highlight-color: transparent;
 }

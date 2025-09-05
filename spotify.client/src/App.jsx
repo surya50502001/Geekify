@@ -101,8 +101,7 @@ function App() {
   const [activeMenu, setActiveMenu] = useState('Home');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [ourSongs, setOurSongs] = useState([]); // GitHub + approved songs
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
+
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -111,7 +110,7 @@ function App() {
   const [authMode, setAuthMode] = useState('login');
   const [authId, setAuthId] = useState('');
   const [authPassword, setAuthPassword] = useState('');
-  const [allUserUploads, setAllUserUploads] = useState([]);
+
   const [userData, setUserData] = useState(null);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
@@ -134,7 +133,6 @@ function App() {
       comments,
       isDarkTheme,
       sidebarOpen,
-      allUserUploads,
       ourSongs
     };
     sessionStorage.setItem('appState', JSON.stringify(state));
@@ -152,7 +150,7 @@ function App() {
       setComments(state.comments || []);
       setIsDarkTheme(state.isDarkTheme ?? true);
       setSidebarOpen(state.sidebarOpen ?? true);
-      if (state.allUserUploads) setAllUserUploads(state.allUserUploads);
+
       if (state.ourSongs) setOurSongs(state.ourSongs);
     }
   };
@@ -194,11 +192,7 @@ function App() {
       document.body.className = savedTheme === 'dark' ? 'dark-theme' : '';
     }
     
-    // Load saved uploads and Our Songs
-    const savedUploads = localStorage.getItem('allUserUploads');
-    if (savedUploads) {
-      setAllUserUploads(JSON.parse(savedUploads));
-    }
+
     
     const savedOurSongs = localStorage.getItem('ourSongs');
     if (savedOurSongs) {
@@ -317,129 +311,7 @@ function App() {
     setAuthPassword('');
   };
 
-  const handleFileUpload = async (event) => {
-    if (!currentUser) {
-      setShowAuth(true);
-      return;
-    }
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('audio/')) {
-      setIsUploading(true);
-      setUploadProgress(0);
-      
-      // Create audio element to get duration
-      const audio = new Audio();
-      audio.src = URL.createObjectURL(file);
-      
-      const handleUpload = async () => {
-        // Upload to server immediately
-        const formData = new FormData();
-        formData.append('song', file);
-        formData.append('uploader', currentUser);
-        
-        // Try server upload first, fallback to local storage
-        let serverUploaded = false;
-        try {
-          const response = await fetch('https://ee2b3f9b8389.ngrok-free.app/api/song/upload', {
-            method: 'POST',
-            body: formData
-          });
-          const result = await response.json();
-          if (result.success) {
-            console.log('Song saved to your local server via ngrok:', result.originalName);
-            serverUploaded = true;
-            
-            const newSong = {
-              title: file.name.replace(/\.[^/.]+$/, ''),
-              artist: `Uploaded by ${currentUser}`,
-              url: `https://ee2b3f9b8389.ngrok-free.app/api/song/play/${result.filename}`,
-              uploadedBy: currentUser,
-              duration: audio.duration,
-              filename: result.filename,
-              isServerSong: true,
-              isPending: true
-            };
-            
-            setUploadProgress(100);
-            setTimeout(() => {
-              setAllUserUploads(prev => {
-                const updated = [...prev, newSong];
-                localStorage.setItem('allUserUploads', JSON.stringify(updated));
-                return updated;
-              });
-              console.log('Song uploaded to server and pending approval:', newSong.title);
-              setIsUploading(false);
-              setUploadProgress(0);
-              saveAppState(); // Save immediately after upload
-              alert('Song uploaded to server! Waiting for admin approval.');
-            }, 500);
-            return;
-          }
-        } catch (error) {
-          console.log('Server not available, using local storage only');
-        }
-        
-        // Fallback: Store locally without server
-        if (!serverUploaded) {
-          const newSong = {
-            title: file.name.replace(/\.[^/.]+$/, ''),
-            artist: `Uploaded by ${currentUser}`,
-            url: URL.createObjectURL(file),
-            uploadedBy: currentUser,
-            duration: audio.duration,
-            file: file,
-            isServerSong: false,
-            isPending: true
-          };
-          
-          setUploadProgress(100);
-          setTimeout(() => {
-            setAllUserUploads(prev => {
-              const updated = [...prev, newSong];
-              localStorage.setItem('allUserUploads', JSON.stringify(updated));
-              return updated;
-            });
-            console.log('Song stored locally and pending approval:', newSong.title);
-            setIsUploading(false);
-            setUploadProgress(0);
-            saveAppState(); // Save immediately after upload
-            alert('Song uploaded locally! Waiting for admin approval.');
-          }, 500);
-        }
-      };
-      
-      // Set timeout for metadata loading
-      const metadataTimeout = setTimeout(() => {
-        console.log('Metadata loading timeout, proceeding with upload');
-        handleUpload();
-      }, 3000);
-      
-      audio.onloadedmetadata = () => {
-        clearTimeout(metadataTimeout);
-        handleUpload();
-      };
-      
-      audio.onerror = () => {
-        clearTimeout(metadataTimeout);
-        console.log('Audio error, proceeding with upload');
-        handleUpload();
-      };
-      
-      // Simulate progress while loading metadata
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
-      
-      // Load audio metadata
-      audio.load();
-    }
-  };
+
   
   const addComment = () => {
     if (newComment.trim()) {
@@ -522,39 +394,7 @@ function App() {
       })
       .catch(err => console.error('Error loading songs:', err));
     
-    // Load uploaded songs from server
-    const fetchUploadedSongs = async () => {
-      try {
-        const response = await fetch('https://ee2b3f9b8389.ngrok-free.app/api/song/songs');
-        const uploadedFiles = await response.json();
-        console.log('Server response:', uploadedFiles);
-        if (uploadedFiles.success) {
-          const serverSongs = uploadedFiles.songs.map(song => ({
-            title: song.name.replace(/\.[^/.]+$/, ''),
-            artist: `Uploaded by ${song.uploader || 'User'}`,
-            url: `https://ee2b3f9b8389.ngrok-free.app/api/song/play/${song.filename}`,
-            uploadedBy: song.uploader,
-            filename: song.filename,
-            duration: 0,
-            isServerSong: true,
-            isPending: true
-          }));
-          console.log('Loaded server songs:', serverSongs);
-          setAllUserUploads(serverSongs);
-          localStorage.setItem('allUserUploads', JSON.stringify(serverSongs));
-        }
-      } catch (error) {
-        console.log('Could not fetch uploaded songs:', error);
-        // Fallback: show locally uploaded songs for testing
-        console.log('Using local fallback songs');
-      }
-    };
-    
-    fetchUploadedSongs();
-    // Refresh uploaded songs every 30 seconds
-    const interval = setInterval(fetchUploadedSongs, 30000);
-    
-    return () => clearInterval(interval);
+
   }, []);
 
   useEffect(() => {
@@ -606,18 +446,40 @@ function App() {
   const playNext = () => {
     const nextSong = (currentSong + 1) % allSongs.length;
     setCurrentSong(nextSong);
-    setIsPlaying(true);
     setCurrentTime(0);
     setDuration(0);
+    // Load and play the new song
+    setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.load();
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(error => {
+          console.log('Autoplay prevented:', error);
+          setIsPlaying(false);
+        });
+      }
+    }, 100);
     saveAppState();
   };
 
   const playPrev = () => {
     const prevSong = currentSong === 0 ? allSongs.length - 1 : currentSong - 1;
     setCurrentSong(prevSong);
-    setIsPlaying(true);
     setCurrentTime(0);
     setDuration(0);
+    // Load and play the new song
+    setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.load();
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(error => {
+          console.log('Autoplay prevented:', error);
+          setIsPlaying(false);
+        });
+      }
+    }, 100);
     saveAppState();
   };
 
@@ -799,8 +661,6 @@ function App() {
           sidebarOpen={sidebarOpen}
           getCurrentColor={getCurrentColor}
           isDarkTheme={isDarkTheme}
-          currentUser={currentUser}
-          isAdmin={isAdmin(currentUser)}
         />
         
         {/* Main Content */}
@@ -1018,44 +878,7 @@ function App() {
             </div>
           )}
           
-          {activeMenu === 'Upload' && (
-            <div>
-              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
-                <h3 style={{fontSize: '20px', margin: 0}}>Upload Songs</h3>
-                <div style={{display: 'flex', gap: '12px'}}>
-                  <button 
-                    onClick={() => {
-                      navigator.clipboard.writeText(window.location.href);
-                      alert('Share link copied! Your friends can upload songs here.');
-                    }}
-                    style={{background: 'transparent', border: `1px solid ${getCurrentColor()}`, color: getCurrentColor(), padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}
-                  >
-                    📤 Share Upload Link
-                  </button>
-                  <label style={{background: getCurrentColor(), color: 'white', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'}}>
-                    + Upload Song
-                    <input type="file" accept="audio/*" onChange={handleFileUpload} style={{display: 'none'}} />
-                  </label>
-                </div>
-              </div>
-              {isUploading && (
-                <div style={{background: '#181818', padding: '16px', borderRadius: '8px', marginBottom: '16px'}}>
-                  <div style={{marginBottom: '8px'}}>Uploading... {uploadProgress}%</div>
-                  <div style={{width: '100%', height: '4px', background: '#333', borderRadius: '2px'}}>
-                    <div style={{width: `${uploadProgress}%`, height: '100%', background: getCurrentColor(), borderRadius: '2px', transition: 'width 0.3s ease'}}></div>
-                  </div>
-                </div>
-              )}
-              
-              <div style={{textAlign: 'center', padding: '60px 20px'}}>
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="#666" style={{marginBottom: '16px'}}>
-                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                </svg>
-                <p style={{color: '#b3b3b3', fontSize: '16px'}}>Upload your music here</p>
-                <p style={{color: '#666', fontSize: '14px'}}>Share your favorite songs with the community</p>
-              </div>
-            </div>
-          )}
+
           
           {activeMenu === 'Your Library' && (
             <div>
@@ -1294,117 +1117,7 @@ function App() {
           
 
           
-          {activeMenu === 'Admin Panel' && isAdmin(currentUser) && (
-            <div>
-              <h3 style={{fontSize: '20px', margin: '0 0 24px 0', color: getCurrentColor()}}>Admin Panel - All User Uploads</h3>
-              {allUserUploads.length > 0 ? (
-                <div>
-                  {allUserUploads.map((song, index) => (
-                    <div key={index} style={{
-                      background: '#181818',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
-                      marginBottom: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}>
-                      <div style={{display: 'flex', alignItems: 'center', gap: '16px', flex: 1}}>
-                        <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-                        </div>
-                        <div style={{flex: 1}}>
-                          <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>{song.title}</div>
-                          <div style={{color: '#b3b3b3', fontSize: '12px'}}>{song.artist}</div>
-                        </div>
-                      </div>
-                      <div style={{display: 'flex', gap: '8px'}}>
-                        <button 
-                          onClick={async () => {
-                            const approvedSong = {
-                              title: song.title,
-                              artist: song.artist || `Uploaded by ${song.uploadedBy}`,
-                              url: song.url,
-                              duration: song.duration,
-                              filename: song.filename,
-                              isServerSong: true,
-                              isPending: false
-                            };
-                            
-                            // Note: GitHub push functionality needs to be implemented in C# server
-                            
-                            setOurSongs(prev => {
-                              const updated = [...prev, approvedSong];
-                              localStorage.setItem('ourSongs', JSON.stringify(updated));
-                              return updated;
-                            });
-                            setAllUserUploads(prev => {
-                              const updated = prev.filter((_, i) => i !== index);
-                              localStorage.setItem('allUserUploads', JSON.stringify(updated));
-                              return updated;
-                            });
-                            console.log('Song approved and moved to library:', approvedSong.title);
-                            alert('Song approved, added to Our Songs, and pushed to GitHub!');
-                          }}
-                          style={{background: getCurrentColor(), color: 'white', padding: '8px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px'}}
-                        >
-                          ✓ Approve & Move to Library
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setAllUserUploads(prev => {
-                              const updated = prev.filter((_, i) => i !== index);
-                              localStorage.setItem('allUserUploads', JSON.stringify(updated));
-                              return updated;
-                            });
-                            alert('Song rejected and removed.');
-                          }}
-                          style={{background: '#ff4444', color: 'white', padding: '8px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px'}}
-                        >
-                          ✗ Reject
-                        </button>
-                        {song.filename && (
-                          <button 
-                            onClick={async () => {
-                              if (confirm(`Delete ${song.title} from server permanently?`)) {
-                                try {
-                                  const response = await fetch(`https://ee2b3f9b8389.ngrok-free.app/api/song/delete/${song.filename}`, {
-                                    method: 'DELETE'
-                                  });
-                                  const result = await response.json();
-                                  if (result.success) {
-                                    setAllUserUploads(prev => {
-                                      const updated = prev.filter((_, i) => i !== index);
-                                      localStorage.setItem('allUserUploads', JSON.stringify(updated));
-                                      return updated;
-                                    });
-                                    alert('Song deleted from server!');
-                                  } else {
-                                    alert('Failed to delete from server');
-                                  }
-                                } catch (error) {
-                                  console.error('Delete error:', error);
-                                  alert('Error deleting from server');
-                                }
-                              }
-                            }}
-                            style={{background: '#dc2626', color: 'white', padding: '8px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px'}}
-                          >
-                            🗑️ Delete from Server
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{textAlign: 'center', padding: '60px 20px'}}>
-                  <p style={{color: '#b3b3b3', fontSize: '16px'}}>No pending uploads</p>
-                  <p style={{color: '#666', fontSize: '14px'}}>User uploads will appear here for approval</p>
-                </div>
-              )}
-            </div>
-          )}
+
         </div>
       </div>
       
@@ -1515,6 +1228,23 @@ function App() {
       )}
       
 
+      
+      {/* Audio Element */}
+      {allSongs[currentSong] && (
+        <audio 
+          ref={audioRef}
+          src={allSongs[currentSong].url}
+          onEnded={playNext}
+          onLoadedData={() => {
+            if (isPlaying) {
+              audioRef.current?.play().catch(error => {
+                console.log('Autoplay prevented:', error);
+                setIsPlaying(false);
+              });
+            }
+          }}
+        />
+      )}
       
       {/* Bottom Player */}
       <MusicPlayer 

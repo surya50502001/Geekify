@@ -308,8 +308,8 @@ function App() {
     return (
       <div style={{background: '#000', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial'}}>
         <div style={{textAlign: 'center'}}>
-          <div onClick={changeSpinnerColor} style={{width: '40px', height: '40px', margin: '0 auto 20px', cursor: 'pointer', background: 'transparent', border: 'none', padding: 0}}>
-            <svg width="40" height="40" viewBox="0 0 100 100" fill={spinnerColor} style={{animation: 'spin 2s linear infinite'}}>
+          <div onClick={changeSpinnerColor} style={{width: '60px', height: '60px', margin: '0 auto 20px', cursor: 'pointer', background: 'transparent', border: 'none', padding: 0}}>
+            <svg width="60" height="60" viewBox="0 0 100 100" fill={spinnerColor} style={{animation: 'spin 2s linear infinite'}}>
               <circle cx="50" cy="50" r="45" fill="none" stroke={spinnerColor} strokeWidth="3"/>
               <circle cx="50" cy="50" r="35" fill="none" stroke={spinnerColor} strokeWidth="2"/>
               <circle cx="50" cy="50" r="25" fill="none" stroke={spinnerColor} strokeWidth="2"/>

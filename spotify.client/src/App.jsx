@@ -226,10 +226,82 @@ function App() {
             </div>
           )}
           
+          {activeMenu === 'Search' && (
+            <div>
+              <h2 style={{fontSize: '24px', marginBottom: '20px'}}>Search</h2>
+              <input 
+                type="text" 
+                placeholder="Search for songs..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  maxWidth: '400px',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  border: `2px solid ${getCurrentColor()}40`,
+                  background: isDarkTheme ? '#181818' : '#f5f5f5',
+                  color: isDarkTheme ? '#fff' : '#000',
+                  fontSize: '16px',
+                  marginBottom: '20px',
+                  outline: 'none'
+                }}
+              />
+              {searchTerm && (
+                <div style={{display: 'grid', gap: '12px'}}>
+                  {ourSongs.filter(song => 
+                    song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    song.artist.toLowerCase().includes(searchTerm.toLowerCase())
+                  ).map((song, index) => (
+                    <div key={index} style={{padding: '12px', background: isDarkTheme ? '#181818' : '#f5f5f5', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px'}}>
+                      <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                      </div>
+                      <div>
+                        <div style={{fontWeight: '500'}}>{song.title}</div>
+                        <div style={{fontSize: '14px', color: '#b3b3b3'}}>{song.artist}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          
           {activeMenu === 'Home' && (
             <div>
               <h2 style={{fontSize: '24px', marginBottom: '20px'}}>Welcome to Geekify</h2>
               <p style={{color: '#b3b3b3', marginBottom: '20px'}}>Your music streaming experience</p>
+              <div style={{display: 'flex', gap: '12px', marginTop: '20px'}}>
+                <button 
+                  onClick={toggleTheme}
+                  style={{
+                    background: getCurrentColor(),
+                    color: '#fff',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  {isDarkTheme ? '☀️ Light' : '🌙 Dark'}
+                </button>
+                <button 
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  style={{
+                    background: 'transparent',
+                    border: `2px solid ${getCurrentColor()}`,
+                    color: getCurrentColor(),
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  {sidebarOpen ? 'Hide' : 'Show'} Menu
+                </button>
+              </div>
             </div>
           )}
           

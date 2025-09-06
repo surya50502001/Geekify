@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import MusicPlayer from './components/MusicPlayer';
+import Messaging from './components/Messaging';
+import './App.css';
 
 
 function App() {
@@ -292,6 +294,109 @@ function App() {
   const playPrev = () => {
     const prevSong = currentSong === 0 ? allSongs.length - 1 : currentSong - 1;
     setCurrentSong(prevSong);
+    setCurrentTime(0);
+    setDuration(0);
+    setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.load();
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(error => {
+          console.log('Autoplay prevented:', error);
+          setIsPlaying(false);
+        });
+      }
+    }, 100);
+    saveAppState();
+  };
+
+  if (isLoading) {
+    return (
+      <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#000'}}>
+        <div style={{color: spinnerColor, fontSize: '18px'}}>Loading...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app" style={{display: 'flex', height: '100vh', background: isDarkTheme ? '#000000' : '#ffffff', color: isDarkTheme ? '#ffffff' : '#000000', fontFamily: 'Arial, sans-serif'}}>
+      <Sidebar 
+        activeMenu={activeMenu}
+        setActiveMenu={setActiveMenu}
+        setSidebarOpen={setSidebarOpen}
+        sidebarOpen={sidebarOpen}
+        getCurrentColor={getCurrentColor}
+        isDarkTheme={isDarkTheme}
+      />
+      
+      <div className="main-content" style={{flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
+        <div style={{padding: '20px', flex: 1, overflowY: 'auto'}}>
+          <h1 style={{fontSize: '32px', margin: '0 0 20px 0', color: getCurrentColor()}}>Geekify</h1>
+          
+          {activeMenu === 'Our Songs' && (
+            <div>
+              <h2 style={{fontSize: '24px', marginBottom: '20px'}}>Our Songs</h2>
+              <div style={{display: 'grid', gap: '12px'}}>
+                {allSongs.map((song, index) => (
+                  <div key={index} onClick={() => {
+                    setCurrentSong(index);
+                    setIsPlaying(true);
+                    setTimeout(() => {
+                      if (audioRef.current) {
+                        audioRef.current.load();
+                        audioRef.current.play();
+                      }
+                    }, 100);
+                  }} style={{padding: '12px', background: isDarkTheme ? '#181818' : '#f5f5f5', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', border: currentSong === index ? `2px solid ${getCurrentColor()}` : '2px solid transparent'}}>
+                    <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                    <div>
+                      <div style={{fontWeight: '500'}}>{song.title}</div>
+                      <div style={{fontSize: '14px', color: '#b3b3b3'}}>{song.artist}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {activeMenu === 'Home' && (
+            <div>
+              <h2 style={{fontSize: '24px', marginBottom: '20px'}}>Welcome to Geekify</h2>
+              <p style={{color: '#b3b3b3', marginBottom: '20px'}}>Your music streaming experience</p>
+            </div>
+          )}
+          
+          {activeMenu === 'Messages' && (
+            <Messaging 
+              isDarkTheme={isDarkTheme}
+              getCurrentColor={getCurrentColor}
+            />
+          )}
+        </div>
+      </div>
+      
+      <MusicPlayer 
+        allSongs={allSongs}
+        currentSong={currentSong}
+        isPlaying={isPlaying}
+        currentTime={currentTime}
+        duration={duration}
+        saveAppState={saveAppState}
+        audioRef={audioRef}
+        getCurrentColor={getCurrentColor}
+        formatTime={formatTime}
+        handleProgressClick={handleProgressClick}
+        playPrev={playPrev}
+        togglePlay={togglePlay}
+        playNext={playNext}
+      />
+    </div>
+  );
+}
+
+export default App;vSong);
     setCurrentTime(0);
     setDuration(0);
     // Load and play the new song

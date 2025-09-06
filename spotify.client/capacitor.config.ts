@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.geekify.music',
-  appName: 'Geekify',
+  appId: 'com.geekifyz.music',
+  appName: 'geekifyZ',
   webDir: 'dist',
   server: {
     androidScheme: 'https'

@@ -1,10 +1,6 @@
 name = "geekify-music"
 compatibility_date = "2023-10-01"
 
-[env.production]
-routes = [
-  { pattern = "geekify.pages.dev", custom_domain = true }
-]
-
-[[env.production.pages_build_output_dir]]
-directory = "dist"
+[build]
+command = "npm run build"
+publish = "dist"

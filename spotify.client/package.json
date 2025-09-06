@@ -3,9 +3,13 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "start": "vite preview --port $PORT --host 0.0.0.0",
     "preview": "vite preview",
     "android": "cap run android",
     "ios": "cap run ios",
@@ -24,12 +28,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "^5.7.8",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.0.0",
-    "typescript": "^5.9.2",
-    "vite": "^4.4.0",
-    "wrangler": "^3.114.14"
+    "vite": "^4.4.0"
   }
 }

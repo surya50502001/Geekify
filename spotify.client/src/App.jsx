@@ -178,10 +178,13 @@ function App() {
   if (isLoading) {
     return (
       <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#000'}}>
-        <div style={{color: spinnerColor, fontSize: '18px'}}>Loading...</div>
+        <div style={{color: spinnerColor, fontSize: '18px'}}>Loading Geekify...</div>
       </div>
     );
   }
+
+  // Debug logging
+  console.log('App rendering:', { activeMenu, ourSongs: ourSongs.length, isDarkTheme });
 
   return (
     <div className="app" style={{display: 'flex', height: '100vh', background: isDarkTheme ? '#000000' : '#ffffff', color: isDarkTheme ? '#ffffff' : '#000000', fontFamily: 'Arial, sans-serif'}}>

@@ -96,29 +96,10 @@ function App() {
     // Simulate loading time
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2000);
+    }, 1000);
     
-    // Check C# server status
-    const checkServerStatus = async () => {
-      try {
-        // const response = await fetch('https://geekify-backend.onrender.com/api/song/songs', {
-          headers: {
-            'ngrok-skip-browser-warning': 'true'
-          }
-        });
-        if (response.ok) {
-          setServerStatus('online');
-        } else {
-          setServerStatus('offline');
-        }
-      } catch (error) {
-        console.log('Server check failed:', error);
-        setServerStatus('offline');
-      }
-    };
-    
-    // checkServerStatus();
-    // const serverCheckInterval = setInterval(checkServerStatus, 30000);
+    // Server status disabled for now
+    setServerStatus('offline');
     
     // Auto-save state periodically
     const saveInterval = setInterval(saveAppState, 10000); // Save every 10 seconds
@@ -126,9 +107,8 @@ function App() {
     return () => {
       clearTimeout(timer);
       clearInterval(saveInterval);
-      // clearInterval(serverCheckInterval);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      saveAppState(); // Save on unmount
+      saveAppState();
     };
   }, []);
   
@@ -206,23 +186,13 @@ function App() {
 
   
   useEffect(() => {
-    // Load GitHub songs into Our Songs playlist
-    fetch('https://api.github.com/repos/surya50502001/Spotify-/contents')
-      .then(res => res.json())
-      .then(files => {
-        const mp3Files = files.filter(file => file.name.endsWith('.mp3'));
-        const songList = mp3Files.map(file => ({
-          title: file.name.replace('.mp3', '').replace(/%20/g, ' '),
-          artist: 'Unknown Artist',
-          url: file.download_url,
-          isGitHubSong: true
-        }));
-        setOurSongs(songList);
-        localStorage.setItem('ourSongs', JSON.stringify(songList));
-      })
-      .catch(err => console.error('Error loading songs:', err));
-    
-
+    // Load sample songs
+    const sampleSongs = [
+      { title: 'Sample Song 1', artist: 'Artist 1', url: '#' },
+      { title: 'Sample Song 2', artist: 'Artist 2', url: '#' },
+      { title: 'Sample Song 3', artist: 'Artist 3', url: '#' }
+    ];
+    setOurSongs(sampleSongs);
   }, []);
 
   useEffect(() => {

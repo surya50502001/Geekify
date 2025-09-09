@@ -39,6 +39,9 @@ function App() {
   const [error, setError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [audio, setAudio] = useState(null);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   useEffect(() => {
     document.addEventListener('touchstart', () => {}, { passive: true });
@@ -85,12 +88,22 @@ function App() {
       audio.pause();
     }
     
+    const trackIndex = tracks.findIndex(t => t.id === track.id);
+    setCurrentTrackIndex(trackIndex);
+    
     const newAudio = new Audio(track.url);
     newAudio.addEventListener('loadeddata', () => {
       newAudio.play();
       setIsPlaying(true);
+      setDuration(newAudio.duration);
     });
-    newAudio.addEventListener('ended', () => setIsPlaying(false));
+    newAudio.addEventListener('timeupdate', () => {
+      setProgress(newAudio.currentTime);
+    });
+    newAudio.addEventListener('ended', () => {
+      setIsPlaying(false);
+      nextTrack();
+    });
     newAudio.addEventListener('error', (e) => {
       console.error('Audio error:', e);
       setIsPlaying(false);
@@ -98,6 +111,21 @@ function App() {
     
     setAudio(newAudio);
     setCurrentTrack(track);
+    setCurrentView('player');
+  };
+  
+  const nextTrack = () => {
+    const nextIndex = (currentTrackIndex + 1) % tracks.length;
+    if (tracks[nextIndex]) {
+      playTrack(tracks[nextIndex]);
+    }
+  };
+  
+  const prevTrack = () => {
+    const prevIndex = currentTrackIndex === 0 ? tracks.length - 1 : currentTrackIndex - 1;
+    if (tracks[prevIndex]) {
+      playTrack(tracks[prevIndex]);
+    }
   };
 
   const theme = {
@@ -186,7 +214,79 @@ function App() {
     </div>
   );
 
-  const Player = () => currentTrack && (
+  const PlayerPage = () => currentTrack && (
+    <div style={{flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px'}}>
+      <button onClick={() => setCurrentView('home')} style={{
+        position: 'absolute',
+        top: '20px',
+        left: '20px',
+        background: 'none',
+        border: 'none',
+        color: theme.text,
+        fontSize: '24px',
+        cursor: 'pointer'
+      }}>←</button>
+      
+      <div style={{textAlign: 'center', marginBottom: '40px'}}>
+        <h1 style={{color: theme.text, margin: '0 0 8px 0', fontSize: '24px'}}>{currentTrack.title}</h1>
+        <p style={{color: theme.textSecondary, margin: 0, fontSize: '16px'}}>{currentTrack.artist}</p>
+      </div>
+      
+      <div style={{width: '100%', maxWidth: '400px', marginBottom: '40px'}}>
+        <div style={{
+          width: '100%',
+          height: '4px',
+          background: theme.border,
+          borderRadius: '2px',
+          marginBottom: '8px'
+        }}>
+          <div style={{
+            width: `${duration ? (progress / duration) * 100 : 0}%`,
+            height: '100%',
+            background: '#1db954',
+            borderRadius: '2px'
+          }} />
+        </div>
+        <div style={{display: 'flex', justifyContent: 'space-between', color: theme.textSecondary, fontSize: '12px'}}>
+          <span>{Math.floor(progress / 60)}:{Math.floor(progress % 60).toString().padStart(2, '0')}</span>
+          <span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, '0')}</span>
+        </div>
+      </div>
+      
+      <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
+        <button onClick={prevTrack} style={{
+          background: 'none',
+          border: 'none',
+          color: theme.text,
+          fontSize: '24px',
+          cursor: 'pointer'
+        }}>⏮️</button>
+        
+        <button onClick={togglePlay} style={{
+          background: '#1db954',
+          border: 'none',
+          borderRadius: '50%',
+          width: '60px',
+          height: '60px',
+          color: '#fff',
+          cursor: 'pointer',
+          fontSize: '24px'
+        }}>
+          {isPlaying ? '⏸️' : '▶️'}
+        </button>
+        
+        <button onClick={nextTrack} style={{
+          background: 'none',
+          border: 'none',
+          color: theme.text,
+          fontSize: '24px',
+          cursor: 'pointer'
+        }}>⏭️</button>
+      </div>
+    </div>
+  );
+  
+  const Player = () => currentTrack && currentView !== 'player' && (
     <div style={{
       background: theme.card,
       borderTop: `1px solid ${theme.border}`,
@@ -297,17 +397,23 @@ function App() {
         />
       )}
       
-      <div style={{display: 'flex', flex: 1, overflow: 'hidden'}}>
-        <Sidebar />
-        <div style={{
-          flex: 1,
-          overflow: 'auto',
-          marginLeft: window.innerWidth <= 768 ? '0' : '0'
-        }}>
-          <TrackList />
-        </div>
-      </div>
-      <Player />
+      {currentView === 'player' ? (
+        <PlayerPage />
+      ) : (
+        <>
+          <div style={{display: 'flex', flex: 1, overflow: 'hidden'}}>
+            <Sidebar />
+            <div style={{
+              flex: 1,
+              overflow: 'auto',
+              marginLeft: window.innerWidth <= 768 ? '0' : '0'
+            }}>
+              <TrackList />
+            </div>
+          </div>
+          <Player />
+        </>
+      )}
     </div>
   );
 }

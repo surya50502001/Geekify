@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getAllSongs } from './services/songsService';
 
 function App() {
   const [isDarkTheme, setIsDarkTheme] = useState(true);
@@ -17,19 +18,9 @@ function App() {
     document.addEventListener('touchstart', () => {}, { passive: true });
     
     // Fetch songs from GitHub
-    fetch('https://api.github.com/repos/surya50502001/Spotify-/contents')
-      .then(res => res.json())
-      .then(data => {
-        const songFiles = data.filter(file => file.name.endsWith('.mp3'));
-        const songList = songFiles.map((file, index) => ({
-          id: index + 1,
-          title: file.name.replace('.mp3', '').replace(/[-_]/g, ' '),
-          artist: 'Unknown Artist',
-          album: 'Unknown Album',
-          duration: '3:00',
-          url: file.download_url
-        }));
-        setTracks(songList);
+    getAllSongs()
+      .then(songs => {
+        setTracks(songs);
         setLoading(false);
       })
       .catch(() => {

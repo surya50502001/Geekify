@@ -1,34 +1,74 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import Sidebar from './components/Sidebar';
+import MusicPlayer from './components/MusicPlayer';
+import Messaging from './components/Messaging';
+import './App.css';
 
 function App() {
-  const [isDarkTheme, setIsDarkTheme] = useState(true);
-  const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showPlayer, setShowPlayer] = useState(false);
+  const [currentSong, setCurrentSong] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeMenu, setActiveMenu] = useState('Home');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [ourSongs, setOurSongs] = useState([]);
+  const [isDarkTheme, setIsDarkTheme] = useState(true);
   const audioRef = useRef(null);
-
-  const songs = [
-    { id: 1, title: 'Song 1', artist: 'Artist 1', url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' },
-    { id: 2, title: 'Song 2', artist: 'Artist 2', url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' },
-    { id: 3, title: 'Song 3', artist: 'Artist 3', url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' }
-  ];
-
+  
+  const saveAppState = () => {
+    const state = {
+      currentSong,
+      isPlaying,
+      currentTime,
+      activeMenu,
+      searchTerm,
+      isDarkTheme,
+      sidebarOpen,
+      ourSongs
+    };
+    sessionStorage.setItem('appState', JSON.stringify(state));
+  };
+  
   useEffect(() => {
-    const viewport = document.querySelector('meta[name=viewport]');
-    if (viewport) {
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-    }
+    const sampleSongs = [
+      { title: 'Sample Song 1', artist: 'Artist 1', url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' },
+      { title: 'Sample Song 2', artist: 'Artist 2', url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' },
+      { title: 'Sample Song 3', artist: 'Artist 3', url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' }
+    ];
+    setOurSongs(sampleSongs);
   }, []);
 
-  const playSong = (song) => {
-    setCurrentSong(song);
-    setShowPlayer(true);
-    setIsPlaying(true);
-    setTimeout(() => {
-      if (audioRef.current) {
-        audioRef.current.play();
-      }
-    }, 100);
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      const updateTime = () => setCurrentTime(audio.currentTime);
+      const updateDuration = () => {
+        if (audio.duration && !isNaN(audio.duration)) {
+          setDuration(audio.duration);
+        }
+      };
+      
+      audio.addEventListener('timeupdate', updateTime);
+      audio.addEventListener('loadedmetadata', updateDuration);
+      
+      return () => {
+        audio.removeEventListener('timeupdate', updateTime);
+        audio.removeEventListener('loadedmetadata', updateDuration);
+      };
+    }
+  }, [ourSongs, currentSong]);
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleProgressClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+    audioRef.current.currentTime = percent * duration;
   };
 
   const togglePlay = () => {
@@ -40,148 +80,182 @@ function App() {
     setIsPlaying(!isPlaying);
   };
 
-  const goBack = () => {
-    setShowPlayer(false);
-    setCurrentSong(null);
-    setIsPlaying(false);
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
+  const playNext = () => {
+    const nextSong = (currentSong + 1) % ourSongs.length;
+    setCurrentSong(nextSong);
+    setCurrentTime(0);
+    setDuration(0);
+    setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.load();
+        if (isPlaying) {
+          audioRef.current.play();
+        }
+      }
+    }, 100);
   };
 
-  if (showPlayer && currentSong) {
-    return (
-      <div style={{
-        height: '100vh',
-        background: isDarkTheme ? '#000' : '#fff',
-        color: isDarkTheme ? '#fff' : '#000',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        textAlign: 'center'
-      }}>
-        <button 
-          onClick={goBack}
-          style={{
-            position: 'absolute',
-            top: '20px',
-            left: '20px',
-            background: 'transparent',
-            border: 'none',
-            color: isDarkTheme ? '#fff' : '#000',
-            fontSize: '24px',
-            cursor: 'pointer'
-          }}
-        >
-          ←
-        </button>
+  const playPrev = () => {
+    const prevSong = currentSong === 0 ? ourSongs.length - 1 : currentSong - 1;
+    setCurrentSong(prevSong);
+    setCurrentTime(0);
+    setDuration(0);
+    setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.load();
+        if (isPlaying) {
+          audioRef.current.play();
+        }
+      }
+    }, 100);
+  };
 
-        <div style={{
-          width: '200px',
-          height: '200px',
-          background: '#1db954',
-          borderRadius: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: '30px'
-        }}>
-          <svg width="80" height="80" viewBox="0 0 24 24" fill="white">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
-        </div>
-
-        <h2 style={{fontSize: '24px', margin: '0 0 10px 0'}}>{currentSong.title}</h2>
-        <p style={{fontSize: '16px', color: '#888', margin: '0 0 30px 0'}}>{currentSong.artist}</p>
-
-        <button
-          onClick={togglePlay}
-          style={{
-            background: '#1db954',
-            border: 'none',
-            borderRadius: '50%',
-            width: '80px',
-            height: '80px',
-            color: 'white',
-            fontSize: '24px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          {isPlaying ? '⏸️' : '▶️'}
-        </button>
-
-        <audio ref={audioRef} src={currentSong.url} />
-      </div>
-    );
-  }
+  const songColors = ['#1db954', '#e22856', '#ff6600', '#8e44ad', '#3498db', '#f39c12', '#e74c3c', '#9b59b6'];
+  
+  const getCurrentColor = () => {
+    return songColors[currentSong % songColors.length] || '#1db954';
+  };
 
   return (
-    <div style={{
-      height: '100vh',
-      background: isDarkTheme ? '#000' : '#fff',
-      color: isDarkTheme ? '#fff' : '#000',
-      padding: '20px'
-    }}>
-      <h1 style={{color: '#1db954', textAlign: 'center', marginBottom: '30px'}}>Geekify Music</h1>
+    <div className="app" style={{display: 'flex', height: '100vh', background: isDarkTheme ? '#000000' : '#ffffff', color: isDarkTheme ? '#ffffff' : '#000000', fontFamily: 'Arial, sans-serif'}}>
+      <Sidebar 
+        activeMenu={activeMenu}
+        setActiveMenu={setActiveMenu}
+        setSidebarOpen={setSidebarOpen}
+        sidebarOpen={sidebarOpen}
+        getCurrentColor={getCurrentColor}
+        isDarkTheme={isDarkTheme}
+      />
       
-      <div style={{maxWidth: '400px', margin: '0 auto'}}>
-        {songs.map(song => (
-          <div 
-            key={song.id}
-            onClick={() => playSong(song)}
-            style={{
-              background: isDarkTheme ? '#181818' : '#f5f5f5',
-              padding: '15px',
-              borderRadius: '10px',
-              marginBottom: '10px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px'
-            }}
-          >
-            <div style={{
-              width: '50px',
-              height: '50px',
-              background: '#1db954',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
-            </div>
+      <div className="main-content" style={{flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
+        <div style={{padding: '20px', flex: 1, overflowY: 'auto'}}>
+          <h1 style={{fontSize: '32px', margin: '0 0 20px 0', color: getCurrentColor()}}>Geekify</h1>
+          
+          {activeMenu === 'Our Songs' && (
             <div>
-              <div style={{fontWeight: 'bold', fontSize: '16px'}}>{song.title}</div>
-              <div style={{color: '#888', fontSize: '14px'}}>{song.artist}</div>
+              <h2 style={{fontSize: '24px', marginBottom: '20px'}}>Our Songs</h2>
+              <div style={{display: 'grid', gap: '12px'}}>
+                {ourSongs.map((song, index) => (
+                  <div key={index} onClick={() => {
+                    setCurrentSong(index);
+                    setIsPlaying(true);
+                    setTimeout(() => {
+                      if (audioRef.current) {
+                        audioRef.current.load();
+                        audioRef.current.play();
+                      }
+                    }, 100);
+                  }} style={{padding: '12px', background: isDarkTheme ? '#181818' : '#f5f5f5', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', border: currentSong === index ? `2px solid ${getCurrentColor()}` : '2px solid transparent'}}>
+                    <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                    <div>
+                      <div style={{fontWeight: '500'}}>{song.title}</div>
+                      <div style={{fontSize: '14px', color: '#b3b3b3'}}>{song.artist}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          )}
+          
+          {activeMenu === 'Search' && (
+            <div>
+              <h2 style={{fontSize: '24px', marginBottom: '20px'}}>Search</h2>
+              <input 
+                type="text" 
+                placeholder="Search for songs..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  maxWidth: '400px',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  border: `2px solid ${getCurrentColor()}40`,
+                  background: isDarkTheme ? '#181818' : '#f5f5f5',
+                  color: isDarkTheme ? '#fff' : '#000',
+                  fontSize: '16px',
+                  marginBottom: '20px',
+                  outline: 'none'
+                }}
+              />
+              {searchTerm && (
+                <div style={{display: 'grid', gap: '12px'}}>
+                  {ourSongs.filter(song => 
+                    song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    song.artist.toLowerCase().includes(searchTerm.toLowerCase())
+                  ).map((song, index) => (
+                    <div key={index} onClick={() => {
+                      const songIndex = ourSongs.indexOf(song);
+                      setCurrentSong(songIndex);
+                      setIsPlaying(true);
+                      setTimeout(() => {
+                        if (audioRef.current) {
+                          audioRef.current.load();
+                          audioRef.current.play();
+                        }
+                      }, 100);
+                    }} style={{padding: '12px', background: isDarkTheme ? '#181818' : '#f5f5f5', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px'}}>
+                      <div style={{width: '48px', height: '48px', background: `linear-gradient(135deg, ${getCurrentColor()}, ${getCurrentColor()}dd)`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                      </div>
+                      <div>
+                        <div style={{fontWeight: '500'}}>{song.title}</div>
+                        <div style={{fontSize: '14px', color: '#b3b3b3'}}>{song.artist}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {activeMenu === 'Home' && (
+            <div>
+              <h2 style={{fontSize: '24px', marginBottom: '20px'}}>Welcome to Geekify</h2>
+              <p style={{color: '#b3b3b3', marginBottom: '20px'}}>Your music streaming experience</p>
+              <button 
+                onClick={() => setIsDarkTheme(!isDarkTheme)}
+                style={{
+                  background: getCurrentColor(),
+                  color: '#fff',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                {isDarkTheme ? '☀️ Light' : '🌙 Dark'}
+              </button>
+            </div>
+          )}
+          
+          {activeMenu === 'Messages' && (
+            <Messaging 
+              isDarkTheme={isDarkTheme}
+              getCurrentColor={getCurrentColor}
+            />
+          )}
+        </div>
       </div>
-
-      <button 
-        onClick={() => setIsDarkTheme(!isDarkTheme)}
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          background: '#1db954',
-          color: '#fff',
-          border: 'none',
-          padding: '12px 20px',
-          borderRadius: '25px',
-          cursor: 'pointer'
-        }}
-      >
-        {isDarkTheme ? '☀️' : '🌙'}
-      </button>
+      
+      <MusicPlayer 
+        allSongs={ourSongs}
+        currentSong={currentSong}
+        isPlaying={isPlaying}
+        currentTime={currentTime}
+        duration={duration}
+        saveAppState={saveAppState}
+        audioRef={audioRef}
+        getCurrentColor={getCurrentColor}
+        formatTime={formatTime}
+        handleProgressClick={handleProgressClick}
+        playPrev={playPrev}
+        togglePlay={togglePlay}
+        playNext={playNext}
+      />
     </div>
   );
 }

@@ -89,7 +89,7 @@ function App() {
       background: theme.sidebar,
       padding: '24px 16px',
       borderRight: `1px solid ${theme.border}`,
-      display: 'flex',
+      display: window.innerWidth <= 768 && !sidebarOpen ? 'none' : 'flex',
       flexDirection: 'column',
       gap: '8px',
       position: window.innerWidth <= 768 ? 'fixed' : 'static',

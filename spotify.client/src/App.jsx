@@ -93,7 +93,8 @@ function App() {
       top: 0,
       height: '100vh',
       zIndex: 1000,
-      transition: 'left 0.3s ease'
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      boxShadow: window.innerWidth <= 768 && sidebarOpen ? '4px 0 20px rgba(0,0,0,0.3)' : 'none'
     }}>
       <h2 style={{color: '#1db954', margin: '0 0 24px 0', fontSize: '24px'}}>Geekify</h2>
       {['Home', 'Search', 'Your Library'].map(item => (
@@ -202,19 +203,53 @@ function App() {
           left: '20px',
           zIndex: 1001,
           background: theme.card,
-          border: `1px solid ${theme.border}`,
-          borderRadius: '8px',
-          padding: '8px',
+          border: 'none',
+          borderRadius: '12px',
+          padding: '12px',
           cursor: 'pointer',
-          display: window.innerWidth <= 768 ? 'block' : 'none'
+          display: window.innerWidth <= 768 ? 'flex' : 'none',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          transition: 'all 0.2s ease',
+          transform: sidebarOpen ? 'rotate(90deg)' : 'rotate(0deg)'
         }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill={theme.text}>
-          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-        </svg>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '3px',
+          width: '18px',
+          height: '14px'
+        }}>
+          <div style={{
+            width: '100%',
+            height: '2px',
+            background: theme.text,
+            borderRadius: '1px',
+            transition: 'all 0.3s ease',
+            transform: sidebarOpen ? 'rotate(45deg) translate(5px, 5px)' : 'rotate(0deg)'
+          }} />
+          <div style={{
+            width: '100%',
+            height: '2px',
+            background: theme.text,
+            borderRadius: '1px',
+            transition: 'all 0.3s ease',
+            opacity: sidebarOpen ? 0 : 1
+          }} />
+          <div style={{
+            width: '100%',
+            height: '2px',
+            background: theme.text,
+            borderRadius: '1px',
+            transition: 'all 0.3s ease',
+            transform: sidebarOpen ? 'rotate(-45deg) translate(7px, -6px)' : 'rotate(0deg)'
+          }} />
+        </div>
       </button>
       
-      {sidebarOpen && window.innerWidth <= 768 && (
+      {window.innerWidth <= 768 && (
         <div
           onClick={() => setSidebarOpen(false)}
           style={{
@@ -223,8 +258,10 @@ function App() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 999
+            background: `rgba(0,0,0,${sidebarOpen ? '0.5' : '0'})`,
+            zIndex: 999,
+            visibility: sidebarOpen ? 'visible' : 'hidden',
+            transition: 'all 0.3s ease'
           }}
         />
       )}

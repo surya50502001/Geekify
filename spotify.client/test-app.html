@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Geekify</title>
+</head>
+<body>
+    <div id="test">Loading...</div>
+    <script>
+        fetch('https://api.github.com/repos/surya50502001/Spotify-/contents')
+            .then(res => res.json())
+            .then(data => {
+                const songs = data.filter(f => f.name.endsWith('.mp3'));
+                document.getElementById('test').innerHTML = 
+                    `Found ${songs.length} songs: ${songs.map(s => s.name).join(', ')}`;
+            })
+            .catch(err => {
+                document.getElementById('test').innerHTML = `Error: ${err.message}`;
+            });
+    </script>
+</body>
+</html>

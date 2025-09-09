@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 
 const getAllSongs = async () => {
   try {
-    const response = await fetch('https://api.github.com/repos/surya50502001/Spotify-/contents');
+    const response = await fetch(`https://api.github.com/repos/surya50502001/Spotify-/contents?v=${Date.now()}`, {
+      cache: 'no-cache'
+    });
     if (!response.ok) throw new Error('Failed to fetch');
     
     const data = await response.json();
@@ -38,6 +40,13 @@ function App() {
 
   useEffect(() => {
     document.addEventListener('touchstart', () => {}, { passive: true });
+    
+    // Clear any cached data
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        names.forEach(name => caches.delete(name));
+      });
+    }
     
     // Fetch songs from GitHub
     getAllSongs()

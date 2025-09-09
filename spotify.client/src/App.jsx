@@ -261,6 +261,11 @@ function App() {
     );
   };
   
+  const getTrackColor = (index) => {
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43', '#10ac84', '#ee5a24', '#0abde3', '#3867d6', '#8854d0'];
+    return colors[index % colors.length];
+  };
+  
   const TrackList = () => (
     <div style={{padding: '24px'}}>
       <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Songs from Repository</h3>
@@ -271,24 +276,26 @@ function App() {
       ) : tracks.length === 0 ? (
         <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No songs found</div>
       ) : (
-        tracks.map((track, index) => (
+        tracks.map((track, index) => {
+          const trackColor = getTrackColor(index);
+          return (
           <div key={track.id} style={{
             display: 'flex',
             alignItems: 'center',
             padding: '12px 16px',
             borderRadius: '8px',
             cursor: 'pointer',
-            background: currentTrack?.id === track.id ? theme.border : 'transparent',
-            transition: 'background 0.2s ease',
-            ':hover': { background: theme.border }
+            background: currentTrack?.id === track.id ? `${trackColor}20` : 'transparent',
+            border: `1px solid ${currentTrack?.id === track.id ? trackColor : 'transparent'}`,
+            transition: 'all 0.2s ease'
           }}>
             <button onClick={() => playTrack(track)} style={{
-              background: currentTrack?.id === track.id && isPlaying ? '#1db954' : 'transparent',
-              border: `1px solid ${currentTrack?.id === track.id ? '#1db954' : theme.border}`,
+              background: currentTrack?.id === track.id && isPlaying ? trackColor : 'transparent',
+              border: `1px solid ${trackColor}`,
               borderRadius: '50%',
               width: '32px',
               height: '32px',
-              color: currentTrack?.id === track.id && isPlaying ? '#fff' : theme.text,
+              color: currentTrack?.id === track.id && isPlaying ? '#fff' : trackColor,
               cursor: 'pointer',
               fontSize: '12px',
               display: 'flex',
@@ -311,7 +318,7 @@ function App() {
             }} style={{
               background: 'none',
               border: 'none',
-              color: favorites.includes(track.id) ? '#1db954' : theme.textSecondary,
+              color: favorites.includes(track.id) ? trackColor : theme.textSecondary,
               fontSize: '16px',
               cursor: 'pointer',
               padding: '4px',
@@ -319,7 +326,8 @@ function App() {
             }}>♥</button>
             <div style={{color: theme.textSecondary, fontSize: '12px', minWidth: '40px'}}>{track.duration}</div>
           </div>
-        ))
+        );
+        })
       )}
     </div>
   );

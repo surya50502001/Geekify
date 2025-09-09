@@ -38,6 +38,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [audio, setAudio] = useState(null);
 
   useEffect(() => {
     document.addEventListener('touchstart', () => {}, { passive: true });
@@ -68,10 +69,35 @@ function App() {
   }, []);
 
   const toggleTheme = () => setIsDarkTheme(!isDarkTheme);
-  const togglePlay = () => setIsPlaying(!isPlaying);
+  const togglePlay = () => {
+    if (audio) {
+      if (isPlaying) {
+        audio.pause();
+      } else {
+        audio.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+  
   const playTrack = (track) => {
+    if (audio) {
+      audio.pause();
+    }
+    
+    const newAudio = new Audio(track.url);
+    newAudio.addEventListener('loadeddata', () => {
+      newAudio.play();
+      setIsPlaying(true);
+    });
+    newAudio.addEventListener('ended', () => setIsPlaying(false));
+    newAudio.addEventListener('error', (e) => {
+      console.error('Audio error:', e);
+      setIsPlaying(false);
+    });
+    
+    setAudio(newAudio);
     setCurrentTrack(track);
-    setIsPlaying(true);
   };
 
   const theme = {

@@ -205,7 +205,7 @@ function App() {
         style={{
           position: 'fixed',
           top: '20px',
-          left: '20px',
+          right: '20px',
           zIndex: 1001,
           background: theme.card,
           border: 'none',

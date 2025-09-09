@@ -152,7 +152,7 @@ function App() {
       top: 0,
       height: '100vh',
       zIndex: 1000,
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+
       boxShadow: window.innerWidth <= 768 && sidebarOpen ? '4px 0 20px rgba(0,0,0,0.3)' : 'none'
     }}>
       <h2 style={{color: '#1db954', margin: '0 0 24px 0', fontSize: '24px'}}>Geekify</h2>
@@ -262,7 +262,129 @@ function App() {
   };
   
   const getTrackColor = (index) => {
-    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43', '#10ac84', '#ee5a24', '#0abde3', '#3867d6', '#8854d0'];
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+    return colors[index % colors.length];
+  };
+  
+  const TrackList = () => (
+    <div style={{padding: '24px'}}>
+      <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Songs from Repository</h3>
+      {loading ? (
+        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>Loading songs...</div>
+      ) : error ? (
+        <div style={{color: '#ff6b6b', textAlign: 'center', padding: '40px'}}>Error: {error}</div>
+      ) : tracks.length === 0 ? (
+        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No songs found</div>
+      ) : (
+        tracks.map((track, index) => {
+          const trackColor = getTrackColor(index);
+          return (
+          <div key={track.id} style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '8px 12px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            background: currentTrack?.id === track.id ? `${trackColor}15` : 'transparent'
+          }}>
+            <button onClick={() => playTrack(track)} style={{
+              background: currentTrack?.id === track.id && isPlaying ? trackColor : 'transparent',
+              border: `1px solid ${trackColor}`,
+              borderRadius: '50%',
+              width: '28px',
+              height: '28px',
+              color: currentTrack?.id === track.id && isPlaying ? '#fff' : trackColor,
+              cursor: 'pointer',
+              fontSize: '10px'
+            }}>
+              {currentTrack?.id === track.id && isPlaying ? '⏸' : '▶'}
+            </button>
+            <div onClick={() => playTrack(track)} style={{flex: 1, marginLeft: '12px', cursor: 'pointer'}}>
+              <div style={{color: theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
+              <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
+            </div>
+            <button onClick={(e) => {
+              e.stopPropagation();
+              setFavorites(prev => 
+                prev.includes(track.id) ? prev.filter(id => id !== track.id) : [...prev, track.id]
+              );
+            }} style={{
+              background: 'none',
+              border: 'none',
+              color: favorites.includes(track.id) ? trackColor : theme.textSecondary,
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}>♥</button>
+            <div style={{color: theme.textSecondary, fontSize: '12px', marginLeft: '8px'}}>{track.duration}</div>
+          </div>
+        );
+        })
+      )}
+    </div>
+  );
+  
+  const Player = () => currentTrack && (
+    <div style={{
+      background: theme.card,
+      borderTop: `1px solid ${theme.border}`,
+      padding: '12px 20px'
+    }}>
+      <div style={{
+        width: '100%',
+        height: '2px',
+        background: theme.border,
+        borderRadius: '1px',
+        marginBottom: '8px'
+      }}>
+        <div style={{
+          width: `${duration ? (progress / duration) * 100 : 0}%`,
+          height: '100%',
+          background: '#1db954',
+          borderRadius: '1px'
+        }} />
+      </div>
+      
+      <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+        <div style={{flex: 1, minWidth: 0}}>
+          <div style={{color: theme.text, fontSize: '13px', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{currentTrack.title}</div>
+          <div style={{color: theme.textSecondary, fontSize: '11px'}}>{currentTrack.artist}</div>
+        </div>
+        
+        <button onClick={prevTrack} style={{
+          background: 'none',
+          border: 'none',
+          color: theme.text,
+          fontSize: '16px',
+          cursor: 'pointer'
+        }}>⏮</button>
+        
+        <button onClick={togglePlay} style={{
+          background: '#1db954',
+          border: 'none',
+          borderRadius: '50%',
+          width: '36px',
+          height: '36px',
+          color: '#fff',
+          cursor: 'pointer',
+          fontSize: '14px'
+        }}>
+          {isPlaying ? '⏸' : '▶'}
+        </button>
+        
+        <button onClick={nextTrack} style={{
+          background: 'none',
+          border: 'none',
+          color: theme.text,
+          fontSize: '16px',
+          cursor: 'pointer'
+        }}>⏭</button>
+        
+        <div style={{color: theme.textSecondary, fontSize: '10px', minWidth: '60px', textAlign: 'right'}}>
+          {Math.floor(progress / 60)}:{Math.floor(progress % 60).toString().padStart(2, '0')}
+        </div>
+      </div>
+    </div>
+  );#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43', '#10ac84', '#ee5a24', '#0abde3', '#3867d6', '#8854d0'];
     return colors[index % colors.length];
   };
   
@@ -577,7 +699,7 @@ function App() {
           justifyContent: 'center',
           boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
           transition: 'all 0.2s ease',
-          transform: sidebarOpen ? 'rotate(90deg)' : 'rotate(0deg)'
+          transform: 'rotate(0deg)'
         }}
       >
         <div style={{
@@ -592,7 +714,6 @@ function App() {
             height: '2px',
             background: theme.text,
             borderRadius: '1px',
-            transition: 'all 0.3s ease',
             transform: sidebarOpen ? 'rotate(45deg) translate(5px, 5px)' : 'rotate(0deg)'
           }} />
           <div style={{
@@ -600,7 +721,6 @@ function App() {
             height: '2px',
             background: theme.text,
             borderRadius: '1px',
-            transition: 'all 0.3s ease',
             opacity: sidebarOpen ? 0 : 1
           }} />
           <div style={{
@@ -608,7 +728,6 @@ function App() {
             height: '2px',
             background: theme.text,
             borderRadius: '1px',
-            transition: 'all 0.3s ease',
             transform: sidebarOpen ? 'rotate(-45deg) translate(7px, -6px)' : 'rotate(0deg)'
           }} />
         </div>
@@ -625,8 +744,7 @@ function App() {
             bottom: 0,
             background: `rgba(0,0,0,${sidebarOpen ? '0.5' : '0'})`,
             zIndex: 999,
-            visibility: sidebarOpen ? 'visible' : 'hidden',
-            transition: 'all 0.3s ease'
+            visibility: sidebarOpen ? 'visible' : 'hidden'
           }}
         />
       )}

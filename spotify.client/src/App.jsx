@@ -42,6 +42,10 @@ function App() {
   useEffect(() => {
     document.addEventListener('touchstart', () => {}, { passive: true });
     
+    // Enable pull-to-refresh
+    document.body.style.overscrollBehavior = 'auto';
+    document.documentElement.style.overscrollBehavior = 'auto';
+    
     // Clear any cached data
     if ('caches' in window) {
       caches.keys().then(names => {
@@ -193,7 +197,8 @@ function App() {
       color: theme.text,
       fontFamily: 'Arial, sans-serif',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      overscrollBehavior: 'auto'
     }}>
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}

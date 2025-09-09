@@ -113,7 +113,6 @@ function App() {
     
     setAudio(newAudio);
     setCurrentTrack(track);
-    setCurrentView('player');
   };
   
   const nextTrack = () => {
@@ -264,6 +263,140 @@ function App() {
   
   const TrackList = () => (
     <div style={{padding: '24px'}}>
+      <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Songs from Repository</h3>
+      {loading ? (
+        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>Loading songs...</div>
+      ) : error ? (
+        <div style={{color: '#ff6b6b', textAlign: 'center', padding: '40px'}}>Error: {error}</div>
+      ) : tracks.length === 0 ? (
+        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No songs found</div>
+      ) : (
+        tracks.map((track, index) => (
+          <div key={track.id} style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            background: currentTrack?.id === track.id ? theme.border : 'transparent',
+            transition: 'background 0.2s ease',
+            ':hover': { background: theme.border }
+          }}>
+            <button onClick={() => playTrack(track)} style={{
+              background: currentTrack?.id === track.id && isPlaying ? '#1db954' : 'transparent',
+              border: `1px solid ${currentTrack?.id === track.id ? '#1db954' : theme.border}`,
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              color: currentTrack?.id === track.id && isPlaying ? '#fff' : theme.text,
+              cursor: 'pointer',
+              fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              {currentTrack?.id === track.id && isPlaying ? '⏸' : '▶'}
+            </button>
+            <div onClick={() => playTrack(track)} style={{flex: 1, marginLeft: '16px', cursor: 'pointer'}}>
+              <div style={{color: theme.text, fontSize: '14px', fontWeight: '500', marginBottom: '2px'}}>{track.title}</div>
+              <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
+            </div>
+            <button onClick={(e) => {
+              e.stopPropagation();
+              if (favorites.includes(track.id)) {
+                setFavorites(favorites.filter(id => id !== track.id));
+              } else {
+                setFavorites([...favorites, track.id]);
+              }
+            }} style={{
+              background: 'none',
+              border: 'none',
+              color: favorites.includes(track.id) ? '#1db954' : theme.textSecondary,
+              fontSize: '16px',
+              cursor: 'pointer',
+              padding: '4px',
+              marginRight: '12px'
+            }}>♥</button>
+            <div style={{color: theme.textSecondary, fontSize: '12px', minWidth: '40px'}}>{track.duration}</div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+  
+  const Player = () => currentTrack && (
+    <div style={{
+      background: theme.card,
+      borderTop: `1px solid ${theme.border}`,
+      padding: '16px 24px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px'
+    }}>
+      <div style={{
+        width: '100%',
+        height: '3px',
+        background: theme.border,
+        borderRadius: '2px',
+        cursor: 'pointer'
+      }}>
+        <div style={{
+          width: `${duration ? (progress / duration) * 100 : 0}%`,
+          height: '100%',
+          background: '#1db954',
+          borderRadius: '2px',
+          transition: 'width 0.1s ease'
+        }} />
+      </div>
+      
+      <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+        <div style={{flex: 1, minWidth: 0}}>
+          <div style={{color: theme.text, fontSize: '14px', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{currentTrack.title}</div>
+          <div style={{color: theme.textSecondary, fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{currentTrack.artist}</div>
+        </div>
+        
+        <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+          <button onClick={prevTrack} style={{
+            background: 'none',
+            border: 'none',
+            color: theme.text,
+            fontSize: '18px',
+            cursor: 'pointer',
+            padding: '4px'
+          }}>⏮</button>
+          
+          <button onClick={togglePlay} style={{
+            background: '#1db954',
+            border: 'none',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            color: '#fff',
+            cursor: 'pointer',
+            fontSize: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {isPlaying ? '⏸' : '▶'}
+          </button>
+          
+          <button onClick={nextTrack} style={{
+            background: 'none',
+            border: 'none',
+            color: theme.text,
+            fontSize: '18px',
+            cursor: 'pointer',
+            padding: '4px'
+          }}>⏭</button>
+        </div>
+        
+        <div style={{color: theme.textSecondary, fontSize: '11px', minWidth: '80px', textAlign: 'right'}}>
+          {Math.floor(progress / 60)}:{Math.floor(progress % 60).toString().padStart(2, '0')} / {Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, '0')}
+        </div>
+      </div>
+    </div>
+  );yle={{padding: '24px'}}>
       <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Songs from Repository</h3>
       {loading ? (
         <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>Loading songs...</div>
@@ -490,25 +623,19 @@ function App() {
         />
       )}
       
-      {currentView === 'player' ? (
-        <PlayerPage />
-      ) : (
-        <>
-          <div style={{display: 'flex', flex: 1, overflow: 'hidden'}}>
-            <Sidebar />
-            <div style={{
-              flex: 1,
-              overflow: 'auto',
-              marginLeft: window.innerWidth <= 768 ? '0' : '0'
-            }}>
-              {currentView === 'search' ? <SearchView /> : 
-               currentView === 'yourlibrary' ? <LibraryView /> : 
-               <TrackList />}
-            </div>
-          </div>
-          <Player />
-        </>
-      )}
+      <div style={{display: 'flex', flex: 1, overflow: 'hidden'}}>
+        <Sidebar />
+        <div style={{
+          flex: 1,
+          overflow: 'auto',
+          marginLeft: window.innerWidth <= 768 ? '0' : '0'
+        }}>
+          {currentView === 'search' ? <SearchView /> : 
+           currentView === 'yourlibrary' ? <LibraryView /> : 
+           <TrackList />}
+        </div>
+      </div>
+      <Player />
     </div>
   );
 }

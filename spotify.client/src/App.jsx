@@ -215,20 +215,36 @@ function App() {
             <div>
               <h2 style={{fontSize: '24px', marginBottom: '20px'}}>Welcome to Geekify</h2>
               <p style={{color: '#b3b3b3', marginBottom: '20px'}}>Your music streaming experience</p>
-              <button 
-                onClick={() => setIsDarkTheme(!isDarkTheme)}
-                style={{
-                  background: getCurrentColor(),
-                  color: '#fff',
-                  border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                {isDarkTheme ? '☀️ Light' : '🌙 Dark'}
-              </button>
+              <div style={{display: 'flex', gap: '12px'}}>
+                <button 
+                  onClick={() => setIsDarkTheme(!isDarkTheme)}
+                  style={{
+                    background: getCurrentColor(),
+                    color: '#fff',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  {isDarkTheme ? '☀️ Light' : '🌙 Dark'}
+                </button>
+                <button 
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  style={{
+                    background: 'transparent',
+                    border: `2px solid ${getCurrentColor()}`,
+                    color: getCurrentColor(),
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  ☰ Menu
+                </button>
+              </div>
             </div>
           )}
           

@@ -37,6 +37,7 @@ function App() {
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     document.addEventListener('touchstart', () => {}, { passive: true });
@@ -86,7 +87,13 @@ function App() {
       borderRight: `1px solid ${theme.border}`,
       display: 'flex',
       flexDirection: 'column',
-      gap: '8px'
+      gap: '8px',
+      position: window.innerWidth <= 768 ? 'fixed' : 'static',
+      left: window.innerWidth <= 768 ? (sidebarOpen ? '0' : '-240px') : 'auto',
+      top: 0,
+      height: '100vh',
+      zIndex: 1000,
+      transition: 'left 0.3s ease'
     }}>
       <h2 style={{color: '#1db954', margin: '0 0 24px 0', fontSize: '24px'}}>Geekify</h2>
       {['Home', 'Search', 'Your Library'].map(item => (
@@ -187,9 +194,48 @@ function App() {
       display: 'flex',
       flexDirection: 'column'
     }}>
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        style={{
+          position: 'fixed',
+          top: '20px',
+          left: '20px',
+          zIndex: 1001,
+          background: theme.card,
+          border: `1px solid ${theme.border}`,
+          borderRadius: '8px',
+          padding: '8px',
+          cursor: 'pointer',
+          display: window.innerWidth <= 768 ? 'block' : 'none'
+        }}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill={theme.text}>
+          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+        </svg>
+      </button>
+      
+      {sidebarOpen && window.innerWidth <= 768 && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 999
+          }}
+        />
+      )}
+      
       <div style={{display: 'flex', flex: 1, overflow: 'hidden'}}>
         <Sidebar />
-        <div style={{flex: 1, overflow: 'auto'}}>
+        <div style={{
+          flex: 1,
+          overflow: 'auto',
+          marginLeft: window.innerWidth <= 768 ? '0' : '0'
+        }}>
           <TrackList />
         </div>
       </div>

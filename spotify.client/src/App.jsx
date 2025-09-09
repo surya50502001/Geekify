@@ -31,12 +31,28 @@ function App() {
   };
   
   useEffect(() => {
-    const sampleSongs = [
-      { title: 'Sample Song 1', artist: 'Artist 1', url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' },
-      { title: 'Sample Song 2', artist: 'Artist 2', url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' },
-      { title: 'Sample Song 3', artist: 'Artist 3', url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' }
-    ];
-    setOurSongs(sampleSongs);
+    // Load GitHub songs
+    fetch('https://api.github.com/repos/surya50502001/Spotify-/contents')
+      .then(res => res.json())
+      .then(files => {
+        const mp3Files = files.filter(file => file.name.endsWith('.mp3'));
+        const songList = mp3Files.map(file => ({
+          title: file.name.replace('.mp3', '').replace(/%20/g, ' '),
+          artist: 'Unknown Artist',
+          url: file.download_url,
+          isGitHubSong: true
+        }));
+        setOurSongs(songList);
+      })
+      .catch(err => {
+        console.error('Error loading GitHub songs:', err);
+        // Fallback to sample songs
+        const sampleSongs = [
+          { title: 'Sample Song 1', artist: 'Artist 1', url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' },
+          { title: 'Sample Song 2', artist: 'Artist 2', url: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav' }
+        ];
+        setOurSongs(sampleSongs);
+      });
   }, []);
 
   useEffect(() => {

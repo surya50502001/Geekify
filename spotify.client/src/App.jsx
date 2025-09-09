@@ -1,14 +1,40 @@
 import { useState, useEffect } from 'react';
-import { getAllSongs } from './services/songsService';
+
+const getAllSongs = async () => {
+  try {
+    const response = await fetch('https://api.github.com/repos/surya50502001/Spotify-/contents');
+    if (!response.ok) throw new Error('Failed to fetch');
+    
+    const data = await response.json();
+    const songFiles = data.filter(file => 
+      file.name.endsWith('.mp3') || 
+      file.name.endsWith('.wav') || 
+      file.name.endsWith('.m4a')
+    );
+    
+    return songFiles.map((file, index) => ({
+      id: `github-${index}`,
+      title: file.name.replace(/\.(mp3|wav|m4a)$/i, '').replace(/[-_]/g, ' '),
+      artist: 'Unknown Artist',
+      album: 'GitHub Collection',
+      duration: '3:00',
+      url: file.download_url,
+      source: 'github'
+    }));
+  } catch (error) {
+    console.error('Error fetching songs from GitHub:', error);
+    return [];
+  }
+};
 
 function App() {
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentView, setCurrentView] = useState('home');
-
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     document.addEventListener('touchstart', () => {}, { passive: true });
@@ -19,7 +45,9 @@ function App() {
         setTracks(songs);
         setLoading(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Error loading songs:', error);
+        setError(error.message);
         setTracks([]);
         setLoading(false);
       });
@@ -85,6 +113,8 @@ function App() {
       <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Songs from Repository</h3>
       {loading ? (
         <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>Loading songs...</div>
+      ) : error ? (
+        <div style={{color: '#ff6b6b', textAlign: 'center', padding: '40px'}}>Error: {error}</div>
       ) : tracks.length === 0 ? (
         <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No songs found</div>
       ) : (

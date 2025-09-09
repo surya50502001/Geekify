@@ -42,6 +42,8 @@ function App() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
     document.addEventListener('touchstart', () => {}, { passive: true });
@@ -183,17 +185,32 @@ function App() {
     </div>
   );
 
-  const TrackList = () => (
-    <div style={{padding: '24px'}}>
-      <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Songs from Repository</h3>
-      {loading ? (
-        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>Loading songs...</div>
-      ) : error ? (
-        <div style={{color: '#ff6b6b', textAlign: 'center', padding: '40px'}}>Error: {error}</div>
-      ) : tracks.length === 0 ? (
-        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No songs found</div>
-      ) : (
-        tracks.map((track, index) => (
+  const SearchView = () => {
+    const filteredTracks = tracks.filter(track => 
+      track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      track.artist.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    return (
+      <div style={{padding: '24px'}}>
+        <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Search</h3>
+        <input
+          type="text"
+          placeholder="Search songs..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: theme.card,
+            border: `1px solid ${theme.border}`,
+            borderRadius: '4px',
+            color: theme.text,
+            fontSize: '14px',
+            marginBottom: '16px'
+          }}
+        />
+        {filteredTracks.map((track, index) => (
           <div key={track.id} onClick={() => playTrack(track)} style={{
             display: 'flex',
             alignItems: 'center',
@@ -207,6 +224,82 @@ function App() {
               <div style={{color: theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
               <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
             </div>
+            <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.duration}</div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+  
+  const LibraryView = () => {
+    const favoriteTracks = tracks.filter(track => favorites.includes(track.id));
+    
+    return (
+      <div style={{padding: '24px'}}>
+        <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Your Library</h3>
+        {favoriteTracks.length === 0 ? (
+          <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No favorites yet</div>
+        ) : (
+          favoriteTracks.map((track, index) => (
+            <div key={track.id} onClick={() => playTrack(track)} style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '8px 16px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              background: currentTrack?.id === track.id ? theme.border : 'transparent'
+            }}>
+              <span style={{color: theme.textSecondary, width: '20px', fontSize: '14px'}}>{index + 1}</span>
+              <div style={{flex: 1, marginLeft: '16px'}}>
+                <div style={{color: theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
+                <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
+              </div>
+              <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.duration}</div>
+            </div>
+          ))
+        )}
+      </div>
+    );
+  };
+  
+  const TrackList = () => (
+    <div style={{padding: '24px'}}>
+      <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Songs from Repository</h3>
+      {loading ? (
+        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>Loading songs...</div>
+      ) : error ? (
+        <div style={{color: '#ff6b6b', textAlign: 'center', padding: '40px'}}>Error: {error}</div>
+      ) : tracks.length === 0 ? (
+        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No songs found</div>
+      ) : (
+        tracks.map((track, index) => (
+          <div key={track.id} style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '8px 16px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            background: currentTrack?.id === track.id ? theme.border : 'transparent'
+          }}>
+            <span onClick={() => playTrack(track)} style={{color: theme.textSecondary, width: '20px', fontSize: '14px', cursor: 'pointer'}}>{index + 1}</span>
+            <div onClick={() => playTrack(track)} style={{flex: 1, marginLeft: '16px', cursor: 'pointer'}}>
+              <div style={{color: theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
+              <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
+            </div>
+            <button onClick={() => {
+              if (favorites.includes(track.id)) {
+                setFavorites(favorites.filter(id => id !== track.id));
+              } else {
+                setFavorites([...favorites, track.id]);
+              }
+            }} style={{
+              background: 'none',
+              border: 'none',
+              color: favorites.includes(track.id) ? '#1db954' : theme.textSecondary,
+              fontSize: '16px',
+              cursor: 'pointer',
+              marginRight: '8px'
+            }}>♥</button>
             <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.duration}</div>
           </div>
         ))
@@ -408,7 +501,9 @@ function App() {
               overflow: 'auto',
               marginLeft: window.innerWidth <= 768 ? '0' : '0'
             }}>
-              <TrackList />
+              {currentView === 'search' ? <SearchView /> : 
+               currentView === 'yourlibrary' ? <LibraryView /> : 
+               <TrackList />}
             </div>
           </div>
           <Player />

@@ -518,11 +518,16 @@ function App() {
   
   const Player = () => currentTrack && (
     <div style={{
+      position: 'fixed',
+      bottom: 0,
+      left: 0,
+      right: 0,
       background: `linear-gradient(135deg, ${theme.card}f0, ${getTrackColor(currentTrackIndex)}08)`,
       backdropFilter: 'blur(10px)',
       borderTop: `1px solid ${getTrackColor(currentTrackIndex)}40`,
       padding: '20px 24px',
-      boxShadow: `0 -4px 20px ${getTrackColor(currentTrackIndex)}20`
+      boxShadow: `0 -4px 20px ${getTrackColor(currentTrackIndex)}20`,
+      zIndex: 100
     }}>
       <div style={{
         width: '100%',
@@ -752,7 +757,7 @@ function App() {
         <div style={{
           flex: 1,
           overflow: 'auto',
-          paddingBottom: currentTrack ? '100px' : '0'
+          paddingBottom: currentTrack ? '120px' : '0'
         }}>
           {currentView === 'search' ? <SearchView /> : 
            currentView === 'yourlibrary' ? <LibraryView /> : 

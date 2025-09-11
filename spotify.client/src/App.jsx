@@ -518,101 +518,130 @@ function App() {
   
   const Player = () => currentTrack && (
     <div style={{
-      background: `linear-gradient(135deg, ${theme.card}, ${getTrackColor(currentTrackIndex)}10)`,
-      borderTop: `2px solid ${getTrackColor(currentTrackIndex)}`,
-      padding: '16px 24px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px'
+      background: `linear-gradient(135deg, ${theme.card}f0, ${getTrackColor(currentTrackIndex)}08)`,
+      backdropFilter: 'blur(10px)',
+      borderTop: `1px solid ${getTrackColor(currentTrackIndex)}40`,
+      padding: '20px 24px',
+      boxShadow: `0 -4px 20px ${getTrackColor(currentTrackIndex)}20`
     }}>
       <div style={{
         width: '100%',
-        height: '6px',
-        background: theme.border,
-        borderRadius: '3px',
-        cursor: 'pointer'
+        height: '4px',
+        background: `${theme.border}80`,
+        borderRadius: '2px',
+        cursor: 'pointer',
+        marginBottom: '16px'
       }} onClick={seekTo}>
         <div style={{
           width: `${duration ? (progress / duration) * 100 : 0}%`,
           height: '100%',
-          background: `linear-gradient(90deg, ${getTrackColor(currentTrackIndex)}, ${getTrackColor(currentTrackIndex)}80)`,
-          borderRadius: '3px',
+          background: getTrackColor(currentTrackIndex),
+          borderRadius: '2px',
           transition: 'width 0.1s ease',
-          boxShadow: `0 0 10px ${getTrackColor(currentTrackIndex)}50`
-        }} />
+          position: 'relative'
+        }}>
+          <div style={{
+            position: 'absolute',
+            right: '-6px',
+            top: '-2px',
+            width: '8px',
+            height: '8px',
+            background: getTrackColor(currentTrackIndex),
+            borderRadius: '50%',
+            boxShadow: `0 0 8px ${getTrackColor(currentTrackIndex)}80`
+          }} />
+        </div>
       </div>
       
-      <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
-        <div style={{flex: 1, minWidth: 0}}>
+      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+        <div style={{flex: '0 0 200px', minWidth: 0}}>
           <div style={{
-            color: getTrackColor(currentTrackIndex), 
-            fontSize: '15px', 
-            fontWeight: '600', 
+            color: theme.text,
+            fontSize: '16px', 
+            fontWeight: '700', 
             overflow: 'hidden', 
             textOverflow: 'ellipsis', 
             whiteSpace: 'nowrap',
-            textShadow: `0 0 10px ${getTrackColor(currentTrackIndex)}30`
+            marginBottom: '2px'
           }}>{currentTrack.title}</div>
-          <div style={{color: theme.textSecondary, fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{currentTrack.artist}</div>
+          <div style={{
+            color: theme.textSecondary, 
+            fontSize: '13px', 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap'
+          }}>{currentTrack.artist}</div>
         </div>
         
-        <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
           <button onClick={() => setIsShuffled(!isShuffled)} style={{
-            background: 'none',
+            background: isShuffled ? `${getTrackColor(currentTrackIndex)}20` : 'transparent',
             border: 'none',
             color: isShuffled ? getTrackColor(currentTrackIndex) : theme.textSecondary,
             fontSize: '16px',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            padding: '8px',
+            borderRadius: '6px',
+            transition: 'all 0.2s ease'
           }}>⚮</button>
           
           <button onClick={prevTrack} style={{
-            background: 'none',
+            background: 'transparent',
             border: 'none',
             color: theme.text,
-            fontSize: '18px',
+            fontSize: '20px',
             cursor: 'pointer',
-            padding: '4px'
+            padding: '8px',
+            borderRadius: '6px',
+            transition: 'all 0.2s ease'
           }}>⏮</button>
           
           <button onClick={togglePlay} style={{
             background: getTrackColor(currentTrackIndex),
             border: 'none',
             borderRadius: '50%',
-            width: '44px',
-            height: '44px',
+            width: '52px',
+            height: '52px',
             color: '#fff',
             cursor: 'pointer',
-            fontSize: '16px',
+            fontSize: '18px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: `0 4px 15px ${getTrackColor(currentTrackIndex)}40`
-          }}>
+            boxShadow: `0 6px 20px ${getTrackColor(currentTrackIndex)}40`,
+            transition: 'all 0.2s ease',
+            transform: 'scale(1)'
+          }} onMouseDown={(e) => e.target.style.transform = 'scale(0.95)'} onMouseUp={(e) => e.target.style.transform = 'scale(1)'}>
             {isPlaying ? '⏸' : '▶'}
           </button>
           
           <button onClick={nextTrack} style={{
-            background: 'none',
+            background: 'transparent',
             border: 'none',
             color: theme.text,
-            fontSize: '18px',
+            fontSize: '20px',
             cursor: 'pointer',
-            padding: '4px'
+            padding: '8px',
+            borderRadius: '6px',
+            transition: 'all 0.2s ease'
           }}>⏭</button>
           
           <button onClick={() => setRepeatMode((repeatMode + 1) % 3)} style={{
-            background: 'none',
+            background: repeatMode > 0 ? `${getTrackColor(currentTrackIndex)}20` : 'transparent',
             border: 'none',
             color: repeatMode > 0 ? getTrackColor(currentTrackIndex) : theme.textSecondary,
             fontSize: '16px',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            padding: '8px',
+            borderRadius: '6px',
+            transition: 'all 0.2s ease'
           }}>
             {repeatMode === 0 ? '⟲' : repeatMode === 1 ? '⟲' : '⟳'}
           </button>
         </div>
         
-        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-          <span style={{fontSize: '14px'}}>♬</span>
+        <div style={{display: 'flex', alignItems: 'center', gap: '12px', flex: '0 0 140px', justifyContent: 'flex-end'}}>
+          <span style={{fontSize: '16px', color: theme.textSecondary}}>♬</span>
           <input
             type="range"
             min="0"
@@ -620,12 +649,24 @@ function App() {
             step="0.1"
             value={volume}
             onChange={(e) => changeVolume(parseFloat(e.target.value))}
-            style={{width: '60px'}}
+            style={{
+              width: '70px',
+              height: '4px',
+              background: theme.border,
+              borderRadius: '2px',
+              outline: 'none',
+              cursor: 'pointer'
+            }}
           />
-        </div>
-        
-        <div style={{color: theme.textSecondary, fontSize: '11px', minWidth: '80px', textAlign: 'right'}}>
-          {Math.floor(progress / 60)}:{Math.floor(progress % 60).toString().padStart(2, '0')} / {Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, '0')}
+          <div style={{
+            color: theme.textSecondary, 
+            fontSize: '12px', 
+            minWidth: '50px', 
+            textAlign: 'right',
+            fontFamily: 'monospace'
+          }}>
+            {Math.floor(progress / 60)}:{Math.floor(progress % 60).toString().padStart(2, '0')}
+          </div>
         </div>
       </div>
     </div>
@@ -710,7 +751,8 @@ function App() {
         <Sidebar />
         <div style={{
           flex: 1,
-          overflow: 'auto'
+          overflow: 'auto',
+          paddingBottom: currentTrack ? '100px' : '0'
         }}>
           {currentView === 'search' ? <SearchView /> : 
            currentView === 'yourlibrary' ? <LibraryView /> : 

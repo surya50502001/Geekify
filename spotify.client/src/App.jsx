@@ -175,6 +175,63 @@ function App() {
     return colors[index % colors.length];
   };
 
+  const ItachiLogo = () => (
+    <svg width="32" height="32" viewBox="0 0 100 100" style={{marginRight: '8px'}}>
+      <defs>
+        <filter id="neonGlow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      
+      {/* Head outline */}
+      <path d="M50 15 C35 15 25 25 25 40 C25 50 30 60 35 65 L35 75 C35 80 40 85 50 85 C60 85 65 80 65 75 L65 65 C70 60 75 50 75 40 C75 25 65 15 50 15 Z" 
+            fill="none" 
+            stroke="#00ffff" 
+            strokeWidth="1.5" 
+            filter="url(#neonGlow)"/>
+      
+      {/* Hair spikes */}
+      <path d="M35 20 L30 10 M45 18 L42 8 M55 18 L58 8 M65 20 L70 10" 
+            stroke="#00ffff" 
+            strokeWidth="1" 
+            fill="none" 
+            filter="url(#neonGlow)"/>
+      
+      {/* Headphones */}
+      <circle cx="25" cy="40" r="8" 
+              fill="none" 
+              stroke="#ff0080" 
+              strokeWidth="2" 
+              filter="url(#neonGlow)"/>
+      <circle cx="75" cy="40" r="8" 
+              fill="none" 
+              stroke="#ff0080" 
+              strokeWidth="2" 
+              filter="url(#neonGlow)"/>
+      
+      {/* Headphone band */}
+      <path d="M33 35 Q50 25 67 35" 
+            fill="none" 
+            stroke="#ff0080" 
+            strokeWidth="2" 
+            filter="url(#neonGlow)"/>
+      
+      {/* Eyes (Sharingan style) */}
+      <circle cx="42" cy="38" r="2" fill="#ff0000" opacity="0.8"/>
+      <circle cx="58" cy="38" r="2" fill="#ff0000" opacity="0.8"/>
+      
+      {/* Nose line */}
+      <line x1="50" y1="42" x2="50" y2="48" 
+            stroke="#00ffff" 
+            strokeWidth="0.5" 
+            opacity="0.6"/>
+    </svg>
+  );
+
   const Sidebar = () => (
     <div style={{
       width: '240px',
@@ -191,7 +248,10 @@ function App() {
       zIndex: 1000,
       boxShadow: window.innerWidth <= 768 && sidebarOpen ? '4px 0 20px rgba(0,0,0,0.3)' : 'none'
     }}>
-      <h2 style={{color: '#1db954', margin: '0 0 24px 0', fontSize: '24px', fontWeight: 'bold'}}>♪ GoofyGeekz</h2>
+      <div style={{display: 'flex', alignItems: 'center', margin: '0 0 24px 0'}}>
+        <ItachiLogo />
+        <h2 style={{color: '#1db954', margin: 0, fontSize: '24px', fontWeight: 'bold'}}>GoofyGeekz</h2>
+      </div>
       {[
         { name: 'Home', icon: '⌂' },
         { name: 'Search', icon: '⌕' },

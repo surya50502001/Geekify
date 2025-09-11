@@ -191,7 +191,7 @@ function App() {
       zIndex: 1000,
       boxShadow: window.innerWidth <= 768 && sidebarOpen ? '4px 0 20px rgba(0,0,0,0.3)' : 'none'
     }}>
-      <h2 style={{color: '#1db954', margin: '0 0 24px 0', fontSize: '24px', fontWeight: 'bold'}}>♪ Geekify</h2>
+      <h2 style={{color: '#1db954', margin: '0 0 24px 0', fontSize: '24px', fontWeight: 'bold'}}>♪ GoofyGeekz</h2>
       {[
         { name: 'Home', icon: '⌂' },
         { name: 'Search', icon: '⌕' },

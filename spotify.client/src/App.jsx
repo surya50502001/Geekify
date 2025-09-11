@@ -335,7 +335,7 @@ function App() {
               width: '40px',
               height: '40px',
               borderRadius: '50%',
-              background: currentTrack?.id === track.id ? `linear-gradient(135deg, ${trackColor}, ${trackColor}80)` : `${trackColor}40`,
+              background: currentTrack?.id === track.id && isPlaying ? trackColor : `${trackColor}40`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -433,7 +433,7 @@ function App() {
           }}>⏮</button>
           
           <button onClick={togglePlay} style={{
-            background: `linear-gradient(135deg, ${getTrackColor(currentTrackIndex)}, ${getTrackColor(currentTrackIndex)}80)`,
+            background: getTrackColor(currentTrackIndex),
             border: 'none',
             borderRadius: '50%',
             width: '44px',

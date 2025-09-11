@@ -46,8 +46,7 @@ function App() {
   const [favorites, setFavorites] = useState([]);
   const [volume, setVolume] = useState(1);
   const [isShuffled, setIsShuffled] = useState(false);
-  const [repeatMode, setRepeatMode] = useState(0); // 0: off, 1: all, 2: one
-  const [showEqualizer, setShowEqualizer] = useState(false);
+  const [repeatMode, setRepeatMode] = useState(0);
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
 
   useEffect(() => {
@@ -192,12 +191,12 @@ function App() {
       zIndex: 1000,
       boxShadow: window.innerWidth <= 768 && sidebarOpen ? '4px 0 20px rgba(0,0,0,0.3)' : 'none'
     }}>
-      <h2 style={{color: '#1db954', margin: '0 0 24px 0', fontSize: '24px', fontWeight: 'bold'}}>🎵 Geekify</h2>
+      <h2 style={{color: '#1db954', margin: '0 0 24px 0', fontSize: '24px', fontWeight: 'bold'}}>♪ Geekify</h2>
       {[
-        { name: 'Home', icon: '🏠' },
-        { name: 'Search', icon: '🔍' },
-        { name: 'Your Library', icon: '📚' },
-        { name: 'Recently Played', icon: '🕒' }
+        { name: 'Home', icon: '⌂' },
+        { name: 'Search', icon: '⌕' },
+        { name: 'Your Library', icon: '♫' },
+        { name: 'Recently Played', icon: '⟲' }
       ].map(item => (
         <button key={item.name} onClick={() => setCurrentView(item.name.toLowerCase().replace(' ', ''))} style={{
           background: 'none',
@@ -214,16 +213,16 @@ function App() {
           gap: '12px',
           transition: 'all 0.2s ease'
         }}>
-          <span>{item.icon}</span>
+          <span style={{fontSize: '16px'}}>{item.icon}</span>
           {item.name}
         </button>
       ))}
       <div style={{marginTop: '20px', padding: '16px', background: theme.card, borderRadius: '8px'}}>
-        <div style={{color: theme.text, fontSize: '12px', marginBottom: '8px'}}>Quick Stats</div>
+        <div style={{color: theme.text, fontSize: '12px', marginBottom: '8px', fontWeight: 'bold'}}>Quick Stats</div>
         <div style={{color: theme.textSecondary, fontSize: '11px'}}>
-          <div>Songs: {tracks.length}</div>
-          <div>Favorites: {favorites.length}</div>
-          <div>Recently Played: {recentlyPlayed.length}</div>
+          <div>♪ Songs: {tracks.length}</div>
+          <div>♥ Favorites: {favorites.length}</div>
+          <div>⟲ Recent: {recentlyPlayed.length}</div>
         </div>
       </div>
       <button onClick={toggleTheme} style={{
@@ -236,16 +235,19 @@ function App() {
         marginTop: 'auto',
         fontSize: '12px'
       }}>
-        {isDarkTheme ? '☀️ Light' : '🌙 Dark'}
+        {isDarkTheme ? '☀ Light' : '☽ Dark'}
       </button>
     </div>
   );
 
   const RecentlyPlayedView = () => (
     <div style={{padding: '24px'}}>
-      <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>🕒 Recently Played</h3>
+      <h3 style={{color: theme.text, margin: '0 0 16px 0', fontSize: '20px', fontWeight: 'bold'}}>⟲ Recently Played</h3>
       {recentlyPlayed.length === 0 ? (
-        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No recently played songs</div>
+        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>
+          <div style={{fontSize: '48px', marginBottom: '16px'}}>♪</div>
+          <div>No recently played songs</div>
+        </div>
       ) : (
         recentlyPlayed.map((track, index) => {
           const trackColor = getTrackColor(tracks.findIndex(t => t.id === track.id));
@@ -254,7 +256,7 @@ function App() {
             display: 'flex',
             alignItems: 'center',
             padding: '12px 16px',
-            borderRadius: '8px',
+            borderRadius: '12px',
             cursor: 'pointer',
             background: currentTrack?.id === track.id ? `${trackColor}20` : 'transparent',
             border: `1px solid ${currentTrack?.id === track.id ? trackColor : 'transparent'}`,
@@ -262,21 +264,21 @@ function App() {
             marginBottom: '8px'
           }}>
             <div style={{
-              width: '32px',
-              height: '32px',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
               background: trackColor,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#fff',
-              fontSize: '12px',
+              fontSize: '16px',
               fontWeight: 'bold'
             }}>
-              {currentTrack?.id === track.id && isPlaying ? '♪' : '🎵'}
+              {currentTrack?.id === track.id && isPlaying ? '♪' : '♫'}
             </div>
             <div style={{flex: 1, marginLeft: '16px'}}>
-              <div style={{color: theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
+              <div style={{color: theme.text, fontSize: '15px', fontWeight: '600'}}>{track.title}</div>
               <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
             </div>
           </div>
@@ -294,10 +296,10 @@ function App() {
     
     return (
       <div style={{padding: '24px'}}>
-        <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>🔍 Search Music</h3>
+        <h3 style={{color: theme.text, margin: '0 0 16px 0', fontSize: '20px', fontWeight: 'bold'}}>⌕ Search Music</h3>
         <input
           type="text"
-          placeholder="🎵 Search songs, artists..."
+          placeholder="♪ Search songs, artists..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{
@@ -358,10 +360,10 @@ function App() {
     
     return (
       <div style={{padding: '24px'}}>
-        <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>📚 Your Library</h3>
+        <h3 style={{color: theme.text, margin: '0 0 16px 0', fontSize: '20px', fontWeight: 'bold'}}>♫ Your Library</h3>
         {favoriteTracks.length === 0 ? (
           <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>
-            <div style={{fontSize: '48px', marginBottom: '16px'}}>💔</div>
+            <div style={{fontSize: '48px', marginBottom: '16px'}}>♡</div>
             <div>No favorites yet. Start liking some songs!</div>
           </div>
         ) : (
@@ -408,7 +410,7 @@ function App() {
   const TrackList = () => (
     <div style={{padding: '24px'}}>
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-        <h3 style={{color: theme.text, margin: 0}}>🎵 All Songs</h3>
+        <h3 style={{color: theme.text, margin: 0, fontSize: '20px', fontWeight: 'bold'}}>♪ All Songs</h3>
         <div style={{display: 'flex', gap: '8px'}}>
           <button onClick={() => setIsShuffled(!isShuffled)} style={{
             background: isShuffled ? '#1db954' : 'transparent',
@@ -418,7 +420,7 @@ function App() {
             borderRadius: '20px',
             cursor: 'pointer',
             fontSize: '12px'
-          }}>🔀 Shuffle</button>
+          }}>⚮ Shuffle</button>
           <button onClick={() => setRepeatMode((repeatMode + 1) % 3)} style={{
             background: repeatMode > 0 ? '#1db954' : 'transparent',
             border: `1px solid ${repeatMode > 0 ? '#1db954' : theme.border}`,
@@ -428,23 +430,23 @@ function App() {
             cursor: 'pointer',
             fontSize: '12px'
           }}>
-            {repeatMode === 0 ? '🔁' : repeatMode === 1 ? '🔁' : '🔂'}
+            {repeatMode === 0 ? '⟲' : repeatMode === 1 ? '⟲' : '⟳'}
           </button>
         </div>
       </div>
       {loading ? (
         <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>
-          <div style={{fontSize: '32px', marginBottom: '16px'}}>🎵</div>
+          <div style={{fontSize: '32px', marginBottom: '16px'}}>♪</div>
           Loading your music...
         </div>
       ) : error ? (
         <div style={{color: '#ff6b6b', textAlign: 'center', padding: '40px'}}>
-          <div style={{fontSize: '32px', marginBottom: '16px'}}>❌</div>
+          <div style={{fontSize: '32px', marginBottom: '16px'}}>⚠</div>
           Error: {error}
         </div>
       ) : tracks.length === 0 ? (
         <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>
-          <div style={{fontSize: '32px', marginBottom: '16px'}}>🎵</div>
+          <div style={{fontSize: '32px', marginBottom: '16px'}}>♪</div>
           No songs found
         </div>
       ) : (
@@ -561,7 +563,7 @@ function App() {
             color: isShuffled ? getTrackColor(currentTrackIndex) : theme.textSecondary,
             fontSize: '16px',
             cursor: 'pointer'
-          }}>🔀</button>
+          }}>⚮</button>
           
           <button onClick={prevTrack} style={{
             background: 'none',
@@ -605,12 +607,12 @@ function App() {
             fontSize: '16px',
             cursor: 'pointer'
           }}>
-            {repeatMode === 0 ? '🔁' : repeatMode === 1 ? '🔁' : '🔂'}
+            {repeatMode === 0 ? '⟲' : repeatMode === 1 ? '⟲' : '⟳'}
           </button>
         </div>
         
         <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-          <span style={{fontSize: '14px'}}>🔊</span>
+          <span style={{fontSize: '14px'}}>♬</span>
           <input
             type="range"
             min="0"

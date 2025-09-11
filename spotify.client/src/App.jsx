@@ -138,6 +138,11 @@ function App() {
     border: isDarkTheme ? '#282828' : '#dee2e6'
   };
 
+  const getTrackColor = (index) => {
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43', '#10ac84', '#ee5a24', '#0abde3', '#3867d6', '#8854d0'];
+    return colors[index % colors.length];
+  };
+
   const Sidebar = () => (
     <div style={{
       width: '240px',
@@ -152,7 +157,6 @@ function App() {
       top: 0,
       height: '100vh',
       zIndex: 1000,
-
       boxShadow: window.innerWidth <= 768 && sidebarOpen ? '4px 0 20px rgba(0,0,0,0.3)' : 'none'
     }}>
       <h2 style={{color: '#1db954', margin: '0 0 24px 0', fontSize: '24px'}}>Geekify</h2>
@@ -209,23 +213,43 @@ function App() {
             marginBottom: '16px'
           }}
         />
-        {filteredTracks.map((track, index) => (
+        {filteredTracks.map((track, index) => {
+          const trackColor = getTrackColor(index);
+          return (
           <div key={track.id} onClick={() => playTrack(track)} style={{
             display: 'flex',
             alignItems: 'center',
-            padding: '8px 16px',
-            borderRadius: '4px',
+            padding: '12px 16px',
+            borderRadius: '8px',
             cursor: 'pointer',
-            background: currentTrack?.id === track.id ? theme.border : 'transparent'
+            background: currentTrack?.id === track.id ? `${trackColor}20` : 'transparent',
+            border: `1px solid ${currentTrack?.id === track.id ? trackColor : 'transparent'}`,
+            transition: 'all 0.2s ease',
+            transform: currentTrack?.id === track.id ? 'scale(1.02)' : 'scale(1)',
+            marginBottom: '8px'
           }}>
-            <span style={{color: theme.textSecondary, width: '20px', fontSize: '14px'}}>{index + 1}</span>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: currentTrack?.id === track.id ? trackColor : `${trackColor}30`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontSize: '12px',
+              fontWeight: 'bold'
+            }}>
+              {currentTrack?.id === track.id && isPlaying ? '♪' : index + 1}
+            </div>
             <div style={{flex: 1, marginLeft: '16px'}}>
-              <div style={{color: theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
+              <div style={{color: currentTrack?.id === track.id ? trackColor : theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
               <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
             </div>
             <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.duration}</div>
           </div>
-        ))}
+        );
+        })}
       </div>
     );
   };
@@ -239,446 +263,46 @@ function App() {
         {favoriteTracks.length === 0 ? (
           <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No favorites yet</div>
         ) : (
-          favoriteTracks.map((track, index) => (
+          favoriteTracks.map((track, index) => {
+            const trackColor = getTrackColor(tracks.findIndex(t => t.id === track.id));
+            return (
             <div key={track.id} onClick={() => playTrack(track)} style={{
               display: 'flex',
               alignItems: 'center',
-              padding: '8px 16px',
-              borderRadius: '4px',
+              padding: '12px 16px',
+              borderRadius: '8px',
               cursor: 'pointer',
-              background: currentTrack?.id === track.id ? theme.border : 'transparent'
+              background: currentTrack?.id === track.id ? `${trackColor}20` : 'transparent',
+              border: `1px solid ${currentTrack?.id === track.id ? trackColor : 'transparent'}`,
+              transition: 'all 0.2s ease',
+              transform: currentTrack?.id === track.id ? 'scale(1.02)' : 'scale(1)',
+              marginBottom: '8px'
             }}>
-              <span style={{color: theme.textSecondary, width: '20px', fontSize: '14px'}}>{index + 1}</span>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: currentTrack?.id === track.id ? trackColor : `${trackColor}30`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff',
+                fontSize: '12px',
+                fontWeight: 'bold'
+              }}>
+                {currentTrack?.id === track.id && isPlaying ? '♪' : '♥'}
+              </div>
               <div style={{flex: 1, marginLeft: '16px'}}>
-                <div style={{color: theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
+                <div style={{color: currentTrack?.id === track.id ? trackColor : theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
                 <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
               </div>
               <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.duration}</div>
             </div>
-          ))
+          );
+          })
         )}
       </div>
     );
-  };
-  
-  const TrackList = () => (
-    <div style={{padding: '24px'}}>
-      <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Songs from Repository</h3>
-      {loading ? (
-        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>Loading songs...</div>
-      ) : error ? (
-        <div style={{color: '#ff6b6b', textAlign: 'center', padding: '40px'}}>Error: {error}</div>
-      ) : tracks.length === 0 ? (
-        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No songs found</div>
-      ) : (
-        <div>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '16px 1fr auto auto',
-            gap: '16px',
-            padding: '8px 16px',
-            borderBottom: `1px solid ${theme.border}`,
-            color: theme.textSecondary,
-            fontSize: '12px',
-            fontWeight: '500',
-            textTransform: 'uppercase',
-            letterSpacing: '1px'
-          }}>
-            <div>#</div>
-            <div>Title</div>
-            <div>♥</div>
-            <div>⏱</div>
-          </div>
-          {tracks.map((track, index) => (
-            <div key={track.id} onMouseEnter={(e) => {
-              e.currentTarget.style.background = theme.border;
-            }} onMouseLeave={(e) => {
-              e.currentTarget.style.background = currentTrack?.id === track.id ? theme.border : 'transparent';
-            }} style={{
-              display: 'grid',
-              gridTemplateColumns: '16px 1fr auto auto',
-              gap: '16px',
-              alignItems: 'center',
-              padding: '8px 16px',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              background: currentTrack?.id === track.id ? theme.border : 'transparent'
-            }}>
-              <div onClick={() => playTrack(track)} style={{
-                color: currentTrack?.id === track.id ? '#1db954' : theme.textSecondary,
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}>
-                {currentTrack?.id === track.id && isPlaying ? '♪' : index + 1}
-              </div>
-              <div onClick={() => playTrack(track)} style={{cursor: 'pointer'}}>
-                <div style={{color: theme.text, fontSize: '16px', fontWeight: '400', marginBottom: '4px'}}>{track.title}</div>
-                <div style={{color: theme.textSecondary, fontSize: '14px'}}>{track.artist}</div>
-              </div>
-              <button onClick={(e) => {
-                e.stopPropagation();
-                setFavorites(prev => 
-                  prev.includes(track.id) ? prev.filter(id => id !== track.id) : [...prev, track.id]
-                );
-              }} style={{
-                background: 'none',
-                border: 'none',
-                color: favorites.includes(track.id) ? '#1db954' : theme.textSecondary,
-                fontSize: '16px',
-                cursor: 'pointer',
-                padding: '8px'
-              }}>♥</button>
-              <div style={{color: theme.textSecondary, fontSize: '14px'}}>{track.duration}</div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-  
-  const Player = () => currentTrack && (
-    <div style={{
-      background: theme.card,
-      borderTop: `1px solid ${theme.border}`,
-      padding: '16px 24px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '16px'
-    }}>
-      <div style={{flex: 1, minWidth: 0}}>
-        <div style={{color: theme.text, fontSize: '14px', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{currentTrack.title}</div>
-        <div style={{color: theme.textSecondary, fontSize: '12px'}}>{currentTrack.artist}</div>
-      </div>
-      
-      <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-        <button onClick={prevTrack} style={{
-          background: 'none',
-          border: 'none',
-          color: theme.textSecondary,
-          fontSize: '16px',
-          cursor: 'pointer',
-          padding: '8px'
-        }}>⏮</button>
-        
-        <button onClick={togglePlay} style={{
-          background: '#1db954',
-          border: 'none',
-          borderRadius: '50%',
-          width: '32px',
-          height: '32px',
-          color: '#fff',
-          cursor: 'pointer',
-          fontSize: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          {isPlaying ? '⏸' : '▶'}
-        </button>
-        
-        <button onClick={nextTrack} style={{
-          background: 'none',
-          border: 'none',
-          color: theme.textSecondary,
-          fontSize: '16px',
-          cursor: 'pointer',
-          padding: '8px'
-        }}>⏭</button>
-      </div>
-      
-      <div style={{display: 'flex', alignItems: 'center', gap: '8px', minWidth: '120px'}}>
-        <span style={{color: theme.textSecondary, fontSize: '11px', minWidth: '35px'}}>
-          {Math.floor(progress / 60)}:{Math.floor(progress % 60).toString().padStart(2, '0')}
-        </span>
-        <div style={{
-          flex: 1,
-          height: '4px',
-          background: theme.border,
-          borderRadius: '2px'
-        }}>
-          <div style={{
-            width: `${duration ? (progress / duration) * 100 : 0}%`,
-            height: '100%',
-            background: '#1db954',
-            borderRadius: '2px'
-          }} />
-        </div>
-        <span style={{color: theme.textSecondary, fontSize: '11px', minWidth: '35px'}}>
-          {Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, '0')}
-        </span>
-      </div>
-    </div>
-  );ors[index % colors.length];
-  };
-  
-  const TrackList = () => (
-    <div style={{padding: '24px'}}>
-      <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Songs from Repository</h3>
-      {loading ? (
-        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>Loading songs...</div>
-      ) : error ? (
-        <div style={{color: '#ff6b6b', textAlign: 'center', padding: '40px'}}>Error: {error}</div>
-      ) : tracks.length === 0 ? (
-        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No songs found</div>
-      ) : (
-        tracks.map((track, index) => {
-          const trackColor = getTrackColor(index);
-          return (
-          <div key={track.id} style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: '8px 12px',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            background: currentTrack?.id === track.id ? `${trackColor}15` : 'transparent'
-          }}>
-            <button onClick={() => playTrack(track)} style={{
-              background: currentTrack?.id === track.id && isPlaying ? trackColor : 'transparent',
-              border: `1px solid ${trackColor}`,
-              borderRadius: '50%',
-              width: '28px',
-              height: '28px',
-              color: currentTrack?.id === track.id && isPlaying ? '#fff' : trackColor,
-              cursor: 'pointer',
-              fontSize: '10px'
-            }}>
-              {currentTrack?.id === track.id && isPlaying ? '⏸' : '▶'}
-            </button>
-            <div onClick={() => playTrack(track)} style={{flex: 1, marginLeft: '12px', cursor: 'pointer'}}>
-              <div style={{color: theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
-              <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
-            </div>
-            <button onClick={(e) => {
-              e.stopPropagation();
-              const trackIndex = tracks.findIndex(t => t.id === track.id);
-              const prevIndex = trackIndex === 0 ? tracks.length - 1 : trackIndex - 1;
-              if (tracks[prevIndex]) playTrack(tracks[prevIndex]);
-            }} style={{
-              background: 'none',
-              border: 'none',
-              color: theme.textSecondary,
-              fontSize: '12px',
-              cursor: 'pointer',
-              padding: '2px'
-            }}>⏮</button>
-            <button onClick={(e) => {
-              e.stopPropagation();
-              const trackIndex = tracks.findIndex(t => t.id === track.id);
-              const nextIndex = (trackIndex + 1) % tracks.length;
-              if (tracks[nextIndex]) playTrack(tracks[nextIndex]);
-            }} style={{
-              background: 'none',
-              border: 'none',
-              color: theme.textSecondary,
-              fontSize: '12px',
-              cursor: 'pointer',
-              padding: '2px'
-            }}>⏭</button>
-            <button onClick={(e) => {
-              e.stopPropagation();
-              setFavorites(prev => 
-                prev.includes(track.id) ? prev.filter(id => id !== track.id) : [...prev, track.id]
-              );
-            }} style={{
-              background: 'none',
-              border: 'none',
-              color: favorites.includes(track.id) ? trackColor : theme.textSecondary,
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}>♥</button>
-            <div style={{color: theme.textSecondary, fontSize: '12px', marginLeft: '8px'}}>{track.duration}</div>
-          </div>
-        );
-        })
-      )}
-    </div>
-  );
-  
-  const Player = () => currentTrack && (
-    <div style={{
-      background: theme.card,
-      borderTop: `1px solid ${theme.border}`,
-      padding: '12px 20px'
-    }}>
-      <div style={{
-        width: '100%',
-        height: '2px',
-        background: theme.border,
-        borderRadius: '1px',
-        marginBottom: '8px'
-      }}>
-        <div style={{
-          width: `${duration ? (progress / duration) * 100 : 0}%`,
-          height: '100%',
-          background: '#1db954',
-          borderRadius: '1px'
-        }} />
-      </div>
-      
-      <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-        <div style={{flex: 1, minWidth: 0}}>
-          <div style={{color: theme.text, fontSize: '13px', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{currentTrack.title}</div>
-          <div style={{color: theme.textSecondary, fontSize: '11px'}}>{currentTrack.artist}</div>
-        </div>
-        
-        <button onClick={prevTrack} style={{
-          background: 'none',
-          border: 'none',
-          color: theme.text,
-          fontSize: '16px',
-          cursor: 'pointer'
-        }}>⏮</button>
-        
-        <button onClick={togglePlay} style={{
-          background: '#1db954',
-          border: 'none',
-          borderRadius: '50%',
-          width: '36px',
-          height: '36px',
-          color: '#fff',
-          cursor: 'pointer',
-          fontSize: '14px'
-        }}>
-          {isPlaying ? '⏸' : '▶'}
-        </button>
-        
-        <button onClick={nextTrack} style={{
-          background: 'none',
-          border: 'none',
-          color: theme.text,
-          fontSize: '16px',
-          cursor: 'pointer'
-        }}>⏭</button>
-        
-        <div style={{color: theme.textSecondary, fontSize: '10px', minWidth: '60px', textAlign: 'right'}}>
-          {Math.floor(progress / 60)}:{Math.floor(progress % 60).toString().padStart(2, '0')}
-        </div>
-      </div>
-    </div>
-  );ors[index % colors.length];
-  };
-  
-  const TrackList = () => (
-    <div style={{padding: '24px'}}>
-      <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Songs from Repository</h3>
-      {loading ? (
-        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>Loading songs...</div>
-      ) : error ? (
-        <div style={{color: '#ff6b6b', textAlign: 'center', padding: '40px'}}>Error: {error}</div>
-      ) : tracks.length === 0 ? (
-        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No songs found</div>
-      ) : (
-        tracks.map((track, index) => {
-          const trackColor = getTrackColor(index);
-          return (
-          <div key={track.id} style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: '8px 12px',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            background: currentTrack?.id === track.id ? `${trackColor}15` : 'transparent'
-          }}>
-            <button onClick={() => playTrack(track)} style={{
-              background: currentTrack?.id === track.id && isPlaying ? trackColor : 'transparent',
-              border: `1px solid ${trackColor}`,
-              borderRadius: '50%',
-              width: '28px',
-              height: '28px',
-              color: currentTrack?.id === track.id && isPlaying ? '#fff' : trackColor,
-              cursor: 'pointer',
-              fontSize: '10px'
-            }}>
-              {currentTrack?.id === track.id && isPlaying ? '⏸' : '▶'}
-            </button>
-            <div onClick={() => playTrack(track)} style={{flex: 1, marginLeft: '12px', cursor: 'pointer'}}>
-              <div style={{color: theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
-              <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
-            </div>
-            <button onClick={(e) => {
-              e.stopPropagation();
-              setFavorites(prev => 
-                prev.includes(track.id) ? prev.filter(id => id !== track.id) : [...prev, track.id]
-              );
-            }} style={{
-              background: 'none',
-              border: 'none',
-              color: favorites.includes(track.id) ? trackColor : theme.textSecondary,
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}>♥</button>
-            <div style={{color: theme.textSecondary, fontSize: '12px', marginLeft: '8px'}}>{track.duration}</div>
-          </div>
-        );
-        })
-      )}
-    </div>
-  );
-  
-  const Player = () => currentTrack && (
-    <div style={{
-      background: theme.card,
-      borderTop: `1px solid ${theme.border}`,
-      padding: '12px 20px'
-    }}>
-      <div style={{
-        width: '100%',
-        height: '2px',
-        background: theme.border,
-        borderRadius: '1px',
-        marginBottom: '8px'
-      }}>
-        <div style={{
-          width: `${duration ? (progress / duration) * 100 : 0}%`,
-          height: '100%',
-          background: '#1db954',
-          borderRadius: '1px'
-        }} />
-      </div>
-      
-      <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-        <div style={{flex: 1, minWidth: 0}}>
-          <div style={{color: theme.text, fontSize: '13px', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{currentTrack.title}</div>
-          <div style={{color: theme.textSecondary, fontSize: '11px'}}>{currentTrack.artist}</div>
-        </div>
-        
-        <button onClick={prevTrack} style={{
-          background: 'none',
-          border: 'none',
-          color: theme.text,
-          fontSize: '16px',
-          cursor: 'pointer'
-        }}>⏮</button>
-        
-        <button onClick={togglePlay} style={{
-          background: '#1db954',
-          border: 'none',
-          borderRadius: '50%',
-          width: '36px',
-          height: '36px',
-          color: '#fff',
-          cursor: 'pointer',
-          fontSize: '14px'
-        }}>
-          {isPlaying ? '⏸' : '▶'}
-        </button>
-        
-        <button onClick={nextTrack} style={{
-          background: 'none',
-          border: 'none',
-          color: theme.text,
-          fontSize: '16px',
-          cursor: 'pointer'
-        }}>⏭</button>
-        
-        <div style={{color: theme.textSecondary, fontSize: '10px', minWidth: '60px', textAlign: 'right'}}>
-          {Math.floor(progress / 60)}:{Math.floor(progress % 60).toString().padStart(2, '0')}
-        </div>
-      </div>
-    </div>
-  );#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43', '#10ac84', '#ee5a24', '#0abde3', '#3867d6', '#8854d0'];
-    return colors[index % colors.length];
   };
   
   const TrackList = () => (
@@ -698,48 +322,58 @@ function App() {
             display: 'flex',
             alignItems: 'center',
             padding: '12px 16px',
-            borderRadius: '8px',
+            borderRadius: '12px',
             cursor: 'pointer',
-            background: currentTrack?.id === track.id ? `${trackColor}20` : 'transparent',
-            border: `1px solid ${currentTrack?.id === track.id ? trackColor : 'transparent'}`,
-            transition: 'all 0.2s ease'
+            background: currentTrack?.id === track.id ? `linear-gradient(135deg, ${trackColor}20, ${trackColor}10)` : 'transparent',
+            border: `2px solid ${currentTrack?.id === track.id ? trackColor : 'transparent'}`,
+            transition: 'all 0.3s ease',
+            transform: currentTrack?.id === track.id ? 'scale(1.02)' : 'scale(1)',
+            boxShadow: currentTrack?.id === track.id ? `0 8px 25px ${trackColor}30` : 'none',
+            marginBottom: '8px'
           }}>
-            <button onClick={() => playTrack(track)} style={{
-              background: currentTrack?.id === track.id && isPlaying ? trackColor : 'transparent',
-              border: `1px solid ${trackColor}`,
+            <div onClick={() => playTrack(track)} style={{
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
-              width: '32px',
-              height: '32px',
-              color: currentTrack?.id === track.id && isPlaying ? '#fff' : trackColor,
-              cursor: 'pointer',
-              fontSize: '12px',
+              background: currentTrack?.id === track.id ? `linear-gradient(135deg, ${trackColor}, ${trackColor}80)` : `${trackColor}40`,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              color: '#fff',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: currentTrack?.id === track.id ? `0 4px 15px ${trackColor}50` : 'none'
             }}>
               {currentTrack?.id === track.id && isPlaying ? '⏸' : '▶'}
-            </button>
+            </div>
             <div onClick={() => playTrack(track)} style={{flex: 1, marginLeft: '16px', cursor: 'pointer'}}>
-              <div style={{color: theme.text, fontSize: '14px', fontWeight: '500', marginBottom: '2px'}}>{track.title}</div>
-              <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
+              <div style={{
+                color: currentTrack?.id === track.id ? trackColor : theme.text, 
+                fontSize: '16px', 
+                fontWeight: '600', 
+                marginBottom: '4px',
+                textShadow: currentTrack?.id === track.id ? `0 0 10px ${trackColor}50` : 'none'
+              }}>{track.title}</div>
+              <div style={{color: theme.textSecondary, fontSize: '13px'}}>{track.artist}</div>
             </div>
             <button onClick={(e) => {
               e.stopPropagation();
-              if (favorites.includes(track.id)) {
-                setFavorites(favorites.filter(id => id !== track.id));
-              } else {
-                setFavorites([...favorites, track.id]);
-              }
+              setFavorites(prev => 
+                prev.includes(track.id) ? prev.filter(id => id !== track.id) : [...prev, track.id]
+              );
             }} style={{
               background: 'none',
               border: 'none',
               color: favorites.includes(track.id) ? trackColor : theme.textSecondary,
-              fontSize: '16px',
+              fontSize: '18px',
               cursor: 'pointer',
-              padding: '4px',
-              marginRight: '12px'
+              padding: '8px',
+              transition: 'all 0.2s ease',
+              transform: favorites.includes(track.id) ? 'scale(1.2)' : 'scale(1)'
             }}>♥</button>
-            <div style={{color: theme.textSecondary, fontSize: '12px', minWidth: '40px'}}>{track.duration}</div>
+            <div style={{color: theme.textSecondary, fontSize: '12px', marginLeft: '12px', minWidth: '40px'}}>{track.duration}</div>
           </div>
         );
         })
@@ -749,8 +383,8 @@ function App() {
   
   const Player = () => currentTrack && (
     <div style={{
-      background: theme.card,
-      borderTop: `1px solid ${theme.border}`,
+      background: `linear-gradient(135deg, ${theme.card}, ${getTrackColor(currentTrackIndex)}10)`,
+      borderTop: `2px solid ${getTrackColor(currentTrackIndex)}`,
       padding: '16px 24px',
       display: 'flex',
       flexDirection: 'column',
@@ -758,7 +392,7 @@ function App() {
     }}>
       <div style={{
         width: '100%',
-        height: '3px',
+        height: '4px',
         background: theme.border,
         borderRadius: '2px',
         cursor: 'pointer'
@@ -766,15 +400,24 @@ function App() {
         <div style={{
           width: `${duration ? (progress / duration) * 100 : 0}%`,
           height: '100%',
-          background: '#1db954',
+          background: `linear-gradient(90deg, ${getTrackColor(currentTrackIndex)}, ${getTrackColor(currentTrackIndex)}80)`,
           borderRadius: '2px',
-          transition: 'width 0.1s ease'
+          transition: 'width 0.1s ease',
+          boxShadow: `0 0 10px ${getTrackColor(currentTrackIndex)}50`
         }} />
       </div>
       
       <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
         <div style={{flex: 1, minWidth: 0}}>
-          <div style={{color: theme.text, fontSize: '14px', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{currentTrack.title}</div>
+          <div style={{
+            color: getTrackColor(currentTrackIndex), 
+            fontSize: '15px', 
+            fontWeight: '600', 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap',
+            textShadow: `0 0 10px ${getTrackColor(currentTrackIndex)}30`
+          }}>{currentTrack.title}</div>
           <div style={{color: theme.textSecondary, fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{currentTrack.artist}</div>
         </div>
         
@@ -785,21 +428,24 @@ function App() {
             color: theme.text,
             fontSize: '18px',
             cursor: 'pointer',
-            padding: '4px'
+            padding: '4px',
+            transition: 'all 0.2s ease'
           }}>⏮</button>
           
           <button onClick={togglePlay} style={{
-            background: '#1db954',
+            background: `linear-gradient(135deg, ${getTrackColor(currentTrackIndex)}, ${getTrackColor(currentTrackIndex)}80)`,
             border: 'none',
             borderRadius: '50%',
-            width: '40px',
-            height: '40px',
+            width: '44px',
+            height: '44px',
             color: '#fff',
             cursor: 'pointer',
             fontSize: '16px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            boxShadow: `0 4px 15px ${getTrackColor(currentTrackIndex)}40`,
+            transition: 'all 0.2s ease'
           }}>
             {isPlaying ? '⏸' : '▶'}
           </button>
@@ -810,157 +456,14 @@ function App() {
             color: theme.text,
             fontSize: '18px',
             cursor: 'pointer',
-            padding: '4px'
+            padding: '4px',
+            transition: 'all 0.2s ease'
           }}>⏭</button>
         </div>
         
         <div style={{color: theme.textSecondary, fontSize: '11px', minWidth: '80px', textAlign: 'right'}}>
           {Math.floor(progress / 60)}:{Math.floor(progress % 60).toString().padStart(2, '0')} / {Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, '0')}
         </div>
-      </div>
-    </div>
-  );yle={{padding: '24px'}}>
-      <h3 style={{color: theme.text, margin: '0 0 16px 0'}}>Songs from Repository</h3>
-      {loading ? (
-        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>Loading songs...</div>
-      ) : error ? (
-        <div style={{color: '#ff6b6b', textAlign: 'center', padding: '40px'}}>Error: {error}</div>
-      ) : tracks.length === 0 ? (
-        <div style={{color: theme.textSecondary, textAlign: 'center', padding: '40px'}}>No songs found</div>
-      ) : (
-        tracks.map((track, index) => (
-          <div key={track.id} style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: '8px 16px',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            background: currentTrack?.id === track.id ? theme.border : 'transparent'
-          }}>
-            <span onClick={() => playTrack(track)} style={{color: theme.textSecondary, width: '20px', fontSize: '14px', cursor: 'pointer'}}>{index + 1}</span>
-            <div onClick={() => playTrack(track)} style={{flex: 1, marginLeft: '16px', cursor: 'pointer'}}>
-              <div style={{color: theme.text, fontSize: '14px', fontWeight: '500'}}>{track.title}</div>
-              <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.artist}</div>
-            </div>
-            <button onClick={() => {
-              if (favorites.includes(track.id)) {
-                setFavorites(favorites.filter(id => id !== track.id));
-              } else {
-                setFavorites([...favorites, track.id]);
-              }
-            }} style={{
-              background: 'none',
-              border: 'none',
-              color: favorites.includes(track.id) ? '#1db954' : theme.textSecondary,
-              fontSize: '16px',
-              cursor: 'pointer',
-              marginRight: '8px'
-            }}>♥</button>
-            <div style={{color: theme.textSecondary, fontSize: '12px'}}>{track.duration}</div>
-          </div>
-        ))
-      )}
-    </div>
-  );
-
-  const PlayerPage = () => currentTrack && (
-    <div style={{flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px'}}>
-      <button onClick={() => setCurrentView('home')} style={{
-        position: 'absolute',
-        top: '20px',
-        left: '20px',
-        background: 'none',
-        border: 'none',
-        color: theme.text,
-        fontSize: '24px',
-        cursor: 'pointer'
-      }}>←</button>
-      
-      <div style={{textAlign: 'center', marginBottom: '40px'}}>
-        <h1 style={{color: theme.text, margin: '0 0 8px 0', fontSize: '24px'}}>{currentTrack.title}</h1>
-        <p style={{color: theme.textSecondary, margin: 0, fontSize: '16px'}}>{currentTrack.artist}</p>
-      </div>
-      
-      <div style={{width: '100%', maxWidth: '400px', marginBottom: '40px'}}>
-        <div style={{
-          width: '100%',
-          height: '4px',
-          background: theme.border,
-          borderRadius: '2px',
-          marginBottom: '8px'
-        }}>
-          <div style={{
-            width: `${duration ? (progress / duration) * 100 : 0}%`,
-            height: '100%',
-            background: '#1db954',
-            borderRadius: '2px'
-          }} />
-        </div>
-        <div style={{display: 'flex', justifyContent: 'space-between', color: theme.textSecondary, fontSize: '12px'}}>
-          <span>{Math.floor(progress / 60)}:{Math.floor(progress % 60).toString().padStart(2, '0')}</span>
-          <span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, '0')}</span>
-        </div>
-      </div>
-      
-      <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
-        <button onClick={prevTrack} style={{
-          background: 'none',
-          border: 'none',
-          color: theme.text,
-          fontSize: '24px',
-          cursor: 'pointer'
-        }}>⏮️</button>
-        
-        <button onClick={togglePlay} style={{
-          background: '#1db954',
-          border: 'none',
-          borderRadius: '50%',
-          width: '60px',
-          height: '60px',
-          color: '#fff',
-          cursor: 'pointer',
-          fontSize: '24px'
-        }}>
-          {isPlaying ? '⏸️' : '▶️'}
-        </button>
-        
-        <button onClick={nextTrack} style={{
-          background: 'none',
-          border: 'none',
-          color: theme.text,
-          fontSize: '24px',
-          cursor: 'pointer'
-        }}>⏭️</button>
-      </div>
-    </div>
-  );
-  
-  const Player = () => currentTrack && currentView !== 'player' && (
-    <div style={{
-      background: theme.card,
-      borderTop: `1px solid ${theme.border}`,
-      padding: '16px 24px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '16px'
-    }}>
-      <div style={{flex: 1}}>
-        <div style={{color: theme.text, fontSize: '14px', fontWeight: '500'}}>{currentTrack.title}</div>
-        <div style={{color: theme.textSecondary, fontSize: '12px'}}>{currentTrack.artist}</div>
-      </div>
-      <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
-        <button onClick={togglePlay} style={{
-          background: '#1db954',
-          border: 'none',
-          borderRadius: '50%',
-          width: '40px',
-          height: '40px',
-          color: '#fff',
-          cursor: 'pointer',
-          fontSize: '16px'
-        }}>
-          {isPlaying ? '⏸️' : '▶️'}
-        </button>
       </div>
     </div>
   );
